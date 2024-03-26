@@ -1,0 +1,79 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <style>
+        #div1,
+        #div2 {
+            float: left;
+            width: 100px;
+            height: 35px;
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid black;
+        }
+
+        .flex {
+            display: flex;
+        }
+    </style>
+    <script>
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+            var data = ev.dataTransfer.getData("text");
+            var draggedElement = document.getElementById(data);
+            draggedElement.setAttribute('class','dragged');
+        }
+        function drop(ev) {
+            ev.preventDefault();
+            var data = ev.dataTransfer.getData("text");
+            var draggedElement = document.getElementById(data);
+            var topOffset = ev.clientY;
+            var body_content = document.querySelector('body').children;
+            var flex_div=document.createElement('div');
+            var div = document.createElement('div');
+            var replace_body =document.createElement('div');
+            for(var i=0;i<body_content.length;i++){
+                 var pos = body_content[i].getBoundingClientRect();
+                 var element_position = pos.y+pos.height;
+                 console.log(pos.y >= topOffset && (element_position <= topOffset + draggedElement.clientHeight));
+                 if(pos.y >= topOffset && (element_position <= topOffset + draggedElement.clientHeight)){
+                    div.append(body_content[i].cloneNode(true));
+                 }
+                 else if(pos.y <topOffset){
+                    replace_body.append(body_content[i].cloneNode(true));
+                 }
+                 else if(element_position > (topOffset + draggedElement.clientHeight)){
+                    console.log(div);
+                   flex_div.innerHTML == ''? (flex_div.append(div),flex_div.append(draggedElement),replace_body.append(flex_div)):'';
+                   flex_div.innerHTML='';
+                   replace_body.append(flex_div.cloneNode(true));
+                 }
+            
+            }
+            console.log(replace_body);
+        }
+
+    </script>
+</head>
+
+<body ondrop="drop(event)" ondragover="allowDrop(event)">
+    <h2>Drag and Drop</h2>
+    <p>Drag the image back and forth between the two div elements.</p>
+    <p>dlfmlfdmldfmlfd</p>
+    <p>dlfmldfmldfm</p>
+    <p>dlfmlfdmldfmlfd</p>
+    <p>dlfmldfmldfm</p>
+    <p>lmfdlmdflmdf</p>
+    <img src="texture1.jpg" draggable="true" ondragstart="drag(event)" id="drag1" width="100" height="100">
+    <p>dldldld</p>
+    <p>dslmsdlmlsdm
+    </p>
+    <p>ksdmsdm</p>
+    <p>mdslm</p>
+</body>
+
+</html>

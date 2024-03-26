@@ -1,0 +1,17 @@
+.button_root{
+color: #bcbcbc;
+display: flex;
+align-items: center;
+position: relative;
+height: 2.5vw;
+padding-left: 0.7vw;
+cursor: pointer;
+}
+.button_root >.material-symbols-outlined:first-child{
+width: 15%;
+font-size: 1vw;
+margin-top: 0.1vw;
+}
+.button_root:hover {
+    background-color: #1A222B;
+}

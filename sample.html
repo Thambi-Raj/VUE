@@ -16,6 +16,16 @@
         .flex {
             display: flex;
         }
+
+        .editable {
+            outline: none;
+            border: none;
+        }
+
+        .pp {
+            height: 10px;
+            width: 100%;
+        }
     </style>
     <script>
         function allowDrop(ev) {
@@ -32,31 +42,49 @@
             var data = ev.dataTransfer.getData("text");
             var draggedElement = document.getElementById(data);
             var topOffset = ev.clientY;
-            var body_content = document.querySelector('body').children;
+            var content_height = document.querySelectorAll('.pp')[0].getBoundingClientRect();
+            var body_content = document.querySelectorAll('.editable')[0].children;
             var clone = [...body_content];
             var match_content = [];
             var ind = -1;
             for (var i = 0; i < body_content.length; i++) {
                 var pos = body_content[i].getBoundingClientRect();
                 var element_position = pos.y + pos.height;
+
+                if (topOffset<27) {
+                    document.querySelectorAll('.editable')[0].prepend(draggedElement);
+                    solved=true;
+                    break;
+                }
+                if(content_height.y < topOffset){
+                    document.querySelectorAll('.editable')[0].append(draggedElement);
+                    solved=true;
+                    break;  
+                }
                 if (draggedElement.parentElement == body_content[i]) {
                     var child = draggedElement.parentElement.children[0];
                     for (var j = 0; j < child.children.length; j++) {
                         var posi = child.children[j].getBoundingClientRect();
                         var ele_posi = posi.y + posi.height
-                        if ((ele_posi >= topOffset && (topOffset + draggedElement.clientHeight) >= ele_posi)) {
+                        if ((topOffset <= ele_posi || (topOffset + draggedElement.clientHeight <= ele_posi)) && posi.y < topOffset + draggedElement.clientHeight) {
                             match_content.push(i + "-" + j);
                         }
                     }
                     ind = i;
                 }
-               
-                else if ((element_position >= topOffset && (topOffset + draggedElement.clientHeight) >= element_position) && body_content[i].tagName.toLocaleLowerCase() != 'div') {
+                else if (((topOffset <= element_position || (topOffset + draggedElement.clientHeight <= element_position)) && pos.y < topOffset + draggedElement.clientHeight) && body_content[i].tagName.toLocaleLowerCase() != 'div') {
                     match_content.push(i);
                 }
+                else {
+                    if (match_content.length != 0) {
+                        break;
+                    }
+                }
             }
+
             var flex_div = document.createElement('div');
             var flex_child = document.createElement('div');
+            flex_child.setAttribute('class', 'flex-child');
             var replace_body = document.createElement('div');
             flex_div.setAttribute('class', 'flex');
             var b = true;
@@ -82,6 +110,21 @@
                                 }
                             }
                         }
+                        else if (draggedElement.parentElement.getAttribute('class') == 'flex-child' && draggedElement.parentElement.parentElement == body_content[i]) {
+                            var child = [...draggedElement.parentElement.children];
+                            var main_div = document.createElement('div');
+                            main_div.setAttribute('class', 'flex');
+                            var rep_div = document.createElement('div');
+                            rep_div.setAttribute('class', 'flex-child');
+                            for (var k = 0; k < child.length; k++) {
+                                if (!(child[k].getAttribute('class') && child[k].getAttribute('class') == 'dragged')) {
+                                    rep_div.append(child[k].cloneNode(true));
+                                }
+                            }
+                            main_div.append(rep_div);
+                            main_div.append(body_content[i].children[1]);
+                            result.push(main_div);
+                        }
                         else {
                             var temp = clone[i].cloneNode(true);
                             flex_child.innerHTML != '' ?
@@ -96,38 +139,39 @@
                 flex_child.innerHTML != '' ?
                     (flex_div.append(flex_child.cloneNode(true)), flex_div.appendChild(draggedElement), result.push(flex_div)) : '';
                 flex_child.innerHTML = '';
-                var body = document.querySelector('body');
+                var body = document.querySelectorAll('.editable')[0];
                 body.innerHTML = '';
                 for (let index = 0; index < result.length; index++) {
-
                     body.append(result[index].cloneNode(true));
                 }
-            }
-            else{
-                alert('invalid posi')
             }
         }
 
     </script>
 </head>
 
-<body ondrop="drop(event)" ondragover="allowDrop(event)"  contenteditable="true">
-    <h2>a</h2>
-    <p>b</p>
-    <p>c</p>
-    <p>d</p>
-    <p>e</p>
-    <p>f</p>
-    <p>g</p>
-    <img src="texture1.jpg" draggable="true" ondragstart="drag(event)" id="drag1" width="100" height="100">
-    <p>h</p>
-    <p>i</p>
-    <img src="texture1.jpg" draggable="true" ondragstart="drag(event)" id="drag2" width="100" height="100">
-    <p>j</p>
-    <p>ld,sl,lsd</p>
-    <p>sdlsld</p>
-    <p>slsdl,</p>
-    <p>k</p>
+<body ondrop="drop(event)" ondragover="allowDrop(event)">
+    <div class="editable" contenteditable="true">
+        <h2>a</h2>
+        <p>b</p>
+        <p>c</p>
+        <p>d</p>
+        <p>e</p>
+        <p>f</p>
+        <p>g</p>
+        <img src="texture1.jpg" draggable="true" ondragstart="drag(event)" id="drag1" width="100" height="100">
+        <p>h</p>
+        <p>i</p>
+        <img src="texture1.jpg" draggable="true" ondragstart="drag(event)" id="drag2" width="200" height="200">
+        <p>j</p>
+        <p>ld,sl,lsd</p>
+        <p>sdlsld</p>
+        <p>slsdl,</p>
+        <p>k</p>
+    </div>
+    <div class="pp">
+
+    </div>
 </body>
 
 </html>

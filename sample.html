@@ -33,13 +33,13 @@
             var draggedElement = document.getElementById(data);
             var topOffset = ev.clientY;
             var body_content = document.querySelector('body').children;
+            var clone = [...body_content];
             var match_content = [];
-            var ind=-1;
+            var ind = -1;
             for (var i = 0; i < body_content.length; i++) {
                 var pos = body_content[i].getBoundingClientRect();
                 var element_position = pos.y + pos.height;
                 if (draggedElement.parentElement == body_content[i]) {
-                    console.log('op');
                     var child = draggedElement.parentElement.children[0];
                     for (var j = 0; j < child.children.length; j++) {
                         var posi = child.children[j].getBoundingClientRect();
@@ -48,9 +48,10 @@
                             match_content.push(i + "-" + j);
                         }
                     }
-                    ind=i;
+                    ind = i;
                 }
-                else if ((element_position >= topOffset && (topOffset + draggedElement.clientHeight) >= element_position)) {
+               
+                else if ((element_position >= topOffset && (topOffset + draggedElement.clientHeight) >= element_position) && body_content[i].tagName.toLocaleLowerCase() != 'div') {
                     match_content.push(i);
                 }
             }
@@ -58,105 +59,75 @@
             var flex_child = document.createElement('div');
             var replace_body = document.createElement('div');
             flex_div.setAttribute('class', 'flex');
-            var b=true;
+            var b = true;
             var result = [];
-            for (var i = 0; i < body_content.length; i++) {
-                if (body_content[i] != draggedElement) {
-                    if (match_content.includes(i)) {
-                            flex_child.append(body_content[i].cloneNode(true));
-                    }   
-                    else if (ind==i) {
-                        var child = body_content[i].children[0];
-                        for (var j = 0; j < child.children.length; j++) {
-                            var str_chk = i + "-" + j;
-                            if (match_content.includes(str_chk)) {
-                                flex_child.append(child.children[j].cloneNode(true));
-                            }
-                            else {
-                                flex_child.innerHTML != '' ?
-                                    (flex_div.appendChild(flex_child.cloneNode(true)), flex_div.appendChild(draggedElement), result.push(flex_div),console.log(flex_div)) : '';                                  
-                                flex_child.innerHTML = '';
-                                result.push(child.children[j].cloneNode(true));
+            if (match_content.length != 0) {
+                for (var i = 0; i < clone.length; i++) {
+                    if (clone[i] != draggedElement) {
+                        if (match_content.includes(i)) {
+                            flex_child.append(clone[i].cloneNode(true));
+                        }
+                        else if (ind == i) {
+                            var child = clone[i].children[0];
+                            for (var j = 0; j < child.children.length; j++) {
+                                var str_chk = i + "-" + j;
+                                if (match_content.includes(str_chk)) {
+                                    flex_child.append(child.children[j].cloneNode(true));
+                                }
+                                else {
+                                    flex_child.innerHTML != '' ?
+                                        (flex_div.appendChild(flex_child.cloneNode(true)), flex_div.appendChild(draggedElement), result.push(flex_div)) : '';
+                                    flex_child.innerHTML = '';
+                                    result.push(child.children[j].cloneNode(true));
+                                }
                             }
                         }
+                        else {
+                            var temp = clone[i].cloneNode(true);
+                            flex_child.innerHTML != '' ?
+                                (flex_div.append(flex_child.cloneNode(true)), flex_div.appendChild(draggedElement), result.push(flex_div.cloneNode(true))) : '';
+                            flex_child.innerHTML = '';
+
+                            result.push(temp);
+                        }
                     }
-                    else {
-                        flex_child.innerHTML != '' ?
-                            (flex_div.append(flex_child.cloneNode(true)), flex_div.appendChild(draggedElement),  result.push(flex_div),console.log(flex_div)) : '';
-                        flex_child.innerHTML = '';
-                        result.push(body_content[i].cloneNode(true));
-                    }
+
+                }
+                flex_child.innerHTML != '' ?
+                    (flex_div.append(flex_child.cloneNode(true)), flex_div.appendChild(draggedElement), result.push(flex_div)) : '';
+                flex_child.innerHTML = '';
+                var body = document.querySelector('body');
+                body.innerHTML = '';
+                for (let index = 0; index < result.length; index++) {
+
+                    body.append(result[index].cloneNode(true));
                 }
             }
-            flex_child.innerHTML != '' ?
-                            (flex_div.append(flex_child.cloneNode(true)), flex_div.appendChild(draggedElement),  result.push(flex_div),console.log(flex_child.innerHTML)) : '';
-                        flex_child.innerHTML = '';
-            var body =document.querySelector('body');
-            body.innerHTML='';
-          for (let index = 0; index < result.length; index++) {
-           body.append(result[index].cloneNode(true));
-          }
+            else{
+                alert('invalid posi')
+            }
         }
 
     </script>
 </head>
 
-<body ondrop="drop(event)" ondragover="allowDrop(event)">
-    <h2>Drag and Drop</h2>
-    <p>Drag the image back and forth between the two div elements.</p>
-    <p>dlfmlfdmldfmlfd</p>
-    <p>dlfmldfmldfm</p>
-    <div class="flex">
-        <div>
-            <p>dlfmlfdmldfmlfd</p>
-            <p>dlfmldfmldfm</p>
-            <p>lmfdlmdflmdf</p>
-        </div>
-        <img src="texture1.jpg" draggable="true" ondragstart="drag(event)" id="drag1" width="100" height="100">
-    </div>
-    <p>dldldld</p>
-    <p>dslmsdlmlsdm
-    </p>
+<body ondrop="drop(event)" ondragover="allowDrop(event)"  contenteditable="true">
+    <h2>a</h2>
+    <p>b</p>
+    <p>c</p>
+    <p>d</p>
+    <p>e</p>
+    <p>f</p>
+    <p>g</p>
+    <img src="texture1.jpg" draggable="true" ondragstart="drag(event)" id="drag1" width="100" height="100">
+    <p>h</p>
+    <p>i</p>
     <img src="texture1.jpg" draggable="true" ondragstart="drag(event)" id="drag2" width="100" height="100">
-
-    <p>ksdmsdm</p>
-    <p>mdslm</p>
+    <p>j</p>
+    <p>ld,sl,lsd</p>
+    <p>sdlsld</p>
+    <p>slsdl,</p>
+    <p>k</p>
 </body>
 
 </html>
-<!-- var pos = body_content[i].getBoundingClientRect();
-var element_position = pos.y + pos.height;
-if (body_content[i] != draggedElement) {
-    if (body_content[i] == draggedElement.parentElement) {
-        var child = draggedElement.parentElement.children[0];
-        for (var j = 0; j < child.children.length; j++) {
-            var posi = child.children[j].getBoundingClientRect();
-            var ele_posi = posi.y + posi.height
-            if ((ele_posi >= topOffset && (topOffset + draggedElement.clientHeight) >= ele_posi)) {
-                flex_child.append(child.children[j].cloneNode(true));
-            }
-            else if (ele_posi < topOffset) {
-                replace_content.push(child.children[j].cloneNode(true));
-            }
-            else {
-                console.log(flex_child);
-                flex_div.innerHTML != '' ? (flex_div.append(flex_child.cloneNode(true)), flex_div.append(draggedElement.cloneNode(true)), replace_content.push(flex_div)) : '';
-                flex_div.innerHTML = '';
-                replace_content.push(child.children[j].cloneNode(true));
-            }
-        }
-    }
-    else if ((element_position >= topOffset && (topOffset + draggedElement.clientHeight) >= element_position) && body_content[i].tagName.toLowerCase() != 'div') {
-        flex_child.append(body_content[i].cloneNode(true));
-    }
-    else if ((element_position >= topOffset && (topOffset + draggedElement.clientHeight) >= element_position) && body_content[i].tagName.toLowerCase() == 'div') {
-        flex_child.innerHTML != '' ? (flex_div.append(flex_div.cloneNode(true)), flex_div.append(draggedElement.cloneNode(true)), replace_content.push(flex_div)) : '';
-        flex_child.innerHTML = '';
-        replace_content.push(body_content[i].cloneNode(true));
-    }
-    else {
-        flex_child.innerHTML != '' ? (flex_div.append(flex_child.cloneNode(true)), flex_div.append(draggedElement.cloneNode(true)), replace_content.push(flex_div)) : '';
-        flex_child.innerHTML = '';
-        replace_content.push(body_content[i].cloneNode(true));
-    }
-} -->

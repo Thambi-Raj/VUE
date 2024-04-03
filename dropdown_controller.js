@@ -1,5 +1,5 @@
 var dropdown_controller = {
-    template: `<div :class="active ===id ? 'section clicked' : 'section' " :id ='id' > 
+    template: `<div :class="active == id ? 'section clicked' : 'section' " :id ='id' > 
         <dropdown-root  :first_icon='first_icon' :title='title' :default_selected='default_selected' :data="data"  :active ='active' :id='id' @change_value = change_value @change_activestate=change_activestate></dropdown-root>
         </div>
         `,
@@ -26,14 +26,13 @@ var dropdown_controller = {
             type:String
         }
     },
+    emits:['change_value','change_active'],
     methods: {
         change_value(data){
-            // this.$root.$data.dropdown_value = data;
-            this.$root.$emit('op');
-        
+            this.$emit('change_value',data);
         },
-        change_activestate(){
-            // this.$root.$data.dropdown_selected = this.id ;
+        change_activestate(data){
+            this.$emit('change_active',data,'calendar');
         }
     }           
 }

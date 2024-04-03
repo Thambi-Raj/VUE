@@ -21,6 +21,10 @@
 .dropdown_root>#dropdown_head>.hide {
     display: none;
 }
+.dropdown_root>.active{
+    background-color: #1A222B;
+
+}
 .dropdown_root>#dropdown_head:hover {
     background-color: #1A222B;
 }

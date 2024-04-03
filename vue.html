@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="button.css">
     <link rel="stylesheet" href="search-dropdown.css">
     <link rel="stylesheet" href="calendar_right.css">
+    <link rel="stylesheet" href="container.css">
+    <link rel="stylesheet" href="content_sidebar.css">
     <script src="dropdown_view.js"></script>
     <script src="dropdown_controller.js"></script>
     <script src="button_view.js"></script>
@@ -21,7 +23,13 @@
     <script src="sidebar_view.js"></script>
     <script src="sidebar_controller.js"></script>
     <script src="calendar_right_view.js"></script>
+    <script src="calendar_right_controller.js"></script>
+    <script src="container_view.js"></script>
+    <script src="container_controller.js"></script>
+    <script src="content_sidebar_view.js"></script>
+    <script src="content_sidebar_controller.js"></script>
     <script src="diary_view.js"></script>
+    <script src="diaryContent_controller.js"></script>
 </head>
 <style>
     * {
@@ -101,8 +109,10 @@
         </div>
         <div id="content">
             <div class="diary">
-                <diary-component :dropdown_selected="dropdown_selected"
-                    :dropdown_value="dropdown_value"></diary-component>
+                <diary-component  :dropdown_selected="dropdown_selected" :favourite="favourite" :mention="mention"
+                    :dropdown_value="dropdown_value" :bookmark="bookmark" :content_view ="content_view" @change_page="page_change"
+                    @change_dropdown_head="change_dropdown_head"
+                    @change_dropdown_value="change_dropdown_value"></diary-component>      
             </div>
         </div>
     </div>
@@ -110,24 +120,34 @@
 
 
 <script>
-
     const app = Vue.createApp({
         data() {
             return {
                 dropdown_selected: 'year_2024',
-                dropdown_value: 'MAR',
+                dropdown_value: 'Mar',
                 id_map: {
                     'year_2024': 2024,
                     'year_2023': 2023
-                }
+                },
+                content_view: true,
+                favourite:[{'FEB 2024': [1,2,5,23,25,27,23,25,27,23,25,27,23,25,27]},{'SEP 2023':[23,25,27]},{'AUG 2023':[20,12,7]},{'FEB 2024': [1,2,5]},{'FEB 2024': [1,2,5]},{'FEB 2024': [1,2,5]},{'FEB 2024': [1,2,5]},{'FEB 2024': [1,2,5]},{'FEB 2024': [1,2,5]},{'FEB 2024': [1,2,5]}],
+                bookmark:[{'FEB 2024': [1,2,5,23,25,27,23,25,27,23,25,27,23,25,27]},{'SEP 2023':[23,25,27]}],
+                mention:[{"thambi":['feb','mar']},{"raj":['feb','jan']}]
             }
         },
+        emits:["page_change","change_dropdown_head","change_dropdown_value"],
         methods: {
-            change_dropdown_selected(dropdown_name, dropdown_value) {
-                this.dropdown_selected = dropdown_value;
-                this.dropdown_value = dropdown_value ? dropdown_value : this.dropdown_value;
+            change_dropdown_head(data,bool) {
+                this.dropdown_selected = data;
+                bool ? (this.content_view=true):'';
             },
-          
+            change_dropdown_value(data,bool) {
+                this.dropdown_value = data;
+                bool ? (this.content_view=true):'';
+            },
+            page_change() {
+                this.content_view = !this.content_view;
+            }
         },
     })
 
@@ -140,12 +160,17 @@
     app.component('sidebar-root', sidebar_component);
     app.component('sidebar-controller', sidebar_controller);
     app.component('calendar-root', calendar_component);
+    app.component('calendar-controller', calendar_controller);
+    app.component('container-root',container_component)
+    app.component('container-controller',container_controller);
+    app.component('contentSidebar-root',content_sidebar_component)
+    app.component('contentSidebar-controller',content_sidebar_controller);
     app.component('diary-component', diary_component);
+    app.component('diary-content-controller', diary_content);
     const vm = app.mount('.diary');
 
 
 </script>
 
-<!-- </script> -->
 
 </html>

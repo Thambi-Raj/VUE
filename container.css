@@ -1,0 +1,73 @@
+#container-root{
+    width: 90%;
+    height: 95%;
+    display: flex;
+    flex-direction: column;
+}
+#container-root > #container-head{
+    display: flex;
+    align-items: center;
+    height: 1.5vw;
+    width: max-content;
+    padding: 1vw;
+    background-color: #e9e9e9;
+    border-radius: 5px 5px 0px 0px;
+    border: 0.1vw solid #d5d5d5;
+    border-bottom:#f5f5f5 !important;
+}
+#container-root > #container-head>.material-symbols-outlined{
+   display: flex;
+   align-items: center;
+   width: 1.5vw;
+}
+#container-root > #container-head>span{
+    font-size: .9vw;
+}
+
+#container-root>#container-body{
+    height: calc(100% - 2.5vw );
+    overflow: auto;
+    background-color: #f5f5f5;
+    padding: .5vw;
+    border: 0.1vw solid #d5d5d5;
+
+}
+#container-root>#container-body >div{
+    display: flex;
+    flex-direction: column;
+    height: max-content;
+    border-radius: 5px ;
+    border: 1px solid #d1d1d1;
+}
+#container-root>#container-body >div:not(:first-child){
+    margin-top: 1vw;
+}
+#container-root>#container-body >div>#main_container>#head{
+    width: 100%;
+    height: 2vw;
+    display: flex;
+    align-items: center;
+    padding-left: 1vw;
+}
+#container-root>#container-body >div>#main_container>#content{
+    width:100%;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    padding-right: 1vw; 
+}
+#container-root>#container-body >div>#main_container>#content>#sub_container{
+    width: calc((100% /6) - 1vw );
+    height: 10vw;
+    margin-left: 1vw;
+    margin-bottom: 1vw;
+    background-color: #fff;
+    border: 1px solid #ebebeb;
+    border-radius: 10px;
+    color: #555;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+    padding: .5vw;
+}
+#container-root>#container-body >div>#main_container>#content>#sub_container>#first_div{
+    height: 90%;
+}

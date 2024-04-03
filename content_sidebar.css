@@ -1,0 +1,49 @@
+.content-sidebar{
+    width: 100%;
+    height: 100%;
+}
+.content-sidebar>#head{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding:.7vw;
+}
+.content-sidebar>#head>span{
+    width: 20%;
+    cursor: pointer;
+}
+.content-sidebar>#head>#drop-down{
+    width: 40%;
+}
+.content-sidebar>#head>#drop-down>#drop-down-head{
+    display: flex;
+    align-items: center;
+    position: relative;
+    height: 1.5vw;
+    cursor: pointer;
+    padding-left: .5vw;
+}
+.content-sidebar>#head>#drop-down>#drop-down-head>.material-symbols-outlined{
+    position:absolute;
+    right: 15%;
+}
+.content-sidebar>#head>#drop-down>#option{
+    display: flex;
+    flex-direction: column;
+}
+.content-sidebar>#head>#drop-down>#option>span{
+height: 1.5vw;
+display: flex;
+align-items: center;
+cursor: pointer;
+padding-left: .5vw;
+}
+.content-sidebar>#head>#drop-down>#option>span:hover{
+    background-color: #1A222B;
+}
+.hide{
+    visibility: hidden;
+}
+.show{
+    visibility: visible;
+}

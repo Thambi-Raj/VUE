@@ -11,9 +11,10 @@ var button_component = {
             type:String
         },
     },
+    emits:['button_clicked'],
     methods:{
         button_clicked(){
-            this.$emit('button_clicked',this.button_name);
+            this.$emit('button_clicked','button',this.button_name);
         }
     }
     

@@ -26,20 +26,15 @@ const search_button_controller={
         },
 
     },
+    emits:['change_active'],
     methods:{
         search_value(value){
              this.p  = this.result.filter(d=> d.includes(value))
         },
         change_activestate(){
           this.clicked = !this.clicked;
-          this.$emit('change_active',this.id);
+          this.$emit('change_active',this.id,'input');
         },
-        // changecolor(){
-        //     this.$emit('change_active',this.id);
-        // }
+      
     }
 }
-  // this.$emit('colorchange',color);
-            // this.bgcolor='green'
-            // this.$root.emit('colorchange',color);
-            // this.$root.$emit('removechange',color);

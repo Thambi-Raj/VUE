@@ -1,87 +1,105 @@
-var json = {
-    "ref": document.querySelector('#app'),
-    "features": ["Bold", "Italics", "Highlight", "font-family", "font-size", "underline", "strikethrough", "alignment", "color", "bgcolor", "heading", "quotes"]
-}
-class Editor {
-
-    constructor(parent, format) {
-        this.parent = parent;
-        this.format = format;
-        this.dropdown = ["alignment", "heading", "font-family"];
-        this.create_Editor_tool();
-        this.create_text_field();
-    }
-
-    create_Editor_tool() {
-        var edit_container = this.create_DOM_elements('div','','editor');
-        this.format.forEach(element => {
-            if (!this.dropdown.includes(element)) {
-                this.create_tool_icon(element, edit_container);
-            }
-            else {
-                this.create_tool_dropdown(element, edit_container);
-            }
-        });
-        this.parent.appendChild(edit_container);
-    }
-
-    create_tool_icon(element, parent) {
-        var div = this.create_DOM_elements('div', 'edit-button', element, '',[],element.charAt(0));
-        parent.appendChild(div);
-    }
-
-    create_tool_dropdown(element, parent) {
-        var drop_json = {
-            "font-family": [
-                "Arial",
-                "Helvetica",
-                "Times New Roman",
-                "Georgia",
-                "Courier New",
-                "Verdana",
-                "Tahoma",
-                "Trebuchet MS",
-                "Palatino Linotype",
-                "Arial Black",
-                "Comic Sans MS",
-                "Impact",
-                "Lucida Console",
-                "Garamond",
-                "Century Gothic",
-                "Calibri",
-                "Book Antiqua",
-                "Franklin Gothic Medium",
-                "Cambria",
-                "Rockwell"
+const editor_component = {
+    template: `<div class="editor-root">
+                 <div id="editor-tool">
+                   <div :class="  active.includes('bold')  ? 'button clicked' : 'button'" id="bold" @click="select('bold')">
+                   <span class="material-symbols-outlined">format_bold</span>
+                   </div>
+                   <div :class=" active.includes('italic')  ? 'button clicked' : 'button'" id="italics" @click="select('italic')">
+                   <span class="material-symbols-outlined">format_italic</span>
+                   </div>
+                   <div :class=" active.includes('underline')  ? 'button clicked' : 'button'" id="underline" @click="select('underline')">
+                   <span class="material-symbols-outlined">format_underlined</span>
+                   </div>
+                   <div :class=" active.includes('quotes')  ? 'button clicked' : 'button'" id="quotes" @click="get_html('quotes')">
+                   <span class="material-symbols-outlined">format_quote</span>
+                   </div>
+                   <div  class="file">
+                   <input type="file"  id="imag">
+                   <label for="imag">Upload</label>
+                   <span class="material-symbols-outlined">image</span>
+                   </div>
+                   <div  class="file">
+                   <label for="Color">Color</label>
+                   <input type="color"  id="Color">
+                   </div>
+                   <simple-dropdown-controller width='small_width'  :data="font_size" :tag="'-'" ></simple-dropdown-controller>
+                   <simple-dropdown-controller width='normal_width' :data="font_family" :tag="'-'" ></simple-dropdown-controller>
+                   <simple-dropdown-controller width='normal_width' :data="heading" :tag="'-'"></simple-dropdown-controller>
+                   <simple-dropdown-controller width='small_width'  :data="align" :tag="'span'"></simple-dropdown-controller>
+                   <simple-dropdown-controller width='small_width'  :data="texture" :tag="'image'" @change_background="change_back"></simple-dropdown-controller>
+                 </div> 
+                 <div id="texture-field" ref="back_ground">
+                    <div id="word-pad" contenteditable="true">
+                      
+                    </div>
+                 </div>
+             </div>`,
+    props: {
+        active: {
+            type: Array
+        }
+    },
+    data(){
+        return{
+            font_size:["5","1","2","3","4","6","7","8","9"],
+            font_family:["Arial",
+            "Helvetica",
+            "Times New Roman",
+            "Georgia",
+            "Courier New",
+            "Verdana",
+            "Tahoma",
+            "Trebuchet MS",
+            "Palatino Linotype",
+            "Arial Black",
+            "Comic Sans MS",
+            "Impact",
+            "Lucida Console",
+            "Garamond",
+            "Century Gothic",
+            "Calibri",
+            "Book Antiqua",
+            "Franklin Gothic Medium",
+            "Cambria",
+            "Rockwell"],
+            heading:[
+                "Normal",
+                "Heading 1",
+                "Heading 2",
+                "Heading 3"
             ],
-            "heading":["H1","H2","H3","H4","H5","H6"],
-            "alignment":["justifyCenter","jsutifyLeft","justifyRight"],
+            align:[
+                "format_align_justify",
+                "format_align_left",
+                "format_align_right",
+            ],
+            texture:[
+                "texture51.jpg",
+                "texture1.jpg",
+                "texture6.avif",
+                "texture2.jpg",
+                "texture44.webp",
+                "texture31.webp"
+            ]
         }
-    
-        var select  = document.createElement('select','change','','font-family');
-        for(var i=0;i<drop_json[element].length;i++){
-        select.append(this.create_DOM_elements('option','','',drop_json[element][i],'',drop_json[element][i]));
+    },
+    inject: ['print_hello'],
+    methods: {
+        select(data) {
+            this.$emit('change_select', data);
+            document.execCommand(data, false, null);
+        },
+        get_html(data){
+            this.$emit('change_select', data);
+        },
+        callPrintHello() {
+            if (this.print_hello) {
+                this.print_hello('year_2023');
+            }
+        },
+        change_back(data){
+          console.log(data);
+          this.$refs.back_ground.style.backgroundImage = `url(${data})`
         }
-      parent.append(select);
     }
-
-    create_text_field(){
-        var div  =document.createElement('div','','text-field');
-        div.designMode = 'on';
-        this.parent.append(div);
-    }
-    create_DOM_elements(type, className, id, value, children, innerText, color) {
-        var element = document.createElement(type);
-        className ? element.setAttribute('class', className) : '';
-        id ? element.setAttribute('id', id) : '';
-        innerText ? (element.innerHTML = innerText) : '';
-        value  ?element.value =value:'';
-        color ? element.style.color = color : '';
-        children ? children.forEach(child => {
-            element.appendChild(child);
-        }) : '';
-        return element;
-    }
-
 }
-var ed = new Editor(json.ref, json.features);

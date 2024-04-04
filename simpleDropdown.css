@@ -1,0 +1,69 @@
+.drop-down-root{
+    width: fit-content   
+}
+.drop-down-root>span:not(.material-symbols-outlined){
+    font-size: .8vw;
+}
+.drop-down-root>.small_width{
+    width: 2.9vw !important;
+}
+.drop-down-root>#drop-down-head {
+    display: flex;
+    width: 6vw;
+    height: 2vw;
+    align-items: center;
+    border: 1px solid #c9c9c9;
+    box-shadow: rgba(88, 92, 94, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+    border-radius: 5px;
+    padding: .4vw;
+    position: relative;
+    cursor: pointer;
+}
+.drop-down-root>#drop-down-head>span:last-child{
+    position: absolute;
+    right: 0;
+}
+.drop-down-root>#drop-down-head>span:first-child{
+    width: 80%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+   text-align: center;
+    display: inline-block;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.drop-down-root>.normal_width{
+    width: 6vw !important;
+}
+.drop-down-root>#option {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1;
+    visibility: visible;
+    background-color: #fff;
+}
+
+.drop-down-root>#option>span {
+    padding: .3vw;
+    overflow: hidden;
+    width: 100%;
+    text-overflow: ellipsis;
+    display: inline-block;
+    white-space: nowrap;
+    cursor: pointer;
+    cursor: pointer;
+}
+.drop-down-root>#option>img{
+    margin-top: .6vw;
+}
+.drop-down-root>#option>img:last-child{
+    margin-bottom: .6vw;
+}
+.drop-down-root>#option>img{
+    cursor:pointer;
+}
+.drop-down-root>#option>span:hover{
+    background-color: #e1e1e1;
+}

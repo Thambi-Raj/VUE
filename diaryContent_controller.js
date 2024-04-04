@@ -15,7 +15,7 @@ const diary_content = {
 
         },
         year_data: {
-
+            
         }
     }
 }

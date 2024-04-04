@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="calendar_right.css">
     <link rel="stylesheet" href="container.css">
     <link rel="stylesheet" href="content_sidebar.css">
+    <link rel="stylesheet" href="editor.css">
+    <link rel="stylesheet" href="simpleDropdown.css">
     <script src="dropdown_view.js"></script>
     <script src="dropdown_controller.js"></script>
     <script src="button_view.js"></script>
@@ -28,6 +30,10 @@
     <script src="container_controller.js"></script>
     <script src="content_sidebar_view.js"></script>
     <script src="content_sidebar_controller.js"></script>
+    <script src="editor_component.js"></script>
+    <script src="editor_controller.js"></script>
+    <script src="simpleDropdown_view.js"></script>
+    <script src="simpleDropdown_controller.js"></script>
     <script src="diary_view.js"></script>
     <script src="diaryContent_controller.js"></script>
 </head>
@@ -109,11 +115,13 @@
         </div>
         <div id="content">
             <div class="diary">
-                <diary-component  :dropdown_selected="dropdown_selected" :favourite="favourite" :mention="mention"
-                    :dropdown_value="dropdown_value" :bookmark="bookmark" :content_view ="content_view" @change_page="page_change"
-                    @change_dropdown_head="change_dropdown_head"
-                    @change_dropdown_value="change_dropdown_value"></diary-component>      
-            </div>
+                <diary-component :dropdown_selected="dropdown_selected" 
+                    :data="data"
+                    :dropdown_value="dropdown_value" :content_view="content_view"
+                    @change_page="page_change" @change_dropdown_head="change_dropdown_head"
+                    @change_dropdown_value="change_dropdown_value"
+                    @change_mention = "change_mention" ></diary-component>
+            </div>            
         </div>
     </div>
 </body>
@@ -121,35 +129,56 @@
 
 <script>
     const app = Vue.createApp({
-        data() {
-            return {
-                dropdown_selected: 'year_2024',
-                dropdown_value: 'Mar',
-                id_map: {
-                    'year_2024': 2024,
-                    'year_2023': 2023
-                },
-                content_view: true,
-                favourite:[{'FEB 2024': [1,2,5,23,25,27,23,25,27,23,25,27,23,25,27]},{'SEP 2023':[23,25,27]},{'AUG 2023':[20,12,7]},{'FEB 2024': [1,2,5]},{'FEB 2024': [1,2,5]},{'FEB 2024': [1,2,5]},{'FEB 2024': [1,2,5]},{'FEB 2024': [1,2,5]},{'FEB 2024': [1,2,5]},{'FEB 2024': [1,2,5]}],
-                bookmark:[{'FEB 2024': [1,2,5,23,25,27,23,25,27,23,25,27,23,25,27]},{'SEP 2023':[23,25,27]}],
-                mention:[{"thambi":['feb','mar']},{"raj":['feb','jan']}]
-            }
-        },
-        emits:["page_change","change_dropdown_head","change_dropdown_value"],
-        methods: {
-            change_dropdown_head(data,bool) {
-                this.dropdown_selected = data;
-                bool ? (this.content_view=true):'';
+    data() {
+        return {
+            dropdown_selected: 'year_2024',
+            dropdown_value: 'Apr',
+            id_map: {
+                'year_2024': 2024,
+                'year_2023': 2023
             },
-            change_dropdown_value(data,bool) {
-                this.dropdown_value = data;
-                bool ? (this.content_view=true):'';
-            },
-            page_change() {
-                this.content_view = !this.content_view;
+            data:[],
+            content_view: true,
+            favourite_data: [{ 'FEB 2024': [1, 2, 5, 23, 25, 27, 23, 25, 27, 23, 25, 27, 23, 25, 27] }, { 'SEP 2023': [23, 25, 27] }, { 'AUG 2023': [20, 12, 7] }, { 'FEB 2024': [1, 2, 5] }, { 'FEB 2024': [1, 2, 5] }, { 'FEB 2024': [1, 2, 5] }, { 'FEB 2024': [1, 2, 5] }, { 'FEB 2024': [1, 2, 5] }, { 'FEB 2024': [1, 2, 5] }, { 'FEB 2024': [1, 2, 5] }],
+            bookmark_data: [{ 'FEB 2024': [1, 2, 5] }, { 'FEB 2024': [1, 2, 5] }],
+            mention_data: [{ "thambi": ['feb', 'mar'] }, { "raj": ['feb', 'jan'] }]
+        }
+    },
+    provide: {
+        print_hello: this.print_hello,
+    },
+    emits: ["page_change", "change_dropdown_head", "change_dropdown_value","change_mention"],
+    methods: {
+        change_dropdown_head(data, bool) {
+            this.dropdown_selected = data;
+            if (bool) {
+                this.content_view = true;
             }
+            this.data =  data =='favorite' 
+                        ? this.favourite_data : data =='bookmarks' 
+                        ? this.bookmark_data :[]
         },
-    })
+        change_dropdown_value(data, bool) {
+            this.dropdown_value = data;
+            if (bool) {
+                this.content_view = true;
+            }
+           
+        },
+        page_change() {
+            this.content_view = !this.content_view;
+        },
+        print_hello(name) {
+            console.log('yes');
+            this.dropdown_selected = name;
+        },
+        change_mention(name){
+           this.data=[{'FEB 2024': [1, 2, 5]}];
+        }
+    },
+})
+
+
 
     app.component('dropdown-root', dropdown_component);
     app.component('dropdown-controller', dropdown_controller);
@@ -161,10 +190,13 @@
     app.component('sidebar-controller', sidebar_controller);
     app.component('calendar-root', calendar_component);
     app.component('calendar-controller', calendar_controller);
-    app.component('container-root',container_component)
-    app.component('container-controller',container_controller);
-    app.component('contentSidebar-root',content_sidebar_component)
-    app.component('contentSidebar-controller',content_sidebar_controller);
+    app.component('container-root', container_component)
+    app.component('container-controller', container_controller);
+    app.component('contentSidebar-root', content_sidebar_component)
+    app.component('contentSidebar-controller', content_sidebar_controller);
+    app.component('editor-root', editor_component);
+    app.component('simple-dropdown-root',simple_dropdown_component);
+    app.component('simple-dropdown-controller',simple_dropdown_controller);
     app.component('diary-component', diary_component);
     app.component('diary-content-controller', diary_content);
     const vm = app.mount('.diary');

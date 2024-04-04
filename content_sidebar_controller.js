@@ -1,7 +1,12 @@
-const content_sidebar_controller ={
+const content_sidebar_controller = {
          template:`<contentSidebar-root  
                    :dropdown_selected="dropdown_selected" 
-                   :dropdown_value="dropdown_value" :month ="month" @month_change="change_month" @back_page="back">
+                   :dropdown_value="dropdown_value" :month_array ="month" 
+                   :last_day="lastDay"
+                   @year_change="change_year" 
+                   @month_change="change_month"
+                   @back_page="back"
+                   >
                    </contentSidebar-root>`,
          props:{
             dropdown_selected:{
@@ -9,26 +14,44 @@ const content_sidebar_controller ={
             },
             dropdown_value:{
                 type:String
+            },
+            month:{
+                type:Array
             }
          },
          data(){
            return{
-               month : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'dec'],
+               lastDay:0
            }
          },
-         created(){
-            var cur = new Date().getFullYear();
-            var mon=new Date().getMonth();
-            this.month = cur == this.dropdown_selected.split('_')[1] ? this.month.slice(0,mon):['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'dec']; 
-         },
+          created(){
+            var mon=0;
+            this.month.forEach((element,i) => {
+                if(element.toLowerCase() == this.dropdown_value.toLowerCase()){
+                    mon =i;
+                }
+            });
+            this.lastDay = new Date(this.dropdown_selected.split('_')[1], mon + 1, 0).getDate();
+        },
+        updated(){
+          var mon=0;
+          this.month.forEach((element,i) => {
+              if(element.toLowerCase() == this.dropdown_value.toLowerCase()){
+                  mon =i;
+              }
+          });
+          this.lastDay = new Date(this.dropdown_selected.split('_')[1], mon + 1, 0).getDate();
+        },
          methods:{
+          change_year(data){
+            this.$emit('drop',data,'calendar')
+          },
           change_month(data){
-            var cur = new Date().getFullYear();
-            var mon=new Date().getMonth();
-            this.month = cur == data ? this.month.slice(0,mon):['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'dec']; 
+            this.$emit('drop1',data);
           },
           back(month,year){
                this.$emit('back',year,month);
           }
          }
 }
+ 

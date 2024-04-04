@@ -6,7 +6,7 @@ const sidebar_component = {
                 :first_icon="'clinical_notes'" 
                 :title="'2024'" 
                 :default_selected="dropdown_value" 
-                :data="['Jan','Feb','Mar','Apr','May']" 
+                :data="month_array" 
                 @change_active="change_activestate" 
                 :active="dropdown_selected" 
                 @change_value="change_value">
@@ -16,15 +16,15 @@ const sidebar_component = {
                 :first_icon="'clinical_notes '" 
                 :title="'2023'"  
                 :default_selected="dropdown_value" 
-                :data="['Jan','Feb','Mar','Apr','May']" 
+                :data="month_array" 
                 @change_active="change_activestate" 
                 :active="dropdown_selected" 
                 @change_value="change_value">
             </dropdown-controller>
 
             <button-controller 
-                :id="'favourite'" 
-                :button_name="'Favourite'" 
+                :id="'favorite'" 
+                :button_name="'favorite'" 
                 :icon_name="'favorite'" 
                 @change_active="change_activestate" 
                 :active="dropdown_selected">
@@ -32,15 +32,15 @@ const sidebar_component = {
 
             <search-btn-controller 
                 :id="'mention'" 
-                :button_name="'Mentions'" 
+                :button_name="'mention'" 
                 :icon_name="'alternate_email'" 
                 @change_active="change_activestate" 
-                :active="dropdown_selected">
+                :active="dropdown_selected" @get_mention="get_mention" >
             </search-btn-controller>
 
             <button-controller 
                 :id="'bookmark'" 
-                :button_name="'Bookmarks'" 
+                :button_name="'bookmarks'" 
                 :icon_name="'bookmarks'" 
                 @change_active="change_activestate" 
                 :active="dropdown_selected">
@@ -49,15 +49,19 @@ const sidebar_component = {
     `,
     props: {
         dropdown_selected: String,
-        dropdown_value: String
+        dropdown_value: String,
+        month_array:Array
     },
-    emits:['change_dropdown_head','change_dropdown_value'],
+    emits:['change_dropdown_head','change_dropdown_value','change_mention'],
     methods: {
         change_activestate(data,button) {
            this.$emit('change_dropdown_head', data,button);
         },
         change_value(data) {
             this.$emit('change_dropdown_value', data);
+        },
+        get_mention(data){
+             this.$emit('change_mention',data)
         }
     }
 };

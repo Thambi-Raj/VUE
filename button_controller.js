@@ -21,16 +21,12 @@ var button_controller = {
     data() {
         return {
             show_drop:this.active ===this.id
-            
         }
-    },
-    updated(){
-       console.log(this.active === this.button_name);
-       console.log(this.id);
     },
     emits:['change_active'],
     methods: {
         button_clicked(template,name) {
+           
             this.$emit('change_active',name,template);
         }
     }

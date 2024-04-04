@@ -48,7 +48,7 @@ var dropdown_component = {
             this.$emit('change_value',this.selected);
         },
         change_activestate(){
-            this.$emit('change_activestate',this.id,);
+            this.$emit('change_activestate',this.id);
         }
     }
 }

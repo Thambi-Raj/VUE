@@ -2,47 +2,64 @@ const content_sidebar_component = {
     template: `<div class="content-sidebar">
                      <div id="head"> 
                          <span class="material-symbols-outlined" @click="back">logout</span>
-                         <div id="drop-down" @click="show_drop('a')" @mouseleave = "hide_drop('a')">
-                             <div id="drop-down-head">
-                                <span>{{month1}}</span>
+                         <div id="drop-down" >
+                             <div id="drop-down-head" @click="show_drop('a')">
+                                <span>{{dropdown_value}}</span>
                                 <span class="material-symbols-outlined" >arrow_drop_down</span>
                             </div>
-                            <div id="option" v-if="month_drop">
-                                <span v-for = "mon in month" @click = "change_drop(0,mon)">
+                            <div id="option" v-if="month_drop"  @mouseout = "hide_drop('a')">
+                                <span v-for = "mon in month_array" @click = "change_drop(0,mon)">
                                     {{mon}}
                                 </span>
                             </div>
                         </div>
-                        <div id="drop-down" @click="show_drop('b')"  @mouseleave ="hide_drop('b')">
-                             <div id="drop-down-head">
+                        <div id="drop-down"   >
+                             <div id="drop-down-head" @click="show_drop('b')">
                                 <span>{{year2}}</span>
                                 <span class="material-symbols-outlined" >arrow_drop_down</span>
                             </div>
-                            <div id="option" v-if="year_drop">
+                            <div id="option" v-show="year_drop">
                                 <span v-for = "yea in year" @click = "change_drop(1,yea)">
                                     {{yea}}
                                 </span>
                             </div>
                         </div>
                     </div>
+                    <div id="body">
+                        <div  id = "day-container" v-for="date in last_day">
+                            <div id="content">
+                              <div id="first">
+                                   <span>{{date}}</span>
+                                   <br>
+                                   <span>{{dropdown_value}}</span>
+                              </div>
+                              <div id="second">
+                              <span>no-content</span> 
+                              </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>`,
-    props: {
+                props: {
         dropdown_selected: {
             type: String,
         },
         dropdown_value: {
             type: String
         },
-        month:{
+        month_array:{
             type:Array
+        },
+        last_day:{
+            type:Number
         }
     },
+    
     data() {
         return {
             year: [2023, 2024],
             month_drop:false,
             year_drop:false,
-            month1: this.dropdown_value,
             year2:this.dropdown_selected.split('_')[1]
         }
     },
@@ -54,11 +71,11 @@ const content_sidebar_component = {
          name =='a' ? this.month_drop = false : this.year_drop =false;
        },
        change_drop(index,name){
-         index == 0 ? (this.month_drop = false, this.month1=name,console.log(this.month_drop ))
-                    : (this.year_drop = false , this.year2=name,this.$emit('month_change',name));
+         index == 0 ? (this.month_drop = false, this.$emit('month_change',name))
+                    : (this.year_drop = false , this.year2=name,this.$emit('year_change','year_'+this.year2));
        },
        back(){
-           this.$emit('back_page',this.month1,('year_'+this.year2));
+           this.$emit('back_page',this.dropdown_value,('year_'+this.year2));
        }
     }
 }

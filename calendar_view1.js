@@ -142,7 +142,6 @@ function create_page_design(i) {
 
 function create_tooltip(parent) {
     var features = ["Bold", "Italic", "Underline", "Image", "Quotes", "Background", "color", "font-size", "font-family", "heading", "align", "bullets", "Texture"];
-
     var tooltip_construct_json = {
         "span_class": "material-symbols-outlined",
         "Bold": {

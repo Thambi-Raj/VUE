@@ -10,7 +10,6 @@ const calendar_component = {
                 <div v-for="dayIndex in 7" :key="dayIndex" 
                      :class="{ 'date-container': true  , 'disable':( (rowIndex-1) * 7 + dayIndex - first_day <= 0)||  (rowIndex-1) * 7 + dayIndex - first_day > total_days}" @click="page_change">
                      <span class="date">{{ (rowIndex-1) * 7 + dayIndex - first_day }}</span>
-                   
                 </div>
             </div>
         </div>

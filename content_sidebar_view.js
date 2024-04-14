@@ -13,7 +13,7 @@ const content_sidebar_component = {
                                 </span>
                             </div>
                         </div>
-                        <div id="drop-down"   >
+                        <div id="drop-down"  >
                              <div id="drop-down-head" @click="show_drop('b')">
                                 <span>{{year2}}</span>
                                 <span class="material-symbols-outlined" >arrow_drop_down</span>

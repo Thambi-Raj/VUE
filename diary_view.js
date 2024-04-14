@@ -19,21 +19,10 @@ const diary_component = {
             </contentSidebar-controller>
         </div>
         <div id="right-container-root">
-                 <calendar-controller v-if="result_template === 'calendar' && content_view" 
-                      :month="dropdown_value"
-                      :year="dropdown_selected" @change_page="change_page">
-                 </calendar-controller>
-                <container-controller v-else-if="(result_template === 'button' ) && content_view"
-                      :name="dropdown_selected"
-                      :span="dropdown_selected"
-                      :data="data">
-                </container-controller>
-                <container-controller v-else-if="(result_template === 'input' ) && content_view"
-                      :name="dropdown_selected"
-                      :span="'alternate_email'"
-                      :data="data">
-                </container-controller>
-                <editor-root v-else :active="active"  @change_select="change_active"></editor-root>
+                <editor-root 
+                @change_select="change_active"
+                @remove_active="remove_active"  
+                @reset_active="reset_active" ></editor-root>
         </div>
         `,
     props: {
@@ -62,7 +51,7 @@ const diary_component = {
             id_map: this.$root.$data.id_map,
             result_template: '',
             month_array: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            active: []
+            active:{'bold':false,'italics':false,'underline':false,'size':5,'color':'#666','family':'sans-serif','align':'left'}
         };
     },
     methods: {
@@ -96,6 +85,31 @@ const diary_component = {
         },
         change_mention(data){
             this.$emit('change_mention',data);
+        },
+        remove_active(){
+            this.active=[];
+        },
+        reset_active(data){
+            console.log(data);
+           this.active=data;
         }
     }
 };
+
+{/* <calendar-controller v-if="result_template === 'calendar' && content_view" 
+                      :month="dropdown_value"
+                      :year="dropdown_selected" @change_page="change_page">
+                 </calendar-controller>
+                <container-controller v-else-if="(result_template === 'button' ) && content_view"
+                      :name="dropdown_selected"
+                      :span="dropdown_selected"
+                      :data="data">
+                </container-controller>
+                <container-controller v-else-if="(result_template === 'input' ) && content_view"
+                      :name="dropdown_selected"
+                      :span="'alternate_email'"
+                      :data="data">
+                </container-controller>
+                                <editor-root v-else :active="active"  @change_select="change_active" @defaut_style="default_style"></editor-root>
+ */
+            }

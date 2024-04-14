@@ -5,6 +5,8 @@ const simple_dropdown_controller={
       :data="data"
       :width="width"
       :tag="tag"
+      :name="name"
+      :default_val="default_val"
       @change_dropdown_value="change_drop"
       >
      </simple-dropdown-root>`,
@@ -22,12 +24,24 @@ const simple_dropdown_controller={
         },
         tag:{
             type:String
+        },
+        name:{
+            type:String
+        },
+        default_val:{
+            type:String
         }
      },
      methods:{
         change_drop(data,background){
-            this.selected_value = data;
-            background ? this.$emit('change_background',data):'';
+            this.selected_value = this.tag =='span'?background :data;
+            if(this.name.startsWith('Font')){
+                this.$emit('change_format',data,background,'font');
+            }
+            else{
+            background== 'back_ground' ? this.$emit('change_background',data):
+                          this.$emit('change_format',data,background);
+            }
         }
      }
      

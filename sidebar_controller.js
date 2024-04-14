@@ -20,7 +20,6 @@ const sidebar_controller= {
     emits:["change_drop_head","change_drop_value","change_mention"],
     methods: {
         change_dropdown_head(data,button) {
-            console.log(data);
            this.$emit('change_drop_head', data,button)
         },
         change_dropdown_value(data) {

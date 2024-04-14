@@ -44,7 +44,6 @@ const search_button_component = {
             this.show_result = !this.show_result;
         },
         change_mention(name) {
-            console.log(name);
             this.$emit('get_data',name);
         }
     }

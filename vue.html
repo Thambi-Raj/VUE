@@ -6,8 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <link rel="stylesheet" href="dropdown.css">
+        <script src="
+        https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.min.js
+        "></script>
+        <link rel="stylesheet" href="dropdown.css">
     <link rel="stylesheet" href="sidebar.css">
     <link rel="stylesheet" href="button.css">
     <link rel="stylesheet" href="search-dropdown.css">
@@ -35,7 +37,6 @@
     <script src="simpleDropdown_view.js"></script>
     <script src="simpleDropdown_controller.js"></script>
     <script src="diary_view.js"></script>
-    <script src="diaryContent_controller.js"></script>
 </head>
 <style>
     * {
@@ -162,8 +163,7 @@
             this.dropdown_value = data;
             if (bool) {
                 this.content_view = true;
-            }
-           
+            } 
         },
         page_change() {
             this.content_view = !this.content_view;
@@ -176,10 +176,7 @@
            this.data=[{'FEB 2024': [1, 2, 5]}];
         }
     },
-})
-
-
-
+})  
     app.component('dropdown-root', dropdown_component);
     app.component('dropdown-controller', dropdown_controller);
     app.component('button-root', button_component);
@@ -198,10 +195,7 @@
     app.component('simple-dropdown-root',simple_dropdown_component);
     app.component('simple-dropdown-controller',simple_dropdown_controller);
     app.component('diary-component', diary_component);
-    app.component('diary-content-controller', diary_content);
     const vm = app.mount('.diary');
-
-
 </script>
 
 

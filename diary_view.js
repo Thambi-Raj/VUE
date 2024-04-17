@@ -19,10 +19,9 @@ const diary_component = {
             </contentSidebar-controller>
         </div>
         <div id="right-container-root">
-                <editor-root 
-                @change_select="change_active"
-                @remove_active="remove_active"  
-                @reset_active="reset_active" ></editor-root>
+                <editor-root  
+                @save_content ="save"
+                ></editor-root>
         </div>
         `,
     props: {
@@ -39,7 +38,7 @@ const diary_component = {
             type: Boolean
         }
     },
-    emits: ['change_page', 'change_dropdown_value', 'change_dropdown_head',"change_mention"],
+    emits: ['change_page', 'change_dropdown_value', 'change_dropdown_head', "change_mention"],
     created() {
         this.result_template = 'calendar';
         var cur = new Date().getFullYear();
@@ -51,7 +50,10 @@ const diary_component = {
             id_map: this.$root.$data.id_map,
             result_template: '',
             month_array: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            active:{'bold':false,'italics':false,'underline':false,'size':5,'color':'#666','family':'sans-serif','align':'left'}
+            active: { 'bold': false, 'italics': false, 'underline': false, 'size': 5, 'color': '#666', 'family': 'sans-serif', 'align': 'left' },
+            styles :{},
+            close_tag:{},
+            html_Array : []
         };
     },
     methods: {
@@ -83,15 +85,55 @@ const diary_component = {
                 this.active.push(data);
             }
         },
-        change_mention(data){
-            this.$emit('change_mention',data);
+        change_mention(data) {
+            this.$emit('change_mention', data);
         },
-        remove_active(){
-            this.active=[];
+        remove_active() {
+            this.active = [];
         },
-        reset_active(data){
+        reset_active(data) {
             console.log(data);
-           this.active=data;
+            this.active = data;
+        },
+        save(html) {
+        
+            function get_child(child, htmlArray, closeTag) {
+                for (var i = 0; i < child.length; i++) {
+                    if (child[i].nodeType === 1) { 
+                        if (child[i].getAttribute("style")) {
+                            styles[htmlArray.length] = child[i].getAttribute("style");
+                        }
+                        htmlArray.push(child[i]);
+                        get_child(child[i].childNodes, htmlArray, closeTag);
+                        closeTag[htmlArray.length] = true;
+                        htmlArray.push(child[i].tagName.toLowerCase());
+                    } else if (child[i].nodeType === 3) { 
+                        htmlArray.push(child[i].nodeValue); 
+                    }
+                }
+            }   
+            var child = html.childNodes;
+            get_child(child, this.html_Array, this.close_tag); 
+            console.log(this.html_Array);
+            console.log(this.close_tag);
+
+            
+            this.render_page();
+        },
+        render_page() {
+            var div = ''
+            for (var i = 0; i < this.html_Array.length; i++) {
+                if (this.close_tag[i]) {
+                    div += '</' + this.html_Array[i]+ '>';
+                } else if (this.html_Array[i].tagName) {
+                     div+= '<' + this.html_Array[i].tagName.toLowerCase() + '>';
+                } else {
+                    console.log(this.html_Array[i]);
+                    div += this.html_Array[i];
+                }
+            }
+            var al = document.createElement('div');
+            al.innerHTML+=div;
         }
     }
 };
@@ -112,4 +154,4 @@ const diary_component = {
                 </container-controller>
                                 <editor-root v-else :active="active"  @change_select="change_active" @defaut_style="default_style"></editor-root>
  */
-            }
+}

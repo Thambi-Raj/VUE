@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Display Image using JavaScript</title>
+</head>
+<body>
+  <input type="file" id="imageInput" accept="image/*">
+  <div id="imageContainer">
+    
+  </div>
+
+  <script>
+    document.getElementById('imageInput').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function() {
+        const imgElement = document.createElement('img');
+        imgElement.src = reader.result;
+        imgElement.width = 200; // Set desired width
+        document.getElementById('imageContainer').innerHTML = ''; // Clear previous image
+        document.getElementById('imageContainer').appendChild(imgElement);
+      };
+
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
+</html>

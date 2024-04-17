@@ -21,8 +21,7 @@
     cursor: pointer;
     border-radius: 5px;
     height: 2vw;
-    border: 1px solid transparent;
-
+    border:1px solid #c9c9c96e;
 }
 
 .editor-root>#editor-tool>.button>span {
@@ -39,7 +38,7 @@
     align-items: center;
     width: 5vw;
     justify-content: space-evenly;
-    border: 1px solid #c9c9c9;
+    border: 1px solid #c9c9c96e;;
     border-radius: 5px;
     position: relative;
 }
@@ -69,9 +68,11 @@
     height: calc(100% - 4vw);
     width: 90%;
     border-radius: 5px;
-    background-image: url(texture51.jpg);
+    background-image: url(texture31.webp);
     background-repeat: no-repeat;
     background-size: cover;
+    position: relative;
+
 }
 .editor-root>#texture-field>#word-pad{
 background-color: #e8bebeab;
@@ -80,7 +81,32 @@ width: 100%;
 outline: none;
 border-radius: 5px;
 overflow: auto;
-
+font-size: 15px;
+font-family: sans-serif;
+color: #666;
+position: relative;
+}
+.editor-root>#texture-field>.image_container{
+    position: absolute;
+    height: 100%;
+    width: 7%;
+    border: 1px solid 1px solid rgb(154 154 154 / 43%);
+    top: 0;
+    left: 93%;
+    padding: 1vw;overflow: auto;
+    overflow-x: hidden;
+    background-color: #ffffff30;
+}
+.editor-root>#texture-field>.image_container>.image-content{
+      width: 100%;
+      height: 7vh;
+}
+.editor-root>#texture-field>.perfect-width{
+    width: 20%;
+    left: 80%;
+}
+.editor-root>#texture-field>.perfect-width>.image-content{
+    height: 25vh;
 }
 .empty{
     visibility: hidden;

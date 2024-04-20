@@ -114,7 +114,6 @@ const diary_component = {
                     }
                 }
             }
-        
             var child = html.childNodes;
                  get_child(child, this.html_Array,this.styles,this.close_tag); 
                  console.log(this.html_Array);
@@ -221,19 +220,22 @@ const diary_component = {
         render_page(editor_content) {
              var div =document.createElement('div');
              var res_string='';
+             console.log(editor_content);
              for(var i=0;i<editor_content.length;i++){
-                res_string+='<div>';
-                  editor_content[i].data.forEach((element,j) => {
+                editor_content[i].line_attributes ? res_string+='<div class="line-content" style="'+editor_content[i].line_attributes+'">'  
+                                                  : res_string+='<div class="line-content">';
+                    editor_content[i].data.forEach((element,j) => {
                      if(j!=0){
-                     res_string = this.check_previous_close_tag(editor_content[i].data[j-1].styles, element.styles,res_string);
+                        res_string = this.check_previous_close_tag(editor_content[i].data[j-1].styles, element.styles,res_string);
                      }
-                     res_string = this.check_for_new_tag(editor_content[i].data[j-1] ? editor_content[i].data[j-1].styles:'', element.styles,res_string);
-                     res_string += element.content;
+                        res_string = this.check_for_new_tag(editor_content[i].data[j-1] ? editor_content[i].data[j-1].styles:'', element.styles,res_string);
+                        res_string += element.content;
                      if(j==editor_content[i].data.length-1){
-                       res_string = this.check_previous_close_tag(element.styles,'',res_string);
+                        res_string = this.check_previous_close_tag(element.styles,'',res_string);
                      }
                   });
                   res_string+='</div>';
+                  console.log(res_string);
                 }
                 div.innerHTML=res_string;
                 console.log(div);

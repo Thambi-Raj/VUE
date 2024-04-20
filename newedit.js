@@ -1,19 +1,24 @@
-if (style.color) {
-    this.active_state['color'] = style.color;
-} 
-if (style.fontSize) {
-    var z = style.fontSize.replace('px', '');
-    this.active_state['font-size'] = z;
-} 
-if (style.fontFamily) {
-    this.active_state['font-family'] = style.fontFamily;
-} 
-if (style.textDecorationLine) {
-    this.active_state['underline'] = true;
-} 
-if (style.fontWeight) {
-    this.active_state['bold'] = true;
-} 
-if (style.fontStyle == 'italic') {
-    this.active_state['italic'] = true;
+check_for_new_tag(previous_styles, current_styles, div){
+    Object.keys(current_styles).forEach(tag => {
+        if (!previous_styles[tag]) {
+            if (tag == 'b') {
+                div.innerHTML += '<b>';
+            }
+            else if (tag == 'i') {
+                div.innerHTML += '<i>';
+            }
+            else if (tag == 'u') {
+                div.innerHTML += '<u>';
+            }
+            else if (tag == 'color') {
+                div.innerHTML += '<span style ="color :' + styles[tag] + '">'
+            }
+            else if (tag == 'font-size') {
+                div.innerHTML += '<span style ="font-size: ' + styles[tag] + 'px;">'
+            }
+            else {
+                div.innerHTML += '<span style=""fontFamily:' + styles[tag] + '">';
+            }
+        }
+    })
 }

@@ -13,7 +13,7 @@ const content_sidebar_component = {
                                 </span>
                             </div>
                         </div>
-                        <div id="drop-down"  >
+                        <div id="drop-down">
                              <div id="drop-down-head" @click="show_drop('b')">
                                 <span>{{year2}}</span>
                                 <span class="material-symbols-outlined" >arrow_drop_down</span>
@@ -25,9 +25,9 @@ const content_sidebar_component = {
                             </div>
                         </div>
                     </div>
-                    <div id="body">
-                        <div  id = "day-container" v-for="date in last_day">
-                            <div id="content">
+                    <div id="body" ref="scroll_container">
+                        <div id = "day-container" v-for="date in last_day" :class="{ active: date === this.$root.default_date }" >
+                            <div id="content" @click="change_date(date)">
                               <div id="first">
                                    <span>{{date}}</span>
                                    <br>
@@ -54,7 +54,11 @@ const content_sidebar_component = {
             type:Number
         }
     },
-    
+    mounted(){
+       var div_position = this.$refs.scroll_container.children[this.$root.default_date-1].getBoundingClientRect();
+       var scroll_y = div_position.y;
+       this.$refs.scroll_container.scrollTop = scroll_y - div_position.height 
+    },
     data() {
         return {
             year: [2023, 2024],
@@ -75,7 +79,11 @@ const content_sidebar_component = {
                     : (this.year_drop = false , this.year2=name,this.$emit('year_change','year_'+this.year2));
        },
        back(){
-           this.$emit('back_page',this.dropdown_value,('year_'+this.year2));
+           this.$emit('back_page',this.dropdown_value,('year_'+this.year2),1);
+       },
+       change_date(date){
+        console.log(date);
+          this.$emit('change_date',date);
        }
     }
 }

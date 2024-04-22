@@ -6,6 +6,7 @@ const content_sidebar_controller = {
                    @year_change="change_year" 
                    @month_change="change_month"
                    @back_page="back"
+                   @change_date="change_date"
                    >
                    </contentSidebar-root>`,
          props:{
@@ -49,8 +50,11 @@ const content_sidebar_controller = {
           change_month(data){
             this.$emit('drop1',data);
           },
-          back(month,year){
-               this.$emit('back',year,month);
+          back(month,year,date){
+               this.$emit('back',year,month,date);
+          },
+          change_date(date){
+            this.$emit('change_date',date)
           }
          }
 }

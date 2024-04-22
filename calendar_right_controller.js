@@ -12,8 +12,8 @@ const calendar_controller = {
         }
     },
     methods:{
-        page_change(){
-            this.$emit('change_page');
+        page_change(date){
+            this.$emit('change_page',date);
         }
     }
 

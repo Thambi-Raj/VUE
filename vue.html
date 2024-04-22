@@ -118,10 +118,14 @@
             <div class="diary">
                 <diary-component :dropdown_selected="dropdown_selected" 
                     :data="data"
-                    :dropdown_value="dropdown_value" :content_view="content_view"
+                    :dropdown_value="dropdown_value" 
+                    :content_view="content_view"
+                    :default_date="default_date"
                     @change_page="page_change" @change_dropdown_head="change_dropdown_head"
                     @change_dropdown_value="change_dropdown_value"
-                    @change_mention = "change_mention" ></diary-component>
+                    @change_mention = "change_mention" 
+                    @change_date="change_date"
+                    ></diary-component>
             </div>            
         </div>
     </div>
@@ -134,6 +138,7 @@
         return {
             dropdown_selected: 'year_2024',
             dropdown_value: 'Apr',
+            default_date:1,
             id_map: {
                 'year_2024': 2024,
                 'year_2023': 2023
@@ -148,7 +153,7 @@
     provide: {
         print_hello: this.print_hello,
     },
-    emits: ["page_change", "change_dropdown_head", "change_dropdown_value","change_mention"],
+    emits: ["page_change", "change_dropdown_head", "change_dropdown_value","change_mention","save_content","change_date"],
     methods: {
         change_dropdown_head(data, bool) {
             this.dropdown_selected = data;
@@ -165,15 +170,18 @@
                 this.content_view = true;
             } 
         },
-        page_change() {
+        page_change(date) {
             this.content_view = !this.content_view;
+            this.default_date = date;
         },
         print_hello(name) {
-            console.log('yes');
             this.dropdown_selected = name;
         },
         change_mention(name){
            this.data=[{'FEB 2024': [1, 2, 5]}];
+        },
+        change_date(date){
+            this.default_date=date;
         }
     },
 })  

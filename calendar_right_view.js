@@ -1,18 +1,23 @@
 const calendar_component = {
     template: `
     <div class="calendar-root">
-        <div id="calendar-head">
-            <div class="day-container" v-for="day in weeks" :key="day"><span>{{ day }}</span></div>
-        </div> 
-        <div id="calendar-body">
-            <div v-for="rowIndex in 6" :key="rowIndex" :class="{'calendar-body-row':true, 'hide': rowIndex == 6 && classFlag === 0  ,
-             'change-height': classFlag === 1 }" >
-                <div v-for="dayIndex in 7" :key="dayIndex" 
-                     :class="{ 'date-container': true  , 'disable':( (rowIndex-1) * 7 + dayIndex - first_day <= 0)||  (rowIndex-1) * 7 + dayIndex - first_day > total_days}" @click="page_change">
-                     <span class="date">{{ (rowIndex-1) * 7 + dayIndex - first_day }}</span>
-                </div>
-            </div>
+    <div id="calendar-head">
+    <div class="day-container" v-for="day in weeks" :key="day"><span>{{ day }}</span></div>
+</div> 
+<div id="calendar-body">
+    <div v-for="rowIndex in 6" :key="rowIndex" 
+         :class="[
+            'calendar-body-row',
+            { 'hide': rowIndex === 6 && classFlag === 0 },
+            { 'change-height': classFlag === 1 }
+         ]">
+        <div v-for="dayIndex in 7" :key="dayIndex" 
+             :class="{ 'date-container': true, 'disable': (rowIndex - 1) * 7 + dayIndex - first_day <= 0 || (rowIndex - 1) * 7 + dayIndex - first_day > total_days }" 
+             @click="page_change((rowIndex - 1) * 7 + dayIndex - first_day)">
+             <span class="date">{{ (rowIndex - 1) * 7 + dayIndex - first_day }}</span>
         </div>
+    </div>
+</div>
     </div>
 `,
     data() {
@@ -48,8 +53,8 @@ const calendar_component = {
             this.total_days = new Date(year,mon[1]+1,0).getDate();
             this.classFlag = this.first_day > 4 && this.total_days==31 ? 1 :0;
         },
-        page_change(){
-            this.$emit('page_change');
+        page_change(date){
+            this.$emit('page_change',date);
         }
         
     }

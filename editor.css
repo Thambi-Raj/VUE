@@ -5,6 +5,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
+    font-size: .75vw !important;
+    color: #666 !important;
 }
 
 .editor-root>#editor-tool {
@@ -22,11 +24,15 @@
     border-radius: 5px;
     height: 2vw;
     border:1px solid #c9c9c96e;
+    color: #666;
 }
 
 .editor-root>#editor-tool>.button>span {
     font-size: 1.2vw;
     color: #818080;
+}
+.editor-root>#editor-tool>.button>.marked{
+    background-color: #b0a664;
 }
 
 .editor-root>#editor-tool>.clicked {
@@ -41,9 +47,18 @@
     border: 1px solid #c9c9c96e;;
     border-radius: 5px;
     position: relative;
+    cursor: pointer;
+}
+.editor-root>#editor-tool>.extra_width{
+    width: 6vw !important;
+}
+.editor-root>#editor-tool>.extra_width>.material-symbols-outlined{
+    font-size: 1vw;
+    color: #666;
 }
 .editor-root>#editor-tool>.file>label{
     font-size: .8vw;
+    cursor: pointer;
 }
 .editor-root>#editor-tool>.file>#imag{
     display: none;

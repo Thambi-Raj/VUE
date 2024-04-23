@@ -4,7 +4,7 @@ const calendar_component = {
     <div id="calendar-head">
     <div class="day-container" v-for="day in weeks" :key="day"><span>{{ day }}</span></div>
 </div> 
-<div id="calendar-body">
+<div id="calendar-body" ref="calendar">
     <div v-for="rowIndex in 6" :key="rowIndex" 
          :class="[
             'calendar-body-row',
@@ -13,13 +13,17 @@ const calendar_component = {
          ]">
         <div v-for="dayIndex in 7" :key="dayIndex" 
              :class="{ 'date-container': true, 'disable': (rowIndex - 1) * 7 + dayIndex - first_day <= 0 || (rowIndex - 1) * 7 + dayIndex - first_day > total_days }" 
-             @click="page_change((rowIndex - 1) * 7 + dayIndex - first_day)">
+             @click="page_change((rowIndex - 1) * 7 + dayIndex - first_day)" >
              <span class="date">{{ (rowIndex - 1) * 7 + dayIndex - first_day }}</span>
+             <editor-root  :default_date=" (rowIndex - 1) * 7 + dayIndex - first_day"></editor-root>
         </div>
     </div>
 </div>
     </div>
 `,
+   mounted(){
+        this.show_preview();
+   },
     data() {
         return {
             weeks: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
@@ -55,6 +59,23 @@ const calendar_component = {
         },
         page_change(date){
             this.$emit('page_change',date);
+        },
+        show_preview(){
+            var preview_container = this.$refs.calendar;
+            var editor_tools = preview_container.querySelectorAll('.calendar-body-row>.date-container>.editor-root>#editor-tool');
+            editor_tools.forEach(element => {
+                element.remove();
+            });        
+            var texture_fields = preview_container.querySelectorAll('.calendar-body-row>.date-container>.editor-root>#texture-field');
+            texture_fields.forEach(element => {
+                 element.classList.add('preview');
+                var note_pad = element.querySelector('#word-pad')
+                note_pad.contentEditable = false;
+                 if(note_pad.innerHTML=='<div class="line-content"></div>'){
+                    element.parentElement.classList.add('hide');
+                       console.log(element.parentElement);
+                 }
+            });
         }
         
     }

@@ -161,8 +161,9 @@
                 this.content_view = true;
             }
             this.data =  data =='favorite' 
-                        ? this.favourite_data : data =='bookmarks' 
-                        ? this.bookmark_data :[]
+                        ?  this.construct_container_format("Favourite") : data =='bookmarks' 
+                        ? this.bookmark_data :[];
+            this.construct_container_format("Favourite")
         },
         change_dropdown_value(data, bool) {
             this.dropdown_value = data;
@@ -182,6 +183,49 @@
         },
         change_date(date){
             this.default_date=date;
+        },
+        construct_container_format(key){
+            var data =JSON.parse(localStorage.getItem(key));
+           if(data!=null){
+            var keys = Object.keys(data).sort().reverse();
+            var result = [];
+            for(var i=0;i<keys.length;i++){
+                var month = Object.keys(data[keys[i]]);
+                var res = this.month_based_sort(month);
+                for(var j=0;j<res.length;j++){
+                      var get_date =Object.keys(data[keys[i]][res[j]]).sort();
+                      if(get_date.length>=1){
+                            var s = res[j].toLocaleUpperCase() +'_' + this.id_map[keys[i]];
+                            var obj ={};
+                            obj[s] = get_date;
+                            result.push(obj);
+                      }
+                }
+            }
+        }
+            return result;
+        },
+        month_based_sort(array){
+            var month = {"Jan": 0,"Feb": 1,"Mar": 2,"Apr": 3,"May": 4,"Jun": 5,"Jul": 6,"Aug": 7,"Sep": 8,"Oct": 9,"Nov": 10,"Dec": 11};
+            var index_month =[];
+            var result =[...array];
+            for(var i=0;i<array.length;i++){
+                index_month.push(month[array[i]]);
+            }
+            console.log('pp');
+            for(var i=0;i<index_month.length;i++){
+                for(var j = i+1;j<index_month.length;j++){
+                    if(index_month[i] > index_month[j]){
+                        var temp = index_month[i];
+                        index_month[i]=index_month[j];
+                        index_month[j]=temp;
+                        var temp1 = result[i];
+                        result[i]=result[j];
+                        result[j]=temp1;
+                    }
+                }
+            }
+            return result;
         }
     },
 })  

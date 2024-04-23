@@ -61,6 +61,7 @@ const editor_component = {
                 'i': 'italic',
                 'u': 'underline',
             },
+            back_ground_image:"texture31.webp",
             empty_select: -1,
             default_size: 15,
             styles: {},
@@ -76,12 +77,16 @@ const editor_component = {
     watch: {
         default_date() {
             var get_local = localStorage.getItem("Data") ? JSON.parse(localStorage.getItem("Data")) : undefined;
-            if (get_local != undefined && get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.$root.default_date]) {
-                var res_string = this.render_page(get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.$root.default_date]);
+            var condition = get_local  && get_local[this.$root.dropdown_selected] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]  ;
+            if (condition!=undefined) {
+                var res_string = this.render_page(get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]);
+                var content =get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date];
                 this.$refs.content.innerHTML = res_string;
+                this.$refs.back_ground.style.backgroundImage = `url(${content[content.length-1]["background"]})`;
             }
             else {
                 this.$refs.content.innerHTML = '<div class="line-content"></div>';
+                this.$refs.back_ground.style.backgroundImage = `url(${"texture31.webp"})`;
             }
             this.check_mark("Favourite","fav");
         }
@@ -195,12 +200,17 @@ const editor_component = {
             this.default_size = 15
         })
         var get_local = localStorage.getItem("Data") ? JSON.parse(localStorage.getItem("Data")) : undefined;
-        var condition = get_local  && get_local[this.$root.dropdown_selected] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.$root.default_date]  ;
+        var condition = get_local  && get_local[this.$root.dropdown_selected] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]  ;
         if (condition!==undefined) {
-            var res_string = this.render_page(get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.$root.default_date]);
+            var res_string = this.render_page(get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]);
+            var content =get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date];
             this.$refs.content.innerHTML = res_string;
+            this.$refs.back_ground.style.backgroundImage = `url(${content[content.length-1]["background"]})`;
+
         } else {
             this.$refs.content.innerHTML = '<div class="line-content"></div>';
+            this.$refs.back_ground.style.backgroundImage = `url(${"texture31.webp"})`;
+
         }
         this.$refs.content.focus();
         this.check_mark("Favourite","fav");
@@ -210,7 +220,7 @@ const editor_component = {
             var get_local = !localStorage.getItem(key) ? undefined : JSON.parse(localStorage.getItem(key));
             var condition = get_local  && get_local[this.$root.dropdown_selected] 
                             && get_local[this.$root.dropdown_selected][this.$root.dropdown_value] 
-                            && get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.$root.default_date];
+                            && get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date];
             if(condition !== undefined){
                 this.$refs[element].children[0].classList.add("marked")
             }
@@ -256,7 +266,8 @@ const editor_component = {
             this.active_state[data] = !this.active_state[data];
         },
         change_back(data) {
-            this.$refs.back_ground.style.backgroundImage = `url(${data})`
+            this.$refs.back_ground.style.backgroundImage = `url(${data})`;
+            this.back_ground_image =data;
         },
         parent_element_style(element) {
             if (!(element.getAttribute && element.getAttribute('class') == 'line-content')) {
@@ -485,6 +496,7 @@ const editor_component = {
                     }
                 }
             }
+
             this.$emit('save_content', editor_content);
             this.saveData_to_localStorage("Data",editor_content);
             this.html_Array = [];
@@ -495,10 +507,10 @@ const editor_component = {
             var get_local = !localStorage.getItem(key) ? {} : JSON.parse(localStorage.getItem(key));
             get_local[this.$root.dropdown_selected] = get_local[this.$root.dropdown_selected] || {};
             get_local[this.$root.dropdown_selected][this.$root.dropdown_value] = get_local[this.$root.dropdown_selected][this.$root.dropdown_value] || {};
-            !json_delete ? get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.$root.default_date] = value
-                         : get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.$root.default_date] ?
-                            delete  get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.$root.default_date]
-                            : get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.$root.default_date]=value;
+            !json_delete ? (get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date] = value , get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date].push({"background" : this.back_ground_image}))
+                         : get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date] ?
+                            delete  get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]
+                            : get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]=value;
             localStorage.setItem(key, JSON.stringify(get_local));
         },
         delete_style(content, obj) {
@@ -550,12 +562,11 @@ const editor_component = {
         add_favourite() {
             this.save();
             this.saveData_to_localStorage("Favourite",true,"delete");
-            console.log(this.$refs["fav"]);
             if(this.$refs["fav"].children[0].classList.contains("marked")){
-                this.$refs.fav.children[0].classList.remove("marked");
+                this.$refs["fav"].children[0].classList.remove("marked");
             }
             else{
-                this.$refs.fav.children[0].classList.add("marked");
+                this.$refs["fav"].children[0].classList.add("marked");
             }   
         },
         add_mark() {
@@ -563,8 +574,7 @@ const editor_component = {
         },
         render_page(editor_content) {
             var res_string = '';
-            console.log(editor_content);
-            for (var i = 0; i < editor_content.length; i++) {
+            for (var i = 0; i < editor_content.length-1; i++) {
                 editor_content[i].line_attributes ? res_string += '<div class="line-content" style="' + editor_content[i].line_attributes + '">'
                     : res_string += '<div class="line-content">';
                     if(editor_content[i].data){                  

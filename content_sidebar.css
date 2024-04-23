@@ -37,7 +37,7 @@
     background-color: #1A222B;
     width: 100%;
     
-}
+}back
 .content-sidebar>#head>#drop-down>#option>span{
 height: 1.5vw;
 display: flex;
@@ -99,4 +99,29 @@ padding-left: .5vw;
     align-items: center;
     color: #666;
     border-radius: 0px 5px 5px 0px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+}
+.content-sidebar>#body>#day-container>#content>#second>.editor-root{
+    height: 100% !important;
+}
+.content-sidebar>#body>#day-container>#content>#second>.editor-root>#texture-field{
+    height: 100% !important;
+    width: 100% !important;
+    overflow: hidden;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+.content-sidebar>#body>#day-container>#content>#second>.editor-root>#texture-field>#word-pad{
+    overflow: hidden;
+}
+.content-sidebar>#body>#day-container>#content>#second>.editor-root>#texture-field>#word-pad>.line-content{
+    padding: .2vw !important;
+    font-size: .55vw;
+}
+.content-sidebar>#body>#day-container>#content>#second>.hide{
+    display: none;
 }

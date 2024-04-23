@@ -36,7 +36,7 @@ const diary_component = {
                 :span="'alternate_email'"
                 :data="data">
             </container-controller>
-            <editor-root v-else :active="active" @save_content ="save" :default_date="default_date" ></editor-root>
+            <editor-root v-else  @save_content ="save" :default_date="default_date" ></editor-root>
         </div>
         `,
     props: {
@@ -61,7 +61,7 @@ const diary_component = {
         this.result_template = 'calendar';
         var cur = new Date().getFullYear();
         var mon = new Date().getMonth();
-        this.month_array = cur == this.dropdown_selected.split('_')[1] ? this.month_array.slice(0, (mon + 1)) : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'dec'];
+        this.month_array = cur == this.dropdown_selected.split('_')[1] ? this.month_array.slice(0, (mon + 1)) : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     },
     data() {
         return {
@@ -83,7 +83,7 @@ const diary_component = {
             var mon = new Date().getMonth();
             this.$emit('change_dropdown_head', data);
             this.result_template = button;
-            button == 'calendar' ? this.month_array = cur == data.split('_')[1] ? this.month_array.slice(0, mon + 1) : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'dec']
+            button == 'calendar' ? this.month_array = cur == data.split('_')[1] ? this.month_array.slice(0, mon + 1) : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
                 : '';
             button == 'calendar' ? this.$emit('change_dropdown_value', 'Jan') : '';
 

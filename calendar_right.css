@@ -57,4 +57,31 @@
     right: 10%;
     top: 10%;
     font-size: .7vw;
+    width: 10%;
+    z-index: 10;
+    background-color: #fff;
+    text-align: center;
+    border-radius: 5px;
 }
+.calendar-body-row>.date-container>.editor-root{
+    height: 100% !important;
+}
+.calendar-body-row>.date-container>.editor-root>#texture-field{
+    height: 100% !important;
+    width: 100% !important;
+    cursor: pointer;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+.calendar-body-row>.date-container>.editor-root>#texture-field>#word-pad{
+    overflow: hidden;
+    padding: .25vw
+}
+.calendar-body-row>.date-container>.editor-root>#texture-field>#word-pad>.line-content{
+    padding: .2vw !important;
+    font-size: .55vw;
+}
+.calendar-body-row>.date-container>.hide{
+    display: none;
+}
+

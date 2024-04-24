@@ -93,14 +93,14 @@ const content_sidebar_component = {
             });        
             var texture_fields = preview_container.querySelectorAll('#day-container>#content>#second>.editor-root>#texture-field');
             texture_fields.forEach(element => {
-                 element.classList.add('preview');
+                element.classList.add('preview');
                 var note_pad = element.querySelector('#word-pad')
                 note_pad.contentEditable = false;
-                 if(note_pad.innerHTML=='<div class="line-content"></div>'){
+                 if(note_pad.innerHTML=='<div class="line-content"></div>' && element.querySelector('#imageContainer').innerHTML ==''){
                     element.parentElement.classList.add('hide');
                     element.parentElement.parentElement.innerHTML =  'no-content'
-
                  }
+                 element.querySelector('#imageContainer').classList.add('hide')
             });
 
         }

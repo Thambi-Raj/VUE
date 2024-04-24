@@ -4,7 +4,7 @@ const calendar_component = {
     <div id="calendar-head">
     <div class="day-container" v-for="day in weeks" :key="day"><span>{{ day }}</span></div>
 </div> 
-<div id="calendar-body" ref="calendar">
+<div id="calendar-body" ref="calendar" >
     <div v-for="rowIndex in 6" :key="rowIndex" 
          :class="[
             'calendar-body-row',
@@ -21,9 +21,10 @@ const calendar_component = {
 </div>
     </div>
 `,
-   mounted(){
+   mounted(){  
         this.show_preview();
    },
+
     data() {
         return {
             weeks: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
@@ -47,6 +48,7 @@ const calendar_component = {
     },
     updated() {
         this.set_config_data();
+        this.show_preview();
     },
     methods: {
         set_config_data() {
@@ -68,14 +70,15 @@ const calendar_component = {
             });        
             var texture_fields = preview_container.querySelectorAll('.calendar-body-row>.date-container>.editor-root>#texture-field');
             texture_fields.forEach(element => {
-                 element.classList.add('preview');
                 var note_pad = element.querySelector('#word-pad')
                 note_pad.contentEditable = false;
-                 if(note_pad.innerHTML=='<div class="line-content"></div>'){
+                element.classList.add('preview');
+                if(note_pad.innerHTML == '<div class="line-content"></div>' &&  element.querySelector('#imageContainer').innerHTML ==''){
                     element.parentElement.classList.add('hide');
-                       console.log(element.parentElement);
-                 }
+                }
+                element.querySelector('#imageContainer').classList.add('hide')
             });
+        
         }
         
     }

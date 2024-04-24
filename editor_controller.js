@@ -1,211 +1,161 @@
-// const editor_component = {
-//     template: `<div class="editor-root">
-//                  <div id="editor-tool" ref="editor_tool">
-//                    <div :class="  active_state.bold  ? 'button clicked' : 'button'" id="bold" @click="select('bold')">
-//                    <span class="material-symbols-outlined">format_bold</span>
-//                    </div>
-//                    <div :class=" active_state.italics  ? 'button clicked' : 'button'" id="italics" @click="select('italic')">
-//                    <span class="material-symbols-outlined">format_italic</span>
-//                    </div>
-//                    <div :class=" active_state.underline  ? 'button clicked' : 'button'" id="underline" @click="select('underline')">
-//                    <span class="material-symbols-outlined">format_underlined</span>
-//                    </div>
-//                    <div  class="file">
-//                    <input type="file"  id="imag">
-//                    <label for="imag">Upload</label>
-//                    <span class="material-symbols-outlined">image</span>
-//                    </div>
-//                    <div  class="file">
-//                    <label for="Color">Color</label>
-//                    <input type="color"  id="Color" @change="select( $event.target.value,'forecolor','font')" >
-//                    </div>
-//                    <simple-dropdown-controller width='small_width'  :data="font_size" :name= "'FontSize'" :tag="'-'" @change_format="select"></simple-dropdown-controller>
-//                    <simple-dropdown-controller width='normal_width' :data="font_family" :name= "'FontName'" :tag="'-'" @change_format="select"></simple-dropdown-controller>
-//                    <simple-dropdown-controller width='normal_width' :data="heading" :name="'formatBlock'" :tag="'-'" @change_format="select" ></simple-dropdown-controller>
-//                    <simple-dropdown-controller width='small_width'  :data="align"  :name="'align'" :tag="'span'" @change_format="select" ></simple-dropdown-controller>
-//                    <simple-dropdown-controller width='small_width'  :data="texture" :tag="'image'" @change_background="change_back"></simple-dropdown-controller>
-//                  </div> 
-//                  <div id="texture-field" >
-//                     <div id="word-pad" contenteditable="true" ref="content">
-//                         <div class="line-content"> write something....</div>
-//                     </div>
-//                  </div>
-//              </div>`,
-//     data() {
-//         return {
-//             font_size: ["5", "1", "2", "3", "4", "6", "7", "8", "9"],
-//             font_family: ["Arial",
-//                 "Helvetica",
-//                 "Times New Roman",
-//                 "Georgia",
-//                 "Courier New",
-//                 "Verdana",
-//                 "Tahoma",
-//                 "Trebuchet MS",
-//                 "Palatino Linotype",
-//                 "Arial Black",
-//                 "Comic Sans MS",
-//                 "Impact",
-//                 "Lucida Console",
-//                 "Garamond",
-//                 "Century Gothic",
-//                 "Calibri",
-//                 "Book Antiqua",
-//                 "Franklin Gothic Medium",
-//                 "Cambria",
-//                 "Rockwell"],
-//             heading: [
-//                 "normal",
-//                 "H1",
-//                 "H2",
-//                 "H3"
-//             ],
-//             align: [
-//                 "format_align_justify",
-//                 "format_align_left",
-//                 "format_align_right",
-//             ],
-//             texture: [
-//                 "texture51.jpg",
-//                 "texture1.jpg",
-//                 "texture6.avif",
-//                 "texture2.jpg",
-//                 "texture44.webp",
-//                 "texture31.webp"
-//             ],
-//             default_state:{'bold':false,'italics':false,'underline':false,'size':5,'color':'#666','family':'sans-serif','align':'left'},
-//             active_state:this.default_state,
-//             start_line: {
-//                 'b': 'bold',
-//                 'i': 'italic',
-//                 'u': 'underline',
-//             }
-
-//         }
-//     },
-//     mounted() {
-//         console.log(this.active_state);
-//         var editor = this.$refs.content;
-//         editor.addEventListener('click', (e) => {
-//             if (e.srcElement != this.$refs.content) {
-//                 this.parent_element_style(e.srcElement, e);
-//             }
-//             else {
-//                 var last_child = this.$refs.content.childNodes[this.$refs.content.childNodes.length - 1];
-//                 this.traverse_element(last_child, false)
-//             }
-//         })
-//         editor.addEventListener('keydown', (e) => {
-//             if ((editor.innerHTML == '<div class="line-content"><br></div>') && e.key == 'Backspace') {
-//                 e.preventDefault();
-//             }
-//         });
-//     },
-//     inject: ['print_hello'],
-//     methods: {
-//         select(data, value, font) {
-//             if (this.$refs.content.innerHTML == '<div class="line-content"> write something....</div>') {
-
-//             }
-//             else {
-//                 this.$emit('change_select', data);
-//                 if (font) {
-//                     document.execCommand(value, false, data);
-//                     if (value == 'forecolor') {
-//                         this.fontTag_to_spanTag('color')
-//                     }
-//                     else if (value == 'FontSize') {
-//                         this.fontTag_to_spanTag('size');
-//                     }
-//                     else {
-//                         this.fontTag_to_spanTag('face');
-//                     }
-//                 }
-//                 else {
-//                     value == undefined || value.startsWith('format') ? (document.execCommand(data, false, null),this.change_active[data]=!this.change_active[data],console.log('op')):
-//                         (document.execCommand(value, false, data), console.log('yes'))
-//                 }
-//             }
-           
-//             this.$refs.content.focus();
-//         },
-//         get_html(data) {
-//             this.$emit('change_select', data);
-//         },
-//         change_back(data) {
-//             this.$refs.back_ground.style.backgroundImage = `url(${data})`
-//         },
-//         parent_element_style(element) {
-//             if (!(element.getAttribute && element.getAttribute('class') == 'line-content')) {
-//                 var h = element;
-//                 var res = [];
-//                 while (h.tagName.toLowerCase() != 'div') {
-//                     if (h.tagName.toLowerCase() != 'span') {
-//                         var style_name = this.start_line[h.tagName.toLowerCase()];
-//                         this.change_active[style_name] = true;
-//                     }
-//                     else {
-
-//                     }
-//                     h = h.parentElement;
-//                 }
-//                 this.$emit('reset_active',this.change_active );
-//             }
-//             else {
-//                 var sel = document.getSelection();
-//                 var content_length = sel.anchorOffset;
-//                 if (content_length <= 1) {
-//                     this.traverse_element(element, true)
-//                 }
-//                 else if (sel.focusNode.parentElement == element) {
-//                     this.remove_active();
-//                 }
-//                 else {
-//                     this.traverse_element(element, false)
-//                 }
-//             }
-//             console.log(this.change_active);
-//         },
-//         remove_active() {
-//             this.$emit('remove_active', { 'bold': false, 'italics': false, 'underline': false, 'size': 5, 'color': '#666', 'family': 'sans-serif', 'align': 'left' });
-//         },
-//         traverse_element(element, forward) {
-//             var child = element.childNodes[forward ? 0 : element.childNodes.length - 1];
-//             while (child && child.tagName && child.tagName.toLowerCase() != 'br') {
-//                 if (child.tagName.toLowerCase() != 'span') {
-//                     var style_name = this.start_line[child.tagName.toLowerCase()];
-//                     this.change_active[style_name] = true;
-//                 }
-//                 else {
-
-//                 }
-//                 child = child.childNodes[forward ? 0 : child.childNodes.length - 1];
-//             }
-//             this.$emit('reset_active',   this.change_active);
-//         },
-//         fontTag_to_spanTag(params) {
-//             document.querySelectorAll("font").forEach(function (font) {
-//                 var span = document.createElement("span");
-//                 var attr = font.getAttribute(params);
-//                 if (params == 'color') {
-//                     span.style.color = attr;
-//                 }
-//                 else if (params == 'size') {
-//                     span.style.fontSize = attr + 'pt';
-//                 }
-//                 else {
-//                     span.style.fontFamily = attr;
-//                 }
-//                 while (font.firstChild) {
-//                     span.appendChild(font.firstChild);
-//                 }
-//                 font.parentNode.insertBefore(span, font);
-//                 font.parentNode.removeChild(font);
-//             });
-//         }
-//     }
-// }
-
-// {/* <div :class=" active_state.includes('quotes')  ? 'button clicked' : 'button'" id="quotes" @click="get_html('quotes')">
-// <span class="material-symbols-outlined">format_quote</span>
-// </div> */}
+const editor_controller = {
+    template:`<editor-root :data="data" :image="image" :favourite:= "favourite" @save="save_content"  @add_fav = "add_to_favourite" > 
+              </editor-root>`,
+    props:{
+        data:{
+            type:Object
+        }
+    },
+    data(){
+          return{
+            element_style: {},
+            closed_element_index: [],
+            editor_elements: []
+          }
+    },
+    methods:{
+            DFS(html){
+                function recursion(child, htmlArray, styles, close_tag) {
+                    for (var i = 0; i < child.length; i++) {
+                        if (child[i].nodeType === 1) {
+                            if (child[i].getAttribute("style")) {
+                                styles[htmlArray.length] = child[i].getAttribute("style");
+                            }
+                            var a = htmlArray.length;
+                            htmlArray.push(child[i].cloneNode(false));
+                            recursion(child[i].childNodes, htmlArray, styles, close_tag);
+                            if (styles[a]) {
+                                close_tag.push(a);
+                            }
+                            htmlArray.push('</' + child[i].tagName.toLowerCase() + '>');
+                        } else if (child[i].nodeType === 3) {
+                            htmlArray.push(child[i]);
+                        }
+                    }
+                }
+                var child = html.childNodes;
+                recursion(child, this.editor_elements, this.element_style, this.closed_element_index);
+            },
+            format_for_json() {
+                var obj = {};
+                obj["contents"] = [];
+                obj["global_props"] = {};
+                return obj;
+            },
+            constructDiary_jsonFormat(content){
+                var result = this.format_for_json();
+                var single_line = {}
+                var styles = {}
+                var close = 0;
+                for (var i = 0; i < content.length; i++) {
+                    if (content[i].tagName && content[i].tagName.toLowerCase() == 'div') {
+                        this.check_for_lineStyle(content[i], single_line);
+                        if(content[i].getAttribute('style')){
+                            close++;
+                        }
+                    }
+                    else if (content[i].tagName) {
+                        this.get_styles_from_tag(content[i], styles);
+                    }
+                    else if (content[i].nodeType === 3) {
+                        var obj1 = this.set_Style_for_text(content[i].nodeValue, styles)
+                        single_line["data"].push(obj1);
+                    }
+                    else if (content[i] != '</br>') {
+                        if (content[this.close_tag[close]] && content[this.close_tag[close]].getAttribute('style')) {
+                            this.delete_style_present_in_attribute(content[this.close_tag[close]], styles);
+                            close++;
+                        }
+                        this.delete_style_present_in_tag(content[i], styles);
+                        if(content[i]=='</div>')  {
+                            result["contents"].push({...single_line});
+                            single_line={};
+                        }
+                    }
+                }
+            },
+            check_for_lineStyle(element, json) {
+                json["data"] = [];
+                if (element.getAttribute('style')) {
+                    json["line_props"] = element.getAttribute('style');
+                }
+                else {
+                    json["line_props"] = null;
+                }
+            },
+            delete_style_present_in_tag(element, styles) {
+                if (element == '</b>') {
+                    delete styles['b'];
+                } else if (element == '</u>') {
+                    delete styles['u'];
+                } else if (element == '</i>') {
+                    delete styles['i']
+                }
+            },
+            set_Style_for_text(text, styles) {
+                var obj1 = {};
+                obj1["content"] = text;
+                obj1["styles"] = { ...styles};
+                return obj1;
+            },
+            get_styles_from_tag(element, styles) {
+                if (element.tagName.toLowerCase() != 'br') {
+                    if (element.tagName.toLowerCase() != 'span') {
+                        styles[element.tagName.toLowerCase()] = true;
+                        if (element.getAttribute('style')) {
+                            this.find_styles_in_tag(element, styles);
+                        }
+                    }
+                    else {
+                        this.find_styles_in_tag(element, styles)
+                    }
+                }
+            }, 
+            delete_style_present_in_attribute(content, obj) {
+                var style = content.style;
+                if (style.color) {
+                    console.log('aa');
+                    delete obj['color']
+                }
+                if (style.fontSize) {
+                    delete obj['font-size']
+                }
+                if (style.fontFamily) {
+                    delete obj['font-family']
+                }
+                if (style.textDecorationLine) {
+                    delete obj['underline']
+                }
+                if (style.fontWeight) {
+                    delete obj['b']
+                }
+                if (style.fontStyle == 'italic') {
+                    delete obj['i']
+                }
+            },
+            find_styles_in_tag(content, obj) {
+                var style = content.style;
+                var z = '';
+                if (style.color) {
+                    obj['color'] = style.color;
+                }
+                if (style.fontSize) {
+                    var z = style.fontSize.replace('px', '');
+                    obj['font-size'] = z;
+                }
+                if (style.fontFamily) {
+                    obj['font-family'] = style.fontFamily;
+                }
+                if (style.textDecorationLine) {
+                    obj['underline'] = true;
+                }
+                if (style.fontWeight) {
+                    obj['b'] = true;
+                }
+                if (style.fontStyle == 'italic') {
+                    obj['i'] = true;
+                }
+            }, 
+            
+    }
+}

@@ -108,20 +108,47 @@ position: relative;
     border: 1px solid 1px solid rgb(154 154 154 / 43%);
     top: 0;
     left: 93%;
-    padding: 1vw;overflow: auto;
+    overflow: auto;
     overflow-x: hidden;
     background-color: #ffffff30;
+    display: flex;
+    align-items: center;
+    flex-direction: column  ;
 }
-.editor-root>#texture-field>.image_container>.image-content{
-      width: 100%;
-      height: 7vh;
+.editor-root>#texture-field>.perfect-width>.clicked{
+    background-color:#b5b3b34f;
+}
+.editor-root>#texture-field>.image_container>div{
+     padding: 1vw;
+     width: 100%;
+     height: 10vh;
+     position: relative;
+}
+.editor-root>#texture-field>.image_container>div>span{
+    display: none;
+}
+.editor-root>#texture-field>.image_container>div>img{
+    width: 100% ;
+    height : 100% ;
 }
 .editor-root>#texture-field>.perfect-width{
     width: 20%;
     left: 80%;
 }
-.editor-root>#texture-field>.perfect-width>.image-content{
-    height: 25vh;
+.editor-root>#texture-field>.perfect-width>.clicked>span{
+    right: 0;
+    position: absolute;
+    top: 0;
+    display: block;
+    cursor: pointer;
+    font-size: 1vw;
+}
+.editor-root>#texture-field>.perfect-width>div{
+    height:23vh;
+}
+.editor-root>#texture-field>.perfect-width>div>img{
+    width: 100%;
+    height: 100%;
 }
 .empty{
     visibility: hidden;

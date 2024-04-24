@@ -11,7 +11,7 @@ const editor_component = {
                    <span class="material-symbols-outlined">format_underlined</span>
                    </div>
                    <div class="file">
-                   <input  type="file" id="imag" accept="image/*" @change="add_photo">
+                   <input  type="file" id="imag" accept="image/*" @change="add_photo" ref="image_file">
                    <label for="imag">Upload</label>
                    <span class="material-symbols-outlined">image</span>
                    </div>
@@ -33,7 +33,7 @@ const editor_component = {
                         <div class="line-content">
                         </div>
                     </div>
-                    <div id="imageContainer" ref="image" @mouseover="show_image_container"  @mouseleave="remove_image_container" class="image_container">
+                    <div id="imageContainer" ref="image" @mouseover="show_image_container"  @mouseleave="remove_image_container" class="image_container"  >
                     
                     </div>
                  </div>
@@ -61,12 +61,13 @@ const editor_component = {
                 'i': 'italic',
                 'u': 'underline',
             },
-            back_ground_image:"texture31.webp",
+            back_ground_image: "texture31.webp",
             empty_select: -1,
             default_size: 15,
             styles: {},
             close_tag: [],
-            html_Array: []
+            html_Array: [],
+            images_url:[]
         };
     },
     props: {
@@ -77,18 +78,20 @@ const editor_component = {
     watch: {
         default_date() {
             var get_local = localStorage.getItem("Data") ? JSON.parse(localStorage.getItem("Data")) : undefined;
-            var condition = get_local  && get_local[this.$root.dropdown_selected] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]  ;
-            if (condition!=undefined) {
-                var res_string = this.render_page(get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]);
-                var content =get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date];
+            var condition = get_local && get_local[this.$root.dropdown_selected] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date];
+            this.$refs.image.innerHTML ='';
+            if (condition != undefined) {
+                var res_string = this.render_page(get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]["contents"]);
+                var global_props = get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]["global_props"];
                 this.$refs.content.innerHTML = res_string;
-                this.$refs.back_ground.style.backgroundImage = `url(${content[content.length-1]["background"]})`;
+                this.$refs.back_ground.style.backgroundImage = `url(${global_props["back_ground"]})`;
+                this.images = get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]["images"]
             }
             else {
                 this.$refs.content.innerHTML = '<div class="line-content"></div>';
                 this.$refs.back_ground.style.backgroundImage = `url(${"texture31.webp"})`;
             }
-            this.check_mark("Favourite","fav");
+            this.check_mark("Favourite", "fav");
         }
     },
     mounted() {
@@ -122,42 +125,42 @@ const editor_component = {
         });
         editor.addEventListener('keyup', (e) => {
             if (this.empty_select == 0) {
-                var get_font_tag = document.querySelectorAll('font')[0];
-                var attr = get_font_tag.getAttributeNames();
-                var prev_span = '';
-                attr.forEach((e, i) => {
-                    var span = document.createElement('span');
-                    if (e == 'size') {
-                        span.style.fontSize = this.default_size + 'px';
+                var fontTags = document.querySelectorAll('font');
+                fontTags.forEach((get_font_tag) => {
+                    var attr = get_font_tag.getAttributeNames();
+                    var prev_span = document.createElement('span');
+                    attr.forEach((e, i) => {
+                        var span = document.createElement('span');
+                        if (e == 'size') {
+                            span.style.fontSize = get_font_tag.getAttribute('size') + 'px';
+                        } else if (e == 'face') {
+                            span.style.fontFamily = get_font_tag.getAttribute('face');
+                        } else if (e == 'color') {
+                            span.style.color = get_font_tag.getAttribute('color');
+                        }
+                        if (i == attr.length - 1) {
+                            span.innerText = get_font_tag.innerText;
+                        }
+                        i == 0 ? prev_span = span :
+                            i == 1 ? (prev_span.append(span)) :
+                                prev_span.children[0].append(span);
+                    });
+                    var gte = get_font_tag.childNodes[0];
+                    while (gte && gte.tagName != 'DIV') {
+                        if (gte.tagName == 'B') {
+                            prev_span.style.fontWeight = "bold";
+                        }
+                        if (gte.tagName == 'U') {
+                            prev_span.style.textDecorationLine = "underline";
+                        }
+                        if (gte.tagName == 'I') {
+                            prev_span.style.fontStyle = "italic";
+                        }
+                        gte = gte.childNodes[0];
                     }
-                    else if (e == 'face') {
-                        span.style.fontFamily = get_font_tag.getAttribute('face');
-                    }
-                    else {
-                        span.style.color = get_font_tag.getAttribute('color');
-                    }
-                    if (i == attr.length - 1) {
-                        span.innerText = get_font_tag.innerText;
-                    }
-                    i == 0 ? prev_span = span
-                        : i == 1 ? (prev_span.append(span), console.log(span), console.log(prev_span))
-                            : prev_span.children[0].append(span);
-                })
-                var gte = get_font_tag.childNodes[0];
-                while (gte && gte.tagName != 'DIV') {
-                    if (gte.tagName == 'B') {
-                        prev_span.style.fontWeight = "bold";
-                    }
-                    if (gte.tagName == 'U') {
-                        prev_span.style.textDecorationLine = "underline";
-                    }
-                    if (gte.tagName == 'I') {
-                        prev_span.style.fontStyle = "italic";
-                    }
-                    gte = gte.childNodes[0]
-                }
-                get_font_tag.parentNode.insertBefore(prev_span, get_font_tag);
-                get_font_tag.parentNode.removeChild(get_font_tag);
+                    get_font_tag.parentNode.insertBefore(prev_span, get_font_tag);
+                    get_font_tag.parentNode.removeChild(get_font_tag);
+                });
             }
             if (e.key == 'Backspace') {
                 var sel = document.getSelection();
@@ -200,32 +203,56 @@ const editor_component = {
             this.default_size = 15
         })
         var get_local = localStorage.getItem("Data") ? JSON.parse(localStorage.getItem("Data")) : undefined;
-        var condition = get_local  && get_local[this.$root.dropdown_selected] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]  ;
-        if (condition!==undefined) {
-            var res_string = this.render_page(get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]);
-            var content =get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date];
+        var condition = get_local && get_local[this.$root.dropdown_selected] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date];
+        this.$refs.image.innerHTML ='';
+        if (condition !== undefined) {
+            var res_string = this.render_page(get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]["contents"]);
+            var global_props = get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]["global_props"];
             this.$refs.content.innerHTML = res_string;
-            this.$refs.back_ground.style.backgroundImage = `url(${content[content.length-1]["background"]})`;
-
+            this.$refs.back_ground.style.backgroundImage = `url(${global_props["back_ground"]})`;
+            this.images_url = get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]["images"];
+            this.add_images_to_editor(this.images_url)
         } else {
             this.$refs.content.innerHTML = '<div class="line-content"></div>';
             this.$refs.back_ground.style.backgroundImage = `url(${"texture31.webp"})`;
-
         }
         this.$refs.content.focus();
-        this.check_mark("Favourite","fav");
+        this.check_mark("Favourite", "fav");
     },
     methods: {
-        check_mark(key,element){
+        add_images_to_editor(result) {
+            const image_container = this.$refs.image;
+            for (let i = 0; i < result.length; i++) {
+                const img = document.createElement('img');
+                img.setAttribute('src', result[i]);
+                var div = document.createElement('div');
+                div.append(img)
+                image_container.appendChild(div);
+                ((div)=>{
+                div.addEventListener('click',()=>{
+                    image_container.querySelector('div>.clicked') ? (image_container.querySelector('div>.clicked').classList.remove('clicked'))
+                    : '';
+                    image_container.querySelector('div>span') ?  image_container.querySelector('div>span').remove()
+                    : '';
+                    var span = document.createElement('span');
+                    span.setAttribute('class','material-symbols-outlined')
+                    span.innerText ='delete';
+                    div.appendChild(span);
+                    div.classList.add('clicked');
+                })
+                })(div)
+            }
+        },
+        check_mark(key, element) {
             var get_local = !localStorage.getItem(key) ? undefined : JSON.parse(localStorage.getItem(key));
-            var condition = get_local  && get_local[this.$root.dropdown_selected] 
-                            && get_local[this.$root.dropdown_selected][this.$root.dropdown_value] 
-                            && get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date];
-            if(condition !== undefined){
+            var condition = get_local && get_local[this.$root.dropdown_selected]
+                && get_local[this.$root.dropdown_selected][this.$root.dropdown_value]
+                && get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date];
+            if (condition !== undefined) {
                 this.$refs[element].children[0].classList.add("marked")
             }
             else {
-                if( this.$refs[element].children[0].classList.contains("marked")){
+                if (this.$refs[element].children[0].classList.contains("marked")) {
                     this.$refs[element].children[0].classList.remove("marked")
                 }
             }
@@ -267,7 +294,7 @@ const editor_component = {
         },
         change_back(data) {
             this.$refs.back_ground.style.backgroundImage = `url(${data})`;
-            this.back_ground_image =data;
+            this.back_ground_image = data;
         },
         parent_element_style(element) {
             if (!(element.getAttribute && element.getAttribute('class') == 'line-content')) {
@@ -389,11 +416,6 @@ const editor_component = {
                 'background': 'texture31.webp'
             }
         },
-        hexToRgb(hex) {
-            hex = hex.replace(/^#/, '');
-            const rgb = hex.match(/.{1,2}/g).map(h => parseInt(h, 16)).join(',');
-            return `rgb(${rgb})`;
-        },
         rgbToHex(rgb) {
             const colors = rgb.match(/\d+/g);
             return "#" + colors.map(color => {
@@ -409,8 +431,22 @@ const editor_component = {
                 const imgElement = document.createElement('img');
                 imgElement.src = reader.result;
                 imgElement.setAttribute('class', 'image-content')
-                console.log(erf.$refs);
-                erf.$refs.image.appendChild(imgElement);
+                var div = document.createElement('div');
+                div.append(imgElement)
+                erf.images_url.push(reader.result);
+                erf.$refs.image.appendChild(div);
+                div.addEventListener('click',()=>{
+                    console.log( erf.$refs.image.querySelector('div>.clicked'));
+                    erf.$refs.image.querySelector('div>.clicked') ? (erf.$refs.image.querySelector('div>.clicked').classList.remove('clicked'))
+                                : '';
+                    div.classList.add('clicked');
+                    var span = document.createElement('span');
+                    span.setAttribute('class','material-symbols-outlined')
+                    span.innerText ='delete';
+                    div.appendChild(span);
+                })
+                
+                
             };
             reader.readAsDataURL(file);
         },
@@ -424,7 +460,6 @@ const editor_component = {
             this.$refs.image.classList.remove('perfect-width');
         },
         save() {
-
             function get_child(child, htmlArray, styles, close_tag) {
                 for (var i = 0; i < child.length; i++) {
                     if (child[i].nodeType === 1) {
@@ -447,76 +482,103 @@ const editor_component = {
             get_child(child, this.html_Array, this.styles, this.close_tag);
             this.json_format();
         },
+        format_for_json() {
+            var obj = {};
+            obj["contents"] = [];
+            obj["global_props"] = {};
+            obj["images"]=[];
+            return obj;
+        },
         json_format() {
-            var editor_content = [];
-            var line = {};
+            var result = this.format_for_json();
+            var single_line = {}
             var styles = {}
-            var cont = '';
             var content = this.html_Array;
             var close = 0;
             for (var i = 0; i < content.length; i++) {
-
                 if (content[i].tagName && content[i].tagName.toLowerCase() == 'div') {
-                    line["data"] = [];
-                    if (content[i].getAttribute('style')) {
-                        line["line_attributes"] = content[i].getAttribute('style');
+                    this.check_for_lineStyle(content[i], single_line);
+                    if(content[i].getAttribute('style')){
                         close++;
-                    }
-                } else if (content[i].tagName) {
-                   if(content[i].tagName.toLowerCase()!='br'){
-                    if (content[i].tagName.toLowerCase() != 'span') {
-                        styles[content[i].tagName.toLowerCase()] = true;
-                        if (content[i].getAttribute('style')) {
-                            this.tag_with_styles(content[i], styles);
-                        }
-                    }
-                    else {
-                        this.tag_with_styles(content[i], styles)
                     }
                 }
-                } else if (content[i].nodeType === 3) {
-                    cont = content[i].nodeValue;
-                    var obj = {};
-                    obj["content"] = cont;
-                    obj["styles"] = { ...styles };
-                    line["data"].push(obj);
-                } else if(content[i]!='</br>') {
-                    if (content[i] == '</b>') {
-                        delete styles['b'];
-                    } else if (content[i] == '</u>') {
-                        delete styles['u'];
-                    } else if (content[i] == '</i>') {
-                        delete styles['i']
-                    } else if (content[i] == '</span>') {
-                        this.delete_style(content[this.close_tag[close]], styles);
+                else if (content[i].tagName) {
+                    this.get_styles_from_tag(content[i], styles);
+                }
+                else if (content[i].nodeType === 3) {
+                    var obj1 = this.set_Style_for_text(content[i].nodeValue, styles)
+                    single_line["data"].push(obj1);
+                }
+                else if (content[i] != '</br>') {
+                    if (content[this.close_tag[close]] && content[this.close_tag[close]].getAttribute('style')) {
+                        this.delete_style_present_in_attribute(content[this.close_tag[close]], styles);
                         close++;
-                    } else {
-                        editor_content.push({ ...line });
-                        line = {};
+                    }
+                    this.delete_style_present_in_tag(content[i], styles);
+                     if(content[i]=='</div>')  {
+                        result["contents"].push({...single_line});
+                        single_line={};
                     }
                 }
             }
-
-            this.$emit('save_content', editor_content);
-            this.saveData_to_localStorage("Data",editor_content);
+            this.set_global_props(result["global_props"]);
+            this.save_images(result["images"]);
+            this.$emit('save_content', result);
+            this.saveData_to_localStorage("Data", result);
             this.html_Array = [];
             this.styles = {};
             this.close_tag = [];
         },
-        saveData_to_localStorage(key,value,json_delete){
+        delete_style_present_in_tag(element, styles) {
+            if (element == '</b>') {
+                delete styles['b'];
+            } else if (element == '</u>') {
+                delete styles['u'];
+            } else if (element == '</i>') {
+                delete styles['i']
+            }
+        },
+        check_for_lineStyle(element, json) {
+            json["data"] = [];
+            if (element.getAttribute('style')) {
+                json["line_props"] = element.getAttribute('style');
+            }
+            else {
+                json["line_props"] = null;
+            }
+        },
+        set_Style_for_text(text, styles) {
+            var obj1 = {};
+            obj1["content"] = text;
+            obj1["styles"] = { ...styles};
+            return obj1;
+        },
+        get_styles_from_tag(element, styles) {
+            if (element.tagName.toLowerCase() != 'br') {
+                if (element.tagName.toLowerCase() != 'span') {
+                    styles[element.tagName.toLowerCase()] = true;
+                    if (element.getAttribute('style')) {
+                        this.find_styles_in_tag(element, styles);
+                    }
+                }
+                else {
+                    this.find_styles_in_tag(element, styles)
+                }
+            }
+        },  
+        saveData_to_localStorage(key, value, json_delete) {
             var get_local = !localStorage.getItem(key) ? {} : JSON.parse(localStorage.getItem(key));
             get_local[this.$root.dropdown_selected] = get_local[this.$root.dropdown_selected] || {};
             get_local[this.$root.dropdown_selected][this.$root.dropdown_value] = get_local[this.$root.dropdown_selected][this.$root.dropdown_value] || {};
-            !json_delete ? (get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date] = value , get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date].push({"background" : this.back_ground_image}))
-                         : get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date] ?
-                            delete  get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]
-                            : get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]=value;
+            !json_delete ? (get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date] = value)
+                : get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date] ?
+                    delete get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]
+                    : get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date] = value;
             localStorage.setItem(key, JSON.stringify(get_local));
         },
-        delete_style(content, obj) {
+        delete_style_present_in_attribute(content, obj) {
             var style = content.style;
             if (style.color) {
-                console.log('aa');
                 delete obj['color']
             }
             if (style.fontSize) {
@@ -535,11 +597,10 @@ const editor_component = {
                 delete obj['i']
             }
         },
-        tag_with_styles(content, obj) {
+        find_styles_in_tag(content, obj) {
             var style = content.style;
             var z = '';
             if (style.color) {
-                console.log('aa');
                 obj['color'] = style.color;
             }
             if (style.fontSize) {
@@ -559,25 +620,34 @@ const editor_component = {
                 obj['i'] = true;
             }
         },
+        set_global_props(result){
+            result["back_ground"] = this.back_ground_image;
+        },
+        save_images(result){
+            var image_container = this.images_url;
+            for(var i=0;i<image_container.length;i++){
+               result.push(image_container[i]);        
+            }
+        },
         add_favourite() {
             this.save();
-            this.saveData_to_localStorage("Favourite",true,"delete");
-            if(this.$refs["fav"].children[0].classList.contains("marked")){
+            this.saveData_to_localStorage("Favourite", true, "delete");
+            if (this.$refs["fav"].children[0].classList.contains("marked")) {
                 this.$refs["fav"].children[0].classList.remove("marked");
             }
-            else{
+            else {
                 this.$refs["fav"].children[0].classList.add("marked");
-            }   
+            }
         },
         add_mark() {
 
         },
         render_page(editor_content) {
             var res_string = '';
-            for (var i = 0; i < editor_content.length-1; i++) {
-                editor_content[i].line_attributes ? res_string += '<div class="line-content" style="' + editor_content[i].line_attributes + '">'
+            for (var i = 0; i < editor_content.length ; i++) {
+                editor_content[i].line_props ? res_string += '<div class="line-content" style="' + editor_content[i].line_props + '">'
                     : res_string += '<div class="line-content">';
-                    if(editor_content[i].data){                  
+                if (editor_content[i].data) {
                     editor_content[i].data.forEach((element, j) => {
                         if (j != 0) {
                             res_string = this.check_previous_close_tag(editor_content[i].data[j - 1].styles, element.styles, res_string);
@@ -588,11 +658,11 @@ const editor_component = {
                             res_string = this.check_previous_close_tag(element.styles, '', res_string);
                         }
                     });
-                    }
-                    else{
-                        res_string+='&ZeroWidthSpace;'
-                    }
-                    res_string += '</div>';
+                }
+                else {
+                    res_string += '&ZeroWidthSpace;'
+                }
+                res_string += '</div>';
             }
             return res_string;
         },
@@ -609,7 +679,7 @@ const editor_component = {
                         div += '</u>';
                     }
                     else {
-                        div += '</span'
+                        div += '</span>'
                     }
                 }
             })

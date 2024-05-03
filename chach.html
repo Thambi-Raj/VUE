@@ -1,31 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Display Image using JavaScript</title>
+    <title>resizer</title>
+    <meta name="author" content="Andrej Hristoliubov anhr@mail.ru">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style>
+        .element {
+            border: 1px solid #999999;
+            border-radius: 4px;
+            margin: 5px;
+            padding: 5px;
+        }
+    </style>
+    <script type="text/javascript">
+        function resizeX(x) {
+            var element2 = document.getElementById("element2");
+            element2.style.width = element2.parentElement.clientWidth + document.getElementById('resizeArea').offsetLeft - x + 'px';
+        }
+
+        function resizerX(elementId, callback) {
+            var element = document.getElementById(elementId);
+            var startX, startWidth;
+
+            function initDrag(e) {
+                startX = e.clientX;
+                startWidth = parseInt(document.defaultView.getComputedStyle(element).width, 10);
+                document.documentElement.addEventListener('mousemove', doDrag, false);
+                document.documentElement.addEventListener('mouseup', stopDrag, false);
+            }
+
+            function doDrag(e) {
+                resizeX(e.pageX + 25);
+            }
+
+            function stopDrag() {
+                document.documentElement.removeEventListener('mousemove', doDrag, false);
+                document.documentElement.removeEventListener('mouseup', stopDrag, false);
+            }
+
+            element.addEventListener('mousedown', initDrag, false);
+        }
+    </script>
 </head>
+
 <body>
-  <input type="file" id="imageInput" accept="image/*">
-  <div id="imageContainer">
-    
-  </div>
+    <h1>Resizer (X-axis)</h1>
+    <p>Please see the example of resizing the HTML element along the x-axis by mouse dragging.</p>
+    <div id="resizeArea" style="width:1000px; height:50px; overflow:auto; position: relative;" class="element">
+        <div id="element2" class="element" style="width: 30%; height:10px; float: right; position: relative;">
+            Element 2
+            <div id="resizerX" style="width: 10px; height:100%; background: red; float: right;"></div>
+        </div>
+    </div>
 
-  <script>
-    document.getElementById('imageInput').addEventListener('change', function(event) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-
-      reader.onload = function() {
-        const imgElement = document.createElement('img');
-        imgElement.src = reader.result;
-        imgElement.width = 200; // Set desired width
-        document.getElementById('imageContainer').innerHTML = ''; // Clear previous image
-        document.getElementById('imageContainer').appendChild(imgElement);
-      };
-
-      reader.readAsDataURL(file);
-    });
-  </script>
+    <script type="text/javascript">
+        resizerX("resizerX");
+    </script>
 </body>
+
 </html>

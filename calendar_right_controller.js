@@ -1,7 +1,9 @@
 const calendar_controller = {
     template: `<calendar-root 
     :month=month
-    :year =year  @page_change = page_change>
+    :year =year 
+    :month_preview = month_preview
+     @page_change = page_change>
     </calendar-root>`,
     props: {
         month: {
@@ -9,6 +11,9 @@ const calendar_controller = {
         },
         year: {
             type: String
+        },
+        month_preview:{
+            type:Object
         }
     },
     methods:{

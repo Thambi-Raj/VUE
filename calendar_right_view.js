@@ -14,17 +14,17 @@ const calendar_component = {
         <div v-for="dayIndex in 7" :key="dayIndex" 
              :class="{ 'date-container': true, 'disable': (rowIndex - 1) * 7 + dayIndex - first_day <= 0 || (rowIndex - 1) * 7 + dayIndex - first_day > total_days }" 
              @click="page_change((rowIndex - 1) * 7 + dayIndex - first_day)" >
+             <div id="sub-container">
              <span class="date">{{ (rowIndex - 1) * 7 + dayIndex - first_day }}</span>
-             <editor-root  :default_date=" (rowIndex - 1) * 7 + dayIndex - first_day"></editor-root>
+             <editor-controller v-if="month_preview[(rowIndex - 1) * 7 + dayIndex - first_day]"  :data="month_preview[(rowIndex - 1) * 7 + dayIndex - first_day] || {}"
+             :preview=false>
+             </editor-controller>
+             </div>
         </div>
     </div>
 </div>
     </div>
 `,
-   mounted(){  
-        this.show_preview();
-   },
-
     data() {
         return {
             weeks: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
@@ -42,13 +42,16 @@ const calendar_component = {
         month: {
             type: String
         },
+        month_preview:{
+            type:Object
+        }
     },
     created(){
         this.set_config_data();
     },
     updated() {
         this.set_config_data();
-        this.show_preview();
+      
     },
     methods: {
         set_config_data() {
@@ -62,24 +65,5 @@ const calendar_component = {
         page_change(date){
             this.$emit('page_change',date);
         },
-        show_preview(){
-            var preview_container = this.$refs.calendar;
-            var editor_tools = preview_container.querySelectorAll('.calendar-body-row>.date-container>.editor-root>#editor-tool');
-            editor_tools.forEach(element => {
-                element.remove();
-            });        
-            var texture_fields = preview_container.querySelectorAll('.calendar-body-row>.date-container>.editor-root>#texture-field');
-            texture_fields.forEach(element => {
-                var note_pad = element.querySelector('#word-pad')
-                note_pad.contentEditable = false;
-                element.classList.add('preview');
-                if(note_pad.innerHTML == '<div class="line-content"></div>' &&  element.querySelector('#imageContainer').innerHTML ==''){
-                    element.parentElement.classList.add('hide');
-                }
-                element.querySelector('#imageContainer').classList.add('hide')
-            });
-        
-        }
-        
     }
 }

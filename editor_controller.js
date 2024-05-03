@@ -1,19 +1,67 @@
 const editor_controller = {
-    template:`<editor-root :data="data" :image="image" :favourite:= "favourite" @save="save_content"  @add_fav = "add_to_favourite" > 
+    template:`<editor-root  
+                :data      = "data"
+                :image     = "image"  
+                :template  = "template"
+                :favourite = "favourite"
+                :global_props = "global_props"
+                @save_content="save_content"
+                @add_fav="add_fav"
+                :preview="preview"
+                > 
               </editor-root>`,
     props:{
         data:{
             type:Object
-        }
+        },
+        favourite:{
+            type:Boolean,
+            default:false
+        },
+        preview:{
+            type:Boolean,
+            default:false
+        },
+    },
+    watch:{
+        data(){
+            this.template = this.data &&  this.data["contents"]  ?  this.decoded_html_string(this.data["contents"]):'';
+            this.image =  this.data && this.data["images"] ? this.data["images"] :[];
+            this.global_props =  this.data && this.data["global_props"] ? this.data["global_props"] :{};
+        },
     },
     data(){
           return{
-            element_style: {},
             closed_element_index: [],
-            editor_elements: []
+            editor_elements: [],
+            image:this.get_images_array(),
+            template:this.get_decode_html(),
+            bookmark : true,
+            global_props : this.get_global_props(),
           }
     },
     methods:{
+            get_decode_html(){
+                var string='';
+                if(this.data){
+                    string = this.data["contents"]  ?  this.decoded_html_string(this.data["contents"]):'';
+                }
+                return string;
+            },
+            get_images_array(){
+                var img=[];
+                if(this.data){
+                    img = this.data["images"] ? this.data["images"] :[];
+                }
+                return img;
+            },
+            get_global_props(){
+                var glob={};
+                if(this.data){
+                    glob = this.data["global_props"] ? this.data["global_props"] :{};
+                }
+                return glob;
+            },
             DFS(html){
                 function recursion(child, htmlArray, styles, close_tag) {
                     for (var i = 0; i < child.length; i++) {
@@ -34,12 +82,13 @@ const editor_controller = {
                     }
                 }
                 var child = html.childNodes;
-                recursion(child, this.editor_elements, this.element_style, this.closed_element_index);
+                recursion(child, this.editor_elements, {}, this.closed_element_index);
             },
             format_for_json() {
                 var obj = {};
                 obj["contents"] = [];
                 obj["global_props"] = {};
+                obj["images"]=[];
                 return obj;
             },
             constructDiary_jsonFormat(content){
@@ -55,35 +104,40 @@ const editor_controller = {
                         }
                     }
                     else if (content[i].tagName) {
-                        this.get_styles_from_tag(content[i], styles);
+                        this.get_styles_from_tag(content[i], styles,close);
                     }
                     else if (content[i].nodeType === 3) {
                         var obj1 = this.set_Style_for_text(content[i].nodeValue, styles)
-                        single_line["data"].push(obj1);
+                        single_line["data"].push({...obj1});
                     }
                     else if (content[i] != '</br>') {
-                        if (content[this.close_tag[close]] && content[this.close_tag[close]].getAttribute('style')) {
-                            this.delete_style_present_in_attribute(content[this.close_tag[close]], styles);
+                        if (content[this.closed_element_index[close]] && content[this.closed_element_index[close]].getAttribute('style')) {
+                            this.delete_style_present_in_attribute(content[this.closed_element_index[close]], styles);
                             close++;
                         }
-                        this.delete_style_present_in_tag(content[i], styles);
+                        this.get_tag_style(content[i], styles);
                         if(content[i]=='</div>')  {
                             result["contents"].push({...single_line});
                             single_line={};
+                            styles={};
                         }
                     }
                 }
+                this.editor_elements=[];
+                this.closed_element_index= [];
+                return result;
+
             },
             check_for_lineStyle(element, json) {
                 json["data"] = [];
                 if (element.getAttribute('style')) {
-                    json["line_props"] = element.getAttribute('style');
+                    json["styles"] = element.getAttribute('style');
                 }
                 else {
-                    json["line_props"] = null;
+                    json["styles"] = null;
                 }
             },
-            delete_style_present_in_tag(element, styles) {
+            get_tag_style(element, styles) {
                 if (element == '</b>') {
                     delete styles['b'];
                 } else if (element == '</u>') {
@@ -98,23 +152,24 @@ const editor_controller = {
                 obj1["styles"] = { ...styles};
                 return obj1;
             },
-            get_styles_from_tag(element, styles) {
+            get_styles_from_tag(element, styles,close) {
                 if (element.tagName.toLowerCase() != 'br') {
                     if (element.tagName.toLowerCase() != 'span') {
                         styles[element.tagName.toLowerCase()] = true;
                         if (element.getAttribute('style')) {
                             this.find_styles_in_tag(element, styles);
+                            close++;
                         }
                     }
                     else {
-                        this.find_styles_in_tag(element, styles)
+                        this.find_styles_in_tag(element, styles);
+                        close++;
                     }
                 }
             }, 
             delete_style_present_in_attribute(content, obj) {
                 var style = content.style;
                 if (style.color) {
-                    console.log('aa');
                     delete obj['color']
                 }
                 if (style.fontSize) {
@@ -155,7 +210,77 @@ const editor_controller = {
                 if (style.fontStyle == 'italic') {
                     obj['i'] = true;
                 }
-            }, 
-            
+            },  
+            save_content(html,images,background,date){
+                this.DFS(html);
+                var json_content = this.constructDiary_jsonFormat(this.editor_elements);
+                json_content["images"]=images;
+                json_content["global_props"]={"background_image":background};
+                this.$emit('save_content',json_content,date);     
+
+            },
+            add_fav(){
+                this.$emit('add_fav');
+            },
+            decoded_html_string(editor_content){
+                var res_string = '';
+                for (var i = 0; i < editor_content.length ; i++) {
+                    editor_content[i].styles ? res_string += '<div class="line-content" style="' + editor_content[i].styles + '">'
+                        : res_string += '<div class="line-content">';
+                    if (editor_content[i].data) {
+                        editor_content[i].data.forEach((element, j) => {
+                            if (j != 0) {
+                                res_string = this.check_previous_close_tag(editor_content[i].data[j - 1].styles, element.styles, res_string);
+                            }
+                            res_string = this.check_for_new_tag(editor_content[i].data[j - 1] ? editor_content[i].data[j - 1].styles : '', element.styles, res_string);
+                            res_string += element.content;
+                            if (j == editor_content[i].data.length - 1) {
+                                res_string = this.check_previous_close_tag(element.styles, '', res_string);
+                            }
+                        });
+                    }
+                    else {
+                        res_string += '&ZeroWidthSpace;'
+                    }
+                    res_string += '</div>';
+                }
+                return res_string;
+            },
+            check_previous_close_tag(previous_styles, current_styles, div) {
+                Object.keys(previous_styles).forEach(tag => {
+                    if (current_styles == '' || current_styles[tag] != previous_styles[tag]) {
+                        if (tag == 'b') {
+                            div += '</b>';
+                        }
+                        else if (tag == 'i') {
+                            div += '</i>';
+                        }
+                        else if (tag == 'u') {
+                            div += '</u>';
+                        }
+                        else {
+                            div += '</span>'
+                        }
+                    }
+                })
+                return div;
+            },
+            check_for_new_tag(previous_styles, current_styles, div) {
+                Object.keys(current_styles).forEach(tag => {
+                    if (previous_styles == '' || previous_styles[tag]!=current_styles[tag]) {
+                        if (tag === 'b' || tag === 'i' || tag === 'u') {
+                            div += `<${tag}>`;
+                        } else if (tag === 'color') {
+                            div += `<span style="color:${current_styles[tag]};">`;
+                        } else if (tag === 'font-size') {
+                            div += `<span style="font-size:${current_styles[tag]}px;">`;
+                        } else if (tag === 'font-family') {
+                            div += `<span style="font-family:${current_styles[tag]};">`;
+                        }
+                    }
+                });
+
+                return div;
+            },
     }
 }

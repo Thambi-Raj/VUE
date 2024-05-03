@@ -21,7 +21,6 @@ const sidebar_component = {
                 :active="dropdown_selected" 
                 @change_value="change_value">
             </dropdown-controller>
-
             <button-controller 
                 :id="'favorite'" 
                 :button_name="'favorite'" 
@@ -29,15 +28,6 @@ const sidebar_component = {
                 @change_active="change_activestate" 
                 :active="dropdown_selected">
             </button-controller>
-
-            <search-btn-controller 
-                :id="'mention'" 
-                :button_name="'mention'" 
-                :icon_name="'alternate_email'" 
-                @change_active="change_activestate" 
-                :active="dropdown_selected" @get_mention="get_mention" >
-            </search-btn-controller>
-
             <button-controller 
                 :id="'bookmark'" 
                 :button_name="'bookmarks'" 

@@ -54,8 +54,8 @@ const content_sidebar_controller = {
                this.$emit('back',year,month,date);
           },
           change_date(date){
-            this.$emit('change_date',date)
-          }
+            this.$emit('change_date',date);
+          },
          }
 }
  

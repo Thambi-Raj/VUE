@@ -12,7 +12,7 @@ const simple_dropdown_controller={
      </simple-dropdown-root>`,
      data(){
         return{
-          selected_value:this.data[0] 
+          selected_value:this.default_val 
         }
      },
      props:{
@@ -29,18 +29,23 @@ const simple_dropdown_controller={
             type:String
         },
         default_val:{
-            type:String
+            type:[String,Number]
+        }
+     },
+     watch:{
+         default_val(){
+             this.selected_value = this.default_val
         }
      },
      methods:{
         change_drop(data,background){
-            this.selected_value = this.tag =='span'?background :data;
+            this.selected_value = this.tag =='span'?background :data;;
             if(this.name.startsWith('Font')){
                 this.$emit('change_format',data,background,'font');
             }
             else{
             background== 'back_ground' ? this.$emit('change_background',data):
-                          this.$emit('change_format',data,background);
+                  this.$emit('change_format',data,background);
             }
         }
      }

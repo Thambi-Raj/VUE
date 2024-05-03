@@ -1,15 +1,15 @@
 .calendar-root{
-    width: 85%;
+    width: 95%;
     height: 95%;
     padding: 1vw;
 }
-#calendar-head {
+.calendar-root>#calendar-head {
     display: flex;
     width: 100%;
     font-size: .75vw;
     height: 2.5vw;
 }
-#calendar-body {
+.calendar-root>#calendar-body {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
@@ -19,7 +19,7 @@
     border-radius: 0px 0px 5px 5px;
     border: 0.1vw solid #d5d5d5;
 }   
-.day-container {
+.calendar-root>#calendar-head>  .day-container {
     width: calc((100% / 7));
     border: 1px solid #e2e2e2;
     display: flex;
@@ -27,61 +27,66 @@
     justify-content: center;
     background-color: #e9e9e9;
 }
-.calendar-body-row {
+.calendar-root>#calendar-body> .calendar-body-row {
     display: flex;
     justify-content: space-evenly;
     width: 100%;
     height: calc(100%/7);
 }
-.date-container {
-    width: 13%;
-    height: 100%;
+.calendar-root>#calendar-body> .calendar-body-row >.date-container>#sub-container{
+    width: 98%;
+    height: 95%;
     position: relative;
     background-color: #fff;
     border: 1px solid #ebebeb;
     border-radius: 10px;
     color: #555;
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+    box-shadow: rgb(0 0 0 / 8%) 0px 4px 8px -3px, rgb(0 0 0 / 1%) 0px 4px 6px -2px;
+    transition: .05s ease-in-out;
+}
+.calendar-root>#calendar-body> .calendar-body-row > .date-container>#sub-container:hover{
+    transition: .05s ease-in-out;
+    width: 100%;
+    height: 100%;
+}
+.calendar-root>#calendar-body> .calendar-body-row >.date-container {
+   width: 13%;
+   height: 100%;
+   cursor: pointer;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+}
+
+.calendar-root>#calendar-body> .calendar-body-row > .date-container>#sub-container>.preview>#texture-field>#word-pad{
+    padding: .8vw !important;
+}
+.calendar-root>#calendar-body> .calendar-body-row > .date-container>#sub-container>.preview>#texture-field>#word-pad>.line-content{
+    width: 9vw !important;
+}
+.calendar-root>#calendar-body> .calendar-body-row > .date-container>#sub-container>.hide{
+    display: none  ;
 }
 .disable{
     visibility: hidden;
 }
-.hide{
+.calendar-root>#calendar-body>.hide{
     display: none;
 }
 .change-height{
     height: calc(100%/8);
 }
-.date-container>.date {
+
+.date-container>#sub-container>.date {
     position: absolute;
-    right: 10%;
-    top: 10%;
-    font-size: .7vw;
-    width: 10%;
+    right: 6%;
+    top: 7%;
+    font-size: 0.6vw;
+    padding: .15vw .2vw;
     z-index: 10;
     background-color: #fff;
     text-align: center;
-    border-radius: 5px;
+    border-radius: 4px;
 }
-.calendar-body-row>.date-container>.editor-root{
-    height: 100% !important;
-}
-.calendar-body-row>.date-container>.editor-root>#texture-field{
-    height: 100% !important;
-    width: 100% !important;
-    cursor: pointer;
-    background-size: cover;
-    background-repeat: no-repeat;
-}
-.calendar-body-row>.date-container>.editor-root>#texture-field>#word-pad{
-    overflow: hidden;
-    padding: .25vw
-}
-.calendar-body-row>.date-container>.editor-root>#texture-field>#word-pad>.line-content{
-    padding: .2vw !important;
-    font-size: .55vw;
-}
-.calendar-body-row>.date-container>.hide{
-    display: none;
-}
+
 

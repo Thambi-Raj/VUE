@@ -1,6 +1,6 @@
 const editor_component = {
-    template: `<div class="editor-root">
-                 <div id="editor-tool" ref="editor_tool">
+    template: `<div class="editor-root" ref="editor_width">
+                 <div id="editor-tool" ref="editor_tool" v-if="preview">
                    <div :class="{ 'button clicked': active_state.bold, 'button': !active_state.bold }" id="bold" @click="change_text_format('bold')">
                    <span class="material-symbols-outlined">format_bold</span>
                    </div>
@@ -10,33 +10,40 @@ const editor_component = {
                    <div :class="{ 'button clicked': active_state.underline, 'button': !active_state.underline }" id="underline" @click="change_text_format('underline')">
                    <span class="material-symbols-outlined">format_underlined</span>
                    </div>
-                   <div class="file">
-                   <input  type="file" id="imag" accept="image/*" @change="add_photo" ref="image_file">
-                   <label for="imag">Upload</label>
-                   <span class="material-symbols-outlined">image</span>
+                   <div class="file" >
+                   <input  type="file" id="imag" accept="image/*" @change="insert_photo" ref="image_file" >
+                   <label for="imag" id="upload">Upload&nbsp;&nbsp;<span class="material-symbols-outlined">image</span> </label>
+                   
                    </div>
                    <div class="file">
-                   <label for="Color">Color</label>
+                   <label for="Color">Color &nbsp;&nbsp;</label>
                    <input type="color" id="Color" @change="change_text_format($event.target.value, 'forecolor', 'font')" :value="active_state.color">
                    </div>
                    <simple-dropdown-controller width="small_width" :default_val="active_state['font-size']" :data="font_size" :name="'FontSize'" :tag="'-'" @change_format="change_text_format"></simple-dropdown-controller>
-                   <simple-dropdown-controller width="normal_width" :default_val="active_state['font-family']" :data="font_family" :name="'FontName'" :tag="'-'" @change_format="change_text_format"></simple-dropdown-controller>
+                   <simple-dropdown-controller width="normal_width":default_val="active_state['font-family']" :data="font_family" :name="'FontName'" :tag="'-'" @change_format="change_text_format"></simple-dropdown-controller>
                    <simple-dropdown-controller width="small_width" :default_val="active_state['align']" :data="align" :name="'align'" :tag="'span'" @change_format="change_text_format"></simple-dropdown-controller>
-                   <simple-dropdown-controller width="small_width" :default_val="active_state['background']" :data="texture" :name="'background'" :tag="'image'" @change_background="change_back"></simple-dropdown-controller>
-                   <button @click="save" class="button">Save</button>
-                   <button @click="add_favourite" class="button" ref="fav">
-                   <span class="material-symbols-outlined">star</span>
-                   </button>
+                   <simple-dropdown-controller width="small_width" :default_val="back_ground" :data="texture" :name="'background'" :tag="'image'" @change_background="change_background"></simple-dropdown-controller>
+                
                    </div> 
                  <div id="texture-field" ref="back_ground">
                     <div id="word-pad" contenteditable="true" ref="content" spellcheck="false">
                         <div class="line-content">
+                        &#x200B; 
                         </div>
                     </div>
-                    <div id="imageContainer" ref="image" @mouseover="show_image_container"  @mouseleave="remove_image_container" class="image_container"  >
+                    <div id="drag_container" ref="drag" @mousedown="add_mousemove_event">
                     
                     </div>
-                 </div>
+                    <div id="imageContainer" ref="image" class="image_container">
+                    
+                    </div>
+                 </div>    
+                 <div id="full_container_photo" class="hide"  @click="close_container" ref="full_container">
+                      
+                     <div id="image_con"  ref="show_photo">
+             
+                    </div>
+                </div> 
              </div>`,
     data() {
         return {
@@ -61,240 +68,214 @@ const editor_component = {
                 'i': 'italic',
                 'u': 'underline',
             },
-            back_ground_image: "texture31.webp",
             empty_select: -1,
             default_size: 15,
-            styles: {},
-            close_tag: [],
-            html_Array: [],
-            images_url:[]
+            images_url:'',
+            back_ground:'',
+            index:0,
         };
     },
     props: {
-        default_date: {
-            type: Number
-        }
-    },
-    watch: {
-        default_date() {
-            var get_local = localStorage.getItem("Data") ? JSON.parse(localStorage.getItem("Data")) : undefined;
-            var condition = get_local && get_local[this.$root.dropdown_selected] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date];
-            this.$refs.image.innerHTML ='';
-            if (condition != undefined) {
-                var res_string = this.render_page(get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]["contents"]);
-                var global_props = get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]["global_props"];
-                this.$refs.content.innerHTML = res_string;
-                this.$refs.back_ground.style.backgroundImage = `url(${global_props["back_ground"]})`;
-                this.images = get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]["images"]
-            }
-            else {
-                this.$refs.content.innerHTML = '<div class="line-content"></div>';
-                this.$refs.back_ground.style.backgroundImage = `url(${"texture31.webp"})`;
-            }
-            this.check_mark("Favourite", "fav");
+        data:{
+            type:Object
+        },
+        template:{
+            type:String
+        },
+        image:{
+            type:Array
+        },
+        global_props:{
+            type:Object
+        },
+        favourite:{
+            type:Boolean,
+        },
+        preview:{
+            type:Boolean
+        },
+        default_date:{
+            type:Number,
+            default:0
         }
     },
     mounted() {
-        var editor = this.$refs.content;
-        editor.focus();
-        editor.addEventListener('click', (e) => {
-            if (e.srcElement != this.$refs.content) {
-                this.parent_element_style(e.srcElement, e);
-            }
-            else {
-                var last_child = this.$refs.content.childNodes[this.$refs.content.childNodes.length - 1];
-                this.traverse_element(last_child, false);
-            }
-        })
-        editor.addEventListener('keydown', (e) => {
-            if (this.$refs.content.innerText.length <= 1 && e.key == 'Backspace') {
-                this.$refs.content.innerHTML = '';
-                this.remove_active();
-                this.$refs.content.innerHTML += '<div class="line-content"></div>';
-                e.preventDefault();
-            }
-            else if (e.key == 'Backspace') {
-                var sel = document.getSelection();
-                if (sel.anchorNode.parentNode.textContent.length == 1 && sel.anchorNode.parentNode.tagName.toLowerCase() == 'span') {
-                    var spanParent = sel.anchorNode.parentNode;
-                    spanParent.parentNode.removeChild(spanParent);
-                    e.preventDefault();
-                }
-
-            }
-        });
-        editor.addEventListener('keyup', (e) => {
-            if (this.empty_select == 0) {
-                var fontTags = document.querySelectorAll('font');
-                fontTags.forEach((get_font_tag) => {
-                    var attr = get_font_tag.getAttributeNames();
-                    var prev_span = document.createElement('span');
-                    attr.forEach((e, i) => {
-                        var span = document.createElement('span');
-                        if (e == 'size') {
-                            span.style.fontSize = get_font_tag.getAttribute('size') + 'px';
-                        } else if (e == 'face') {
-                            span.style.fontFamily = get_font_tag.getAttribute('face');
-                        } else if (e == 'color') {
-                            span.style.color = get_font_tag.getAttribute('color');
-                        }
-                        if (i == attr.length - 1) {
-                            span.innerText = get_font_tag.innerText;
-                        }
-                        i == 0 ? prev_span = span :
-                            i == 1 ? (prev_span.append(span)) :
-                                prev_span.children[0].append(span);
-                    });
-                    var gte = get_font_tag.childNodes[0];
-                    while (gte && gte.tagName != 'DIV') {
-                        if (gte.tagName == 'B') {
-                            prev_span.style.fontWeight = "bold";
-                        }
-                        if (gte.tagName == 'U') {
-                            prev_span.style.textDecorationLine = "underline";
-                        }
-                        if (gte.tagName == 'I') {
-                            prev_span.style.fontStyle = "italic";
-                        }
-                        gte = gte.childNodes[0];
-                    }
-                    get_font_tag.parentNode.insertBefore(prev_span, get_font_tag);
-                    get_font_tag.parentNode.removeChild(get_font_tag);
-                });
-            }
-            if (e.key == 'Backspace') {
-                var sel = document.getSelection();
-                this.remove_active();
-
-                if (!(sel.anchorNode.parentElement.tagName.toLowerCase() == 'div')) {
-                    var h = sel.anchorNode.parentElement;
-                    while (h && h.tagName.toLowerCase() != 'div') {
-                        if (h.tagName.toLowerCase() != 'span') {
-                            var style_name = this.start_line[h.tagName.toLowerCase()];
-                            this.active_state[style_name] = true;
-                        }
-                        var style = h.style;
-                        var z = '';
-                        if (style.color) {
-                            console.log('aa');
-                            this.active_state['color'] = this.rgbToHex(style.color);
-                        }
-                        if (style.fontSize) {
-                            var z = style.fontSize.replace('px', '');
-                            this.active_state['font-size'] = z;
-                        }
-                        if (style.fontFamily) {
-                            this.active_state['font-family'] = style.fontFamily;
-                        }
-                        if (style.textDecorationLine) {
-                            this.active_state['underline'] = true;
-                        }
-                        if (style.fontWeight) {
-                            this.active_state['bold'] = true;
-                        }
-                        if (style.fontStyle == 'italic') {
-                            this.active_state['italic'] = true;
-                        }
-                        h = h.parentElement;
-                    }
-                }
-            }
-            this.empty_select = -1
-            this.default_size = 15
-        })
-        var get_local = localStorage.getItem("Data") ? JSON.parse(localStorage.getItem("Data")) : undefined;
-        var condition = get_local && get_local[this.$root.dropdown_selected] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value] && get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date];
-        this.$refs.image.innerHTML ='';
-        if (condition !== undefined) {
-            var res_string = this.render_page(get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]["contents"]);
-            var global_props = get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]["global_props"];
-            this.$refs.content.innerHTML = res_string;
-            this.$refs.back_ground.style.backgroundImage = `url(${global_props["back_ground"]})`;
-            this.images_url = get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]["images"];
-            this.add_images_to_editor(this.images_url)
-        } else {
-            this.$refs.content.innerHTML = '<div class="line-content"></div>';
-            this.$refs.back_ground.style.backgroundImage = `url(${"texture31.webp"})`;
-        }
-        this.$refs.content.focus();
-        this.check_mark("Favourite", "fav");
+         this.editor_functionality();
+         this.check_for_draft();
+         this.check_for_preview();
+         this.convert_url_to_image(this.image);
+    },
+    watch:{
+        data(current,prev){
+            this.check_for_draft();
+        },
+         favourite(){
+            // this.check_favourite(); 
+         },
+         image(){
+            this.convert_url_to_image(this.image);
+         }
     },
     methods: {
-        add_images_to_editor(result) {
-            const image_container = this.$refs.image;
-            for (let i = 0; i < result.length; i++) {
-                const img = document.createElement('img');
-                img.setAttribute('src', result[i]);
-                var div = document.createElement('div');
-                div.append(img)
-                image_container.appendChild(div);
-                ((div)=>{
-                div.addEventListener('click',()=>{
-                    image_container.querySelector('div>.clicked') ? (image_container.querySelector('div>.clicked').classList.remove('clicked'))
-                    : '';
-                    image_container.querySelector('div>span') ?  image_container.querySelector('div>span').remove()
-                    : '';
-                    var span = document.createElement('span');
-                    span.setAttribute('class','material-symbols-outlined')
-                    span.innerText ='delete';
-                    div.appendChild(span);
-                    div.classList.add('clicked');
-                })
-                })(div)
-            }
-        },
-        check_mark(key, element) {
-            var get_local = !localStorage.getItem(key) ? undefined : JSON.parse(localStorage.getItem(key));
-            var condition = get_local && get_local[this.$root.dropdown_selected]
-                && get_local[this.$root.dropdown_selected][this.$root.dropdown_value]
-                && get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date];
-            if (condition !== undefined) {
-                this.$refs[element].children[0].classList.add("marked")
-            }
-            else {
-                if (this.$refs[element].children[0].classList.contains("marked")) {
-                    this.$refs[element].children[0].classList.remove("marked")
-                }
-            }
-        },
-        change_text_format(format, value, span) {
-            if (span) {
-                document.execCommand(value, false, format);
-                if (value == 'forecolor') {
-                    var val = document.querySelector('.file>#Color').value
-                    this.active_state['color'] = val;
-                    this.fontTag_to_spanTag('color');
-                }
-                else if (value == 'FontSize') {
-                    this.active_state['font-size'] = format;
-                    this.fontTag_to_spanTag('size', format);
-                }
-                else {
-                    this.active_state['font-family'] = format;
-                    this.fontTag_to_spanTag('face');
-                }
-            }
-            else {
-                if (value == undefined) {
-                    document.execCommand(format, false, null);
-                    this.highlight_button(format)
-                }
-                else if (value.startsWith('format')) {
-                    document.execCommand(format, false, null);
-                }
-                else {
-                    document.execCommand(value, false, format)
-                }
-            }
 
-            this.$refs.content.focus();
+        editor_functionality(){
+             var editor = this.$refs.content;
+             editor.focus();
+            editor.addEventListener('click', (e) => {
+                if (e.srcElement != this.$refs.content) {
+                    this.parent_element_style(e.srcElement, e);
+                }
+                else {
+                    var last_child = this.$refs.content.childNodes[this.$refs.content.childNodes.length - 1];
+                    this.traverse_element(last_child, false);
+                }
+            })
+            editor.addEventListener('keydown', (e) => {
+                if (this.$refs.content.innerText.length <= 1 && e.key == 'Backspace') {
+                    this.$refs.content.innerHTML = '';
+                    this.remove_active();
+                    this.$refs.content.innerHTML += '<div class="line-content"> &#x200B;</div>';
+                    e.preventDefault();
+                }
+                else if (e.key == 'Backspace') {
+                    var sel = document.getSelection();
+                    if (sel.anchorNode.parentNode.textContent.length == 1 && sel.anchorNode.parentNode.tagName.toLowerCase() == 'span') {
+                        var spanParent = sel.anchorNode.parentNode;
+                        spanParent.parentNode.removeChild(spanParent);
+                        e.preventDefault();
+                    }
+                }
+            });
+            editor.addEventListener('keyup', (e) => {
+                if (this.empty_select == 0) {
+                    var fontTags = document.querySelectorAll('font');
+                    fontTags.forEach((get_font_tag) => {
+                        var attr = get_font_tag.getAttributeNames();
+                        var prev_span = document.createElement('span');
+                        attr.forEach((e, i) => {
+                            var span = document.createElement('span');
+                            if (e == 'size') {
+                                ;
+                                span.style.fontSize = this.active_state['font-size'] + 'px';
+                            } else if (e == 'face') {
+                                span.style.fontFamily = get_font_tag.getAttribute('face');
+                            } else if (e == 'color') {
+                                span.style.color = get_font_tag.getAttribute('color');
+                            }
+                            if (i == attr.length - 1) {
+                                span.innerText = get_font_tag.innerText;
+                            }
+                            i == 0 ? prev_span = span :
+                                i == 1 ? (prev_span.append(span)) :
+                                    prev_span.children[0].append(span);
+                        });
+                        var gte = get_font_tag.childNodes[0];
+                        while (gte && gte.tagName != 'DIV') {
+                            if (gte.tagName == 'B') {
+                                prev_span.style.fontWeight = "bold";
+                            }
+                            if (gte.tagName == 'U') {
+                                prev_span.style.textDecorationLine = "underline";
+                            }
+                            if (gte.tagName == 'I') {
+                                prev_span.style.fontStyle = "italic";
+                            }
+                            gte = gte.childNodes[0];
+                        }
+                        get_font_tag.parentNode.insertBefore(prev_span, get_font_tag);
+                        get_font_tag.parentNode.removeChild(get_font_tag);
+                    });
+    
+                }
+                if (e.key == 'Backspace') {
+                    var sel = document.getSelection();
+                    this.remove_active();
+                    if (!(sel.anchorNode.parentElement.tagName.toLowerCase() == 'div')) {
+                        var h = sel.anchorNode.parentElement;
+                        while (h && h.tagName.toLowerCase() != 'div') {
+                            if (h.tagName.toLowerCase() != 'span') {
+                                var style_name = this.start_line[h.tagName.toLowerCase()];
+                                this.active_state[style_name] = true;
+                            }
+                            var style = h.style;
+                            var z = '';
+                            if (style.color) {
+                                this.active_state['color'] = this.rgbToHex(style.color);
+                            }
+                            if (style.fontSize) {
+                                var z = style.fontSize.replace('px', '');
+                                this.active_state['font-size'] = z;
+                            }
+                            if (style.fontFamily) {
+                                this.active_state['font-family'] = style.fontFamily;
+                            }
+                            if (style.textDecorationLine) {
+                                this.active_state['underline'] = true;
+                            }
+                            if (style.fontWeight) {
+                                this.active_state['bold'] = true;
+                            }
+                            if (style.fontStyle == 'italic') {
+                                this.active_state['italic'] = true;
+                            }
+                            h = h.parentElement;
+                        }
+                    }
+                }
+                this.empty_select = -1
+                this.default_size = 15; 
+                this.save_content(this.default_date);
+            })
         },
-        highlight_button(data) {
-            this.active_state[data] = !this.active_state[data];
+        call_save(){
+            this.save_content(this.default_date);
         },
-        change_back(data) {
-            this.$refs.back_ground.style.backgroundImage = `url(${data})`;
-            this.back_ground_image = data;
+        add_mousemove_event(ev) {
+            var prev =  ev.screenX;
+            const mousemoveHandler = (e) => {
+               prev = this.drag_start(prev, e.clientX,e.currentTarget);
+            };
+            const mouseupHandler = () => {
+                this.$refs.editor_width.removeEventListener('mousemove', mousemoveHandler);
+                this.$refs.editor_width.removeEventListener('mouseup', mouseupHandler);
+            };
+            this.$refs.editor_width.addEventListener('mousemove', mousemoveHandler);
+            this.$refs.editor_width.addEventListener('mouseup', mouseupHandler);
+        },
+        
+        drag_start(prev,result_x,target) {
+                const content = this.$refs.content;
+                const image = this.$refs.image;
+                const background = this.$refs.back_ground.getBoundingClientRect();
+                if(prev>result_x){
+                     result_x+=(2/100)*background.width;
+                }
+                else{
+                    result_x-=(2/100)*background.width;
+                }
+                var parent_width  = target.clientWidth;
+                if(result_x < parent_width){
+                image.style.width = background.width - (result_x - background.x )+"px";
+                content.style.width =(result_x - background.x )+"px";
+                var image_container_width = image.clientWidth;
+                this.set_image_height(image_container_width);
+                console.log('aaa');
+                }
+                return result_x;
+        },              
+        set_image_height(img_width){
+            const aspectRatio = 16 / 14 ;
+            const height = img_width / aspectRatio;
+            var img_container = this.$refs.image.children;
+            for(var i=0;i<img_container.length;i++){
+                  img_container[i].style.height = height+"px";              
+            }
+        },
+        check_for_preview(){
+            if (!this.preview) {
+                this.$refs.content.setAttribute('contentEditable', 'false');
+                this.$refs.editor_width.classList.add('preview')
+            }
         },
         parent_element_style(element) {
             if (!(element.getAttribute && element.getAttribute('class') == 'line-content')) {
@@ -308,7 +289,6 @@ const editor_component = {
                     var style = h.style;
                     var z = '';
                     if (style.color) {
-                        console.log('aa');
                         this.active_state['color'] = this.rgbToHex(style.color);
                     }
                     if (style.fontSize) {
@@ -355,7 +335,6 @@ const editor_component = {
                 var style = child.style;
                 var z = '';
                 if (style.color) {
-                    console.log('aa');
                     this.active_state['color'] = this.rgbToHex(style.color);
                 }
                 if (style.fontSize) {
@@ -373,25 +352,54 @@ const editor_component = {
                 }
                 if (style.fontStyle == 'italic') {
                     this.active_state['italic'] = true;
-                }
-
+                }   
                 child = child.childNodes[forward ? 0 : child.childNodes.length - 1];
             }
 
         },
+        change_text_format(format, value, span) {
+            if (span) {
+                document.execCommand(value, false, format);
+                if (value == 'forecolor') {
+                    var val = document.querySelector('.file>#Color').value
+                    this.active_state['color'] = val;
+                    this.fontTag_to_spanTag('color');
+                }
+                else if (value == 'FontSize') {
+                    this.active_state['font-size'] = format;
+                    this.fontTag_to_spanTag('size', format);
+                }
+                else {
+                    this.active_state['font-family'] = format;
+                    this.fontTag_to_spanTag('face');
+                }
+            }
+            else {
+                if (value == undefined) {
+                    document.execCommand(format, false, null);
+                    this.highlight_button(format)
+                }
+                else if (value.startsWith('format')) {
+                    document.execCommand(format, false, null);
+                }
+                else {
+                    document.execCommand(value, false, format)
+                }
+            }
+            this.save_content(this.default_date);
+            this.$refs.content.focus();
+        },
         fontTag_to_spanTag(params, value) {
             this.empty_select = document.querySelectorAll("font").length;
-            params == 'size' ? this.default_size = value : '';
+            var ref=this;
             document.querySelectorAll("font").forEach(function (font) {
                 var span = document.createElement("span");
                 var attr = font.getAttribute(params);
                 if (params == 'color') {
-                    console.log(document.querySelectorAll("font"));
                     span.style.color = attr;
                 }
                 else if (params == 'size') {
-                    console.log(value);
-                    span.style.fontSize = value + 'px';
+                    span.style.fontSize = ref.active_state['font-size'] + 'px';
                 }
                 else {
                     span.style.fontFamily = attr;
@@ -402,6 +410,16 @@ const editor_component = {
                 font.parentNode.insertBefore(span, font);
                 font.parentNode.removeChild(font);
             });
+        },
+        highlight_button(data) {
+            this.active_state[data] = !this.active_state[data];
+        },
+        rgbToHex(rgb) {
+            const colors = rgb.match(/\d+/g);
+            return "#" + colors.map(color => {
+                const hex = parseInt(color).toString(16);
+                return hex.length === 1 ? "0" + hex : hex;
+            }).join('');
         },
         remove_active() {
             this.active_state = {
@@ -416,290 +434,188 @@ const editor_component = {
                 'background': 'texture31.webp'
             }
         },
-        rgbToHex(rgb) {
-            const colors = rgb.match(/\d+/g);
-            return "#" + colors.map(color => {
-                const hex = parseInt(color).toString(16);
-                return hex.length === 1 ? "0" + hex : hex;
-            }).join('');
+        check_for_draft(){
+                this.remove_active();
+                this.template !='' ?   this.$refs.content.innerHTML = this.template :  this.$refs.content.innerHTML= '<div class="line-content"> &#x200B;</div>'   
+                this.set_global_props(this.global_props);
+                !this.$refs.full_container.classList.contains('hide')? this.$refs.full_container.classList.add('hide'):'';
+                if(this.images_url.length==0){
+                    this.$refs.image.classList.add('hide');
+                    this.$refs.content.classList.add('full-width');
+                    this.$refs.drag.classList.add('hide')
+                }
+                else{
+                    this.$refs.image.classList.contains('hide') ?(  this.$refs.image.classList.remove('hide'),
+                                                                    this.$refs.content.classList.remove('full-width'), this.$refs.drag.classList.remove('hide')):'';
+                }
         },
-        add_photo(event) {
+        // check_favourite(){
+        //     if(this.preview){
+        //         if(this.favourite){
+        //             this.$refs.icon.classList.add('clicked');
+        //         }
+        //         else if(this.$refs.icon.classList.contains('clicked')){
+        //             this.$refs.icon.classList.remove('clicked');
+        //         }
+        //     }
+
+        // },
+        convert_url_to_image(result){
+            const image_container = this.$refs.image;
+            image_container.innerHTML='';
+            this.images_url=[];
+            if(result.length==0){
+                this.$refs.image.classList.add('hide');
+                this.$refs.content.classList.add('full-width');
+                this.$refs.drag.classList.add('hide')
+            }
+            else{
+                this.$refs.image.classList.contains('hide') ?(  this.$refs.image.classList.remove('hide'),
+                        this.$refs.content.classList.remove('full-width'),this.$refs.drag.classList.remove('hide')):'';
+            }
+            for (let i = 0; i < result.length; i++) {
+                const img = document.createElement('img');
+                img.setAttribute('src', result[i]);
+                var span ='<span class="material-symbols-outlined">delete</span>'
+                var div = document.createElement('div');
+                div.appendChild(img.cloneNode(true));
+                div.innerHTML+=span;
+                this.set_img_height(div);
+                image_container.appendChild(div);
+                this.add_event_listener(div,this.$refs.show_photo,i);
+                (div => {
+                    div.addEventListener('mouseover', () => {
+                        div.children[1].classList.add('show');
+                    });
+                })(div);
+                (div => {
+                    div.children[1].addEventListener('click', () => {
+                        this.remove_image(div);
+                    });
+                })(div);
+                
+                (div => {
+                    div.addEventListener('mouseout', () => {
+                        div.children[1].classList.remove('show');
+                    });
+                })(div);
+                this.images_url.push(result[i])
+            }
+
+          
+        },
+        set_img_height(img){
+            var img_width = this.$refs.image.clientWidth;
+            const aspectRatio = 16 / 14;
+            const height = img_width / aspectRatio;
+            img.style.height = height+"px"; 
+        },
+        add_event_listener(div,parent_container,index){
+            var ref= this;
+            div.addEventListener('click',(e)=>{
+              if(e.srcElement.tagName !='SPAN'){
+                    ref.$refs.show_photo.innerHTML='';
+                    const img = document.createElement('img');
+                    img.setAttribute('src', ref.images_url[index]);
+                    var photo_div = ref.add_image_in_full_screen(img);
+                    photo_div.innerHTML+=`<span class="material-symbols-outlined">close</span>`;
+                    ref.$refs.show_photo.appendChild(photo_div);
+                    ref.$refs.full_container.classList.remove('hide');
+              }
+            })
+           
+        },
+        add_image_in_full_screen(img){
+             var div = document.createElement('div');
+             div.appendChild(img);
+             return div;
+        },
+        remove_image(div) {
+            var parent = div.parentElement;
+            var index = Array.from(parent.children).indexOf(div);
+            parent.children[index].remove();
+            this.images_url.splice(index, 1);   
+            this.save_content(this.default_date);
+            if(this.images_url.length==0){
+                this.$refs.image.classList.add('hide');
+                this.$refs.content.classList.add('full-width');
+                this.$refs.drag.classList.add('hide');
+            }
+        },
+        set_global_props(props){
+            if(props["background_image"]){
+                this.$refs.back_ground.style.backgroundImage = props["background_image"];
+                this.back_ground =  props["background_image"].replace("url(\"", "");
+                this.back_ground = this.back_ground.replace("\")", "");
+            }
+            else{
+                this.$refs.back_ground.style.backgroundImage = `url(${"texture31.webp"})`
+                this.back_ground = "texture31.webp" 
+            }
+        },
+        change_background(data){
+            this.$refs.back_ground.style.backgroundImage = `url(${data})`;
+            this.background = data;
+            this.save_content(this.default_date);
+        },
+        insert_photo(event) {
             const file = event.target.files[0];
             const reader = new FileReader();
-            var erf = this;
+            const ref = this; 
+            if(this.images_url.length==0){
+                this.$refs.image.classList.contains('hide') ?(  this.$refs.image.classList.remove('hide'),
+                this.$refs.content.classList.remove('full-width'),this.$refs.drag.classList.remove('hide')):'';
+            }
             reader.onload = function () {
-                const imgElement = document.createElement('img');
-                imgElement.src = reader.result;
-                imgElement.setAttribute('class', 'image-content')
-                var div = document.createElement('div');
-                div.append(imgElement)
-                erf.images_url.push(reader.result);
-                erf.$refs.image.appendChild(div);
-                div.addEventListener('click',()=>{
-                    console.log( erf.$refs.image.querySelector('div>.clicked'));
-                    erf.$refs.image.querySelector('div>.clicked') ? (erf.$refs.image.querySelector('div>.clicked').classList.remove('clicked'))
-                                : '';
-                    div.classList.add('clicked');
-                    var span = document.createElement('span');
-                    span.setAttribute('class','material-symbols-outlined')
-                    span.innerText ='delete';
-                    div.appendChild(span);
-                })
-                
-                
+                const img = document.createElement('img');
+                img.setAttribute('src', reader.result);
+        
+                const div = document.createElement('div');
+        
+                const deleteSpan = document.createElement('span');
+                deleteSpan.className = 'material-symbols-outlined';
+                deleteSpan.textContent = 'delete';
+                deleteSpan.addEventListener('click', () => {
+                    ref.remove_image(div);
+                });
+                div.appendChild(img);
+                div.appendChild(deleteSpan);
+                ref.set_img_height(div);
+                ref.$refs.image.appendChild(div);
+                div.addEventListener('mouseover', () => {
+                    deleteSpan.classList.add('show');
+                });
+                div.addEventListener('mouseout', () => {
+                    deleteSpan.classList.remove('show');
+                });
+                const photo_div = ref.add_image_in_full_screen(img.cloneNode(true));
+                const index = ref.images_url.length;
+                ref.$refs.show_photo.appendChild(photo_div);
+                ref.add_event_listener(div, ref.$refs.show_photo, index);
+                ref.storeDataURL(reader.result);
             };
             reader.readAsDataURL(file);
         },
-        show_image_container() {
-            if (this.$refs.image.children.length != 0) {
-                this.$refs.image.classList.add('perfect-width');
-            }
+        storeDataURL(dataURL) {
+            this.images_url.push(dataURL);
+            this.save_content(this.default_date);
         },
-
-        remove_image_container() {
-            this.$refs.image.classList.remove('perfect-width');
+        save_content(date){
+          var html =this.$refs.content; 
+          var back_ground = this.$refs.back_ground.style.backgroundImage;
+          console.log(html);
+          console.log(this.images_url);
+          console.log(back_ground)
+          console.log(date);;
+          this.$emit('save_content' , html , this.images_url,back_ground,date);
         },
-        save() {
-            function get_child(child, htmlArray, styles, close_tag) {
-                for (var i = 0; i < child.length; i++) {
-                    if (child[i].nodeType === 1) {
-                        if (child[i].getAttribute("style")) {
-                            styles[htmlArray.length] = child[i].getAttribute("style");
-                        }
-                        var a = htmlArray.length;
-                        htmlArray.push(child[i].cloneNode(false));
-                        get_child(child[i].childNodes, htmlArray, styles, close_tag);
-                        if (styles[a]) {
-                            close_tag.push(a);
-                        }
-                        htmlArray.push('</' + child[i].tagName.toLowerCase() + '>');
-                    } else if (child[i].nodeType === 3) {
-                        htmlArray.push(child[i]);
-                    }
-                }
-            }
-            var child = this.$refs.content.childNodes;
-            get_child(child, this.html_Array, this.styles, this.close_tag);
-            this.json_format();
+        add_favourite(){
+            this.$emit('add_fav','op')
         },
-        format_for_json() {
-            var obj = {};
-            obj["contents"] = [];
-            obj["global_props"] = {};
-            obj["images"]=[];
-            return obj;
-        },
-        json_format() {
-            var result = this.format_for_json();
-            var single_line = {}
-            var styles = {}
-            var content = this.html_Array;
-            var close = 0;
-            for (var i = 0; i < content.length; i++) {
-                if (content[i].tagName && content[i].tagName.toLowerCase() == 'div') {
-                    this.check_for_lineStyle(content[i], single_line);
-                    if(content[i].getAttribute('style')){
-                        close++;
-                    }
-                }
-                else if (content[i].tagName) {
-                    this.get_styles_from_tag(content[i], styles);
-                }
-                else if (content[i].nodeType === 3) {
-                    var obj1 = this.set_Style_for_text(content[i].nodeValue, styles)
-                    single_line["data"].push(obj1);
-                }
-                else if (content[i] != '</br>') {
-                    if (content[this.close_tag[close]] && content[this.close_tag[close]].getAttribute('style')) {
-                        this.delete_style_present_in_attribute(content[this.close_tag[close]], styles);
-                        close++;
-                    }
-                    this.delete_style_present_in_tag(content[i], styles);
-                     if(content[i]=='</div>')  {
-                        result["contents"].push({...single_line});
-                        single_line={};
-                    }
-                }
+        close_container(event){
+            if(event.target.tagName=='SPAN'){
+                this.$refs.full_container.classList.add('hide');
             }
-            this.set_global_props(result["global_props"]);
-            this.save_images(result["images"]);
-            this.$emit('save_content', result);
-            this.saveData_to_localStorage("Data", result);
-            this.html_Array = [];
-            this.styles = {};
-            this.close_tag = [];
-        },
-        delete_style_present_in_tag(element, styles) {
-            if (element == '</b>') {
-                delete styles['b'];
-            } else if (element == '</u>') {
-                delete styles['u'];
-            } else if (element == '</i>') {
-                delete styles['i']
-            }
-        },
-        check_for_lineStyle(element, json) {
-            json["data"] = [];
-            if (element.getAttribute('style')) {
-                json["line_props"] = element.getAttribute('style');
-            }
-            else {
-                json["line_props"] = null;
-            }
-        },
-        set_Style_for_text(text, styles) {
-            var obj1 = {};
-            obj1["content"] = text;
-            obj1["styles"] = { ...styles};
-            return obj1;
-        },
-        get_styles_from_tag(element, styles) {
-            if (element.tagName.toLowerCase() != 'br') {
-                if (element.tagName.toLowerCase() != 'span') {
-                    styles[element.tagName.toLowerCase()] = true;
-                    if (element.getAttribute('style')) {
-                        this.find_styles_in_tag(element, styles);
-                    }
-                }
-                else {
-                    this.find_styles_in_tag(element, styles)
-                }
-            }
-        },  
-        saveData_to_localStorage(key, value, json_delete) {
-            var get_local = !localStorage.getItem(key) ? {} : JSON.parse(localStorage.getItem(key));
-            get_local[this.$root.dropdown_selected] = get_local[this.$root.dropdown_selected] || {};
-            get_local[this.$root.dropdown_selected][this.$root.dropdown_value] = get_local[this.$root.dropdown_selected][this.$root.dropdown_value] || {};
-            !json_delete ? (get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date] = value)
-                : get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date] ?
-                    delete get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date]
-                    : get_local[this.$root.dropdown_selected][this.$root.dropdown_value][this.default_date] = value;
-            localStorage.setItem(key, JSON.stringify(get_local));
-        },
-        delete_style_present_in_attribute(content, obj) {
-            var style = content.style;
-            if (style.color) {
-                delete obj['color']
-            }
-            if (style.fontSize) {
-                delete obj['font-size']
-            }
-            if (style.fontFamily) {
-                delete obj['font-family']
-            }
-            if (style.textDecorationLine) {
-                delete obj['underline']
-            }
-            if (style.fontWeight) {
-                delete obj['b']
-            }
-            if (style.fontStyle == 'italic') {
-                delete obj['i']
-            }
-        },
-        find_styles_in_tag(content, obj) {
-            var style = content.style;
-            var z = '';
-            if (style.color) {
-                obj['color'] = style.color;
-            }
-            if (style.fontSize) {
-                var z = style.fontSize.replace('px', '');
-                obj['font-size'] = z;
-            }
-            if (style.fontFamily) {
-                obj['font-family'] = style.fontFamily;
-            }
-            if (style.textDecorationLine) {
-                obj['underline'] = true;
-            }
-            if (style.fontWeight) {
-                obj['b'] = true;
-            }
-            if (style.fontStyle == 'italic') {
-                obj['i'] = true;
-            }
-        },
-        set_global_props(result){
-            result["back_ground"] = this.back_ground_image;
-        },
-        save_images(result){
-            var image_container = this.images_url;
-            for(var i=0;i<image_container.length;i++){
-               result.push(image_container[i]);        
-            }
-        },
-        add_favourite() {
-            this.save();
-            this.saveData_to_localStorage("Favourite", true, "delete");
-            if (this.$refs["fav"].children[0].classList.contains("marked")) {
-                this.$refs["fav"].children[0].classList.remove("marked");
-            }
-            else {
-                this.$refs["fav"].children[0].classList.add("marked");
-            }
-        },
-        add_mark() {
-
-        },
-        render_page(editor_content) {
-            var res_string = '';
-            for (var i = 0; i < editor_content.length ; i++) {
-                editor_content[i].line_props ? res_string += '<div class="line-content" style="' + editor_content[i].line_props + '">'
-                    : res_string += '<div class="line-content">';
-                if (editor_content[i].data) {
-                    editor_content[i].data.forEach((element, j) => {
-                        if (j != 0) {
-                            res_string = this.check_previous_close_tag(editor_content[i].data[j - 1].styles, element.styles, res_string);
-                        }
-                        res_string = this.check_for_new_tag(editor_content[i].data[j - 1] ? editor_content[i].data[j - 1].styles : '', element.styles, res_string);
-                        res_string += element.content;
-                        if (j == editor_content[i].data.length - 1) {
-                            res_string = this.check_previous_close_tag(element.styles, '', res_string);
-                        }
-                    });
-                }
-                else {
-                    res_string += '&ZeroWidthSpace;'
-                }
-                res_string += '</div>';
-            }
-            return res_string;
-        },
-        check_previous_close_tag(previous_styles, current_styles, div) {
-            Object.keys(previous_styles).forEach(tag => {
-                if (current_styles == '' || !current_styles[tag]) {
-                    if (tag == 'b') {
-                        div += '</b>';
-                    }
-                    else if (tag == 'i') {
-                        div += '</i>';
-                    }
-                    else if (tag == 'u') {
-                        div += '</u>';
-                    }
-                    else {
-                        div += '</span>'
-                    }
-                }
-            })
-            return div;
-        },
-        check_for_new_tag(previous_styles, current_styles, div) {
-            Object.keys(current_styles).forEach(tag => {
-                if (previous_styles == '' || !previous_styles[tag]) {
-                    if (tag === 'b' || tag === 'i' || tag === 'u') {
-                        div += `<${tag}>`;
-                    } else if (tag === 'color') {
-                        div += `<span style="color:${current_styles[tag]};">`;
-                    } else if (tag === 'font-size') {
-                        div += `<span style="font-size:${current_styles[tag]}px;">`;
-                    } else if (tag === 'font-family') {
-                        div += `<span style="font-family:${current_styles[tag]};">`;
-                    }
-                }
-            });
-            return div;
         }
     }
 };

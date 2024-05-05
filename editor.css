@@ -110,7 +110,6 @@
     background-image: url(texture31.webp);
     background-repeat: no-repeat;
     background-size: cover;
-    position: relative;
     display: flex;
 
 }
@@ -133,31 +132,41 @@
     display: none;
 }   
 .preview{
+    transform: scale(1);
     width: 100% !important;
     height: 100% !important;
 }
-.preview>#texture-field{
+ .preview>#texture-field{
     height: 100% !important;
     width: 100% !important;
-}
-.preview>#texture-field>#word-pad{
-    overflow: hidden !important;
-    width: 100% !important;
-    line-height: .5vw !important;
-    font-size: .6vw !important;
-    padding: .5vw !important;
-}
-.preview>#texture-field>#word-pad>.line-content{
-    width: 8.5vw;
 }
 .preview>#texture-field>#drag_container{
     display: none;
 }
+.preview>#texture-field>#word-pad{
+    font-size: .45vw !important;
+    line-height: .8vw !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    padding:  .5vw !important;
+}
 .preview>#texture-field>#word-pad span{
-    font-size: .55vw !important;
+    font-size: .45vw !important;
+}
+.preview>#texture-field>#drag_container>span{
+    display: none;
+}
+.preview>#texture-field>#drag_container{
+    display: none !important;
 }
 .preview>#texture-field>#imageContainer{
     display: none !important;
+}
+.preview>#texture-field>#word-pad>.line-content{
+    opacity: 1;
+}
+.preview>#texture-field>#word-pad>.line-content b{
+    opacity: .7;
 }
 .editor-root>#texture-field>#word-pad{
 background-color: #e8bebeab;
@@ -170,7 +179,6 @@ font-family: sans-serif;
 color: #666;
 overflow: auto;
 overflow-x: hidden;
-position: relative;
 padding: 1vw;
 line-height: 2vw;
 }
@@ -181,15 +189,11 @@ line-height: 2vw;
     cursor: col-resize;
     display: flex;
     align-items: center;
-    position: relative;
     width: .7%;
     background-color: #e4e4e494;
 }
 .editor-root>#texture-field>#drag_container:hover{
     background-color: #dadada;
-}
-.preview>#texture-field>#drag_container>span{
-    display: none;
 }
 .editor-root>#texture-field>#drag_container>span{
     font-size: 1vw;
@@ -295,8 +299,8 @@ line-height: 2vw;
     scrollbar-width: none;
 }
 .editor-root>#full_container_photo>#image_con>div{
-    width: 85%;
-    height: 90%;
+    width: fit-content;
+    height: fit-content;
     padding: .5vw;
     display: flex;
     justify-content: center;
@@ -307,8 +311,8 @@ line-height: 2vw;
     margin-top: 1vw;
 }
 .editor-root>#full_container_photo>#image_con>div>img{
-    width: 95%;
-    height: 100%;
+    max-width: 95%;
+    max-height: 90%;
     border-radius: 5px;
 }
 
@@ -318,13 +322,13 @@ line-height: 2vw;
 .editor-root>#full_container_photo>#image_con>div>span{
     color: #fff;
     position: absolute;
-    right: 2%;
-    top: -1%;
-    font-size: 1.1vw;
-    background-color: #b6b6b6;
-    padding: 0.2vw;
+    font-size: 1.15vw;
+    background-color: #b6b6b6d9;
+    padding: 0.25vw;
     border-radius: 50%;
     cursor: pointer;
+    top: 1.5%;
+    right: 1.5%;
 }
 .editor-root>#full_container_photo>#image_con>div>span:hover{
     color: #e56b6b;

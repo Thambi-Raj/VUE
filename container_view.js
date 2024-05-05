@@ -23,9 +23,7 @@ const container_component = {
                            </div>
                          </div>
                     </div>
-              </div>
-              <editor-controller  :data="data" :preview="true" v-else   >
-              </editor-controller>`
+              </div>`
         ,
     props: {
         name: {
@@ -41,7 +39,6 @@ const container_component = {
     data() {
         return {
             content: {},
-            data:{},
             preview:true
         }
     },
@@ -53,7 +50,7 @@ const container_component = {
             var year = "year_" + key.split('_')[1];
             var month = key.split('_')[0].toLowerCase();
             month = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
-            click ?(this.data = this.content[year][month][date],this.preview=false):'';
+            click ?(this.$emit('change_left_pane',year,month,date)):'';
             return this.content[year][month][date];
         }
     }

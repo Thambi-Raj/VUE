@@ -1,5 +1,5 @@
 const container_controller = {
-    template:   `<container-root :name = name :span=span :container_data=container_data></container-root>`,
+    template:   `<container-root :name = name :span=span :container_data=container_data @change_left_pane="change_left_pane"></container-root>`,
     props:{
      name:{
         type:String,
@@ -11,11 +11,15 @@ const container_controller = {
         type:Array
      },
     },
-    emits:[],
+    emits:['change_left_pane'],
     methods:{
-
+      change_left_pane(year,month,date){
+         
+         this.$emit('change_left_pane',year,month,date);
+      }
     },
     mounted(){
       console.log('aaa');
     }
+
 }

@@ -49,12 +49,13 @@
         </div>
         <div id="content">
             <div class="diary">
-                <diary-component :dropdown_selected="dropdown_selected" :data="data" :dropdown_value="dropdown_value"
+                  <diary-component :dropdown_selected="dropdown_selected" :data="data" :dropdown_value="dropdown_value"
                     :content_view="content_view" :default_date="default_date" :favourite="favourite_data"
                     :month_preview="month_preview" :favourite="favourite" @change_page="page_change"
                     @change_dropdown_head="change_dropdown_head" @change_dropdown_value="change_dropdown_value"
-                    @change_mention="change_mention" @change_date="change_date" @save_json="save_json"
-                    @add_fav="add_fav" :result_data="result_data"></diary-component>
+                    @change_mention="change_mention" @change_date="change_date" @save_json="save_json" @change_content_view= "change_content_view"
+                    @add_fav="add_fav" :result_data="result_data">
+                </diary-component>
             </div>
         </div>
     </div>
@@ -77,8 +78,6 @@
                 content_view: true,
                 favourite_data: this.check_favourite(),
                 month_preview: this.get_month_preview("year_2024", "Apr"),
-                bookmark_data: [{ 'FEB 2024': [1, 2, 5] }, { 'FEB 2024': [1, 2, 5] }],
-                mention_data: [{ "thambi": ['feb', 'mar'] }, { "raj": ['feb', 'jan'] }],
                 result_data: {},
                 favourite: false
             }
@@ -107,6 +106,7 @@
                     this.month_preview = this.get_month_preview(this.dropdown_selected, this.dropdown_value)
                 }
                 this.favourite_data = this.check_favourite(this.default_date);
+                ;
             },
             change_dropdown_value(data, bool) {
                 this.dropdown_value = data;
@@ -230,7 +230,9 @@
                 console.log('month');
                 return condition ? condition : {};
             },
-
+            change_content_view(){
+                this.content_view = !this.content_view;
+            }
         },
     })
     app.component('dropdown-root', dropdown_component);

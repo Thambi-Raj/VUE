@@ -19,7 +19,6 @@ const diary_component = {
                 @change_date="change_date"
                 @add_fav=ad_fav
                 :data="month_preview"
-
                 >
             </contentSidebar-controller>
         </div>
@@ -40,10 +39,16 @@ const diary_component = {
         <container-controller  v-if ="content_view && result_template== 'button' "
                 :name="dropdown_selected"
                 :span="dropdown_selected"
-                :container_data="data">
+                :container_data="data"
+                @change_left_pane="change_left_pane">
         </container-controller>
         </div>
         `,
+    watch:{
+        content_view(){
+            console.log(this.content_view);
+        }
+    },
     props: {
         dropdown_value: {
             type: String
@@ -70,7 +75,7 @@ const diary_component = {
             type:Object
         }
     },
-    emits: ['change_page','page_change', 'change_dropdown_value', 'change_dropdown_head', "change_mention","save_json","change_date","add_fav"],
+    emits: ['change_page','page_change', 'change_dropdown_value', 'change_dropdown_head', "change_mention","save_json","change_date","add_fav"," change_left_pane","change_content_view"],
     created() {
         this.result_template = 'calendar';
         var cur = new Date().getFullYear();
@@ -82,7 +87,8 @@ const diary_component = {
             id_map: this.$root.$data.id_map,
             result_template: '',
             month_array: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            active: []
+            active: [],
+            favourite_template:false
         };
     },
     methods: {
@@ -99,16 +105,23 @@ const diary_component = {
             if (data.startsWith('year')) {
                 this.month_array = cur == data.split('_')[1] ? this.month_array.slice(0, mon + 1) : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                 this.$emit('change_dropdown_value', 'Jan');
+                this.favourite_template = false;    
             }
             else{
-                this.result_template='button'
+                this.result_template='button';
             }
             this.$emit('change_dropdown_head', data);
         },
         back_page(year, month, date) {
+         if(!this.favourite_template){
             this.$emit('change_dropdown_value', month);
             this.$emit('change_dropdown_head', year);
             this.$emit('change_page', date);
+         }
+         else{
+            this.$emit("change_content_view");
+            this.change_drop_head("favorite");
+         }
         },
         change_active(data) {
             if (this.active.includes(data)) {
@@ -141,6 +154,13 @@ const diary_component = {
             if(date){
                 this.$emit('add_fav',date);
             }
+        },
+        change_left_pane(year,month,date){
+            date = parseInt(date);
+            this.$emit('change_dropdown_value', month);
+            this.$emit('change_dropdown_head', year);
+            this.$emit('change_page', date);
+            this.favourite_template=true;
         }
     }
 };

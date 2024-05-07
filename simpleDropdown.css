@@ -1,5 +1,6 @@
 .drop-down-root{
-    width: fit-content   
+    width: fit-content;  
+    position:relative; 
 }
 .drop-down-root>span:not(.material-symbols-outlined){
     font-size: .8vw;
@@ -9,6 +10,12 @@
 }
 .drop-down-root>.small_width_dropdown{
     width: 3vw !important;
+}
+.drop-down-root>.font_size_width{
+    width: 3.8vw !important;
+}
+.drop-down-root>.font_size_width_dropdown{
+    width: 3.8vw !important;
 }
 .drop-down-root>.normal_width_dropdown>span{
     padding: 0.3vw .5vw !important;
@@ -57,6 +64,9 @@
     z-index: 1;
     visibility: visible;
     background-color: #fff;
+    border-radius: 3px;
+    border-top: none;
+    border-left: none;
 }
 .drop-down-root>#option>.material-symbols-outlined{
     font-size: 1.2vw;

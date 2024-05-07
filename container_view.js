@@ -13,9 +13,16 @@ const container_component = {
                                 <div id="content">
                                   <div id="sub_container" v-for="val in value" :key="val" @click="get_key_for_data(key, val,'click')">
                                      <div id="first_div">
-                                     <editor-controller  :data="get_key_for_data(key, val)" 
-                                     :preview="false">
-                                     </editor-controller>
+                                     <preview-controller 
+                                     :year="get_year(key)"
+                                     :month="get_month(key)"
+                                     :favourite_data="total_favourite"
+                                     :data="get_key_for_data(key,val)"
+                                     :date="val"
+                                     :show_date="false"
+                                     :favourite_access="false"
+                                     @change_default_date="get_key_for_data(key,val,'click')">
+                                     </preview-controller>
                                      <span id="date">{{val}}</span>
                                      </div>
                                   </div>
@@ -35,6 +42,9 @@ const container_component = {
         container_data: {
             type: Array
         },
+        total_favourite:{
+            type:Object
+        }
     },
     data() {
         return {
@@ -52,6 +62,15 @@ const container_component = {
             month = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
             click ?(this.$emit('change_left_pane',year,month,date)):'';
             return this.content[year][month][date];
+        },
+        get_month(key){
+            var month = key.split('_')[0].toLowerCase();
+            return month;
+        },
+        get_year(key){
+            var year = key.split('_')[1];
+            return year;
         }
+
     }
 }

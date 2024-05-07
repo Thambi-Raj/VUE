@@ -216,7 +216,7 @@ const editor_controller = {
                 var json_content = this.constructDiary_jsonFormat(this.editor_elements);
                 json_content["images"]=images;
                 json_content["global_props"]={"background_image":background};
-                this.$emit('save_content',json_content,date);     
+                this.$emit('save_json_content',json_content,date);     
 
             },
             add_fav(){

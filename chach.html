@@ -1,62 +1,51 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
 
-<head>
-    <title>resizer</title>
-    <meta name="author" content="Andrej Hristoliubov anhr@mail.ru">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <style>
-        .element {
-            border: 1px solid #999999;
-            border-radius: 4px;
-            margin: 5px;
-            padding: 5px;
-        }
-    </style>
-    <script type="text/javascript">
-        function resizeX(x) {
-            var element2 = document.getElementById("element2");
-            element2.style.width = element2.parentElement.clientWidth + document.getElementById('resizeArea').offsetLeft - x + 'px';
-        }
-
-        function resizerX(elementId, callback) {
-            var element = document.getElementById(elementId);
-            var startX, startWidth;
-
-            function initDrag(e) {
-                startX = e.clientX;
-                startWidth = parseInt(document.defaultView.getComputedStyle(element).width, 10);
-                document.documentElement.addEventListener('mousemove', doDrag, false);
-                document.documentElement.addEventListener('mouseup', stopDrag, false);
-            }
-
-            function doDrag(e) {
-                resizeX(e.pageX + 25);
-            }
-
-            function stopDrag() {
-                document.documentElement.removeEventListener('mousemove', doDrag, false);
-                document.documentElement.removeEventListener('mouseup', stopDrag, false);
-            }
-
-            element.addEventListener('mousedown', initDrag, false);
-        }
-    </script>
-</head>
-
-<body>
-    <h1>Resizer (X-axis)</h1>
-    <p>Please see the example of resizing the HTML element along the x-axis by mouse dragging.</p>
-    <div id="resizeArea" style="width:1000px; height:50px; overflow:auto; position: relative;" class="element">
-        <div id="element2" class="element" style="width: 30%; height:10px; float: right; position: relative;">
-            Element 2
-            <div id="resizerX" style="width: 10px; height:100%; background: red; float: right;"></div>
-        </div>
-    </div>
-
-    <script type="text/javascript">
-        resizerX("resizerX");
-    </script>
-</body>
-
-</html>
+if (h.tagName.toLowerCase() != 'span') {
+    var style_name = this.start_line[h.tagName.toLowerCase()];
+    this.active_state[style_name] = true;
+}
+var style = h.style;
+var z = '';
+if (style.color) {
+    this.active_state['color'] = this.rgbToHex(style.color);
+}
+if (style.fontSize) {
+    var z = style.fontSize.replace('px', '');
+    this.active_state['font-size'] = z;
+}
+if (style.fontFamily) {
+    this.active_state['font-family'] = style.fontFamily;
+}
+if (style.textDecorationLine) {
+    this.active_state['underline'] = true;
+}
+if (style.fontWeight) {
+    this.active_state['bold'] = true;
+}
+if (style.fontStyle == 'italic') {
+    this.active_state['italic'] = true;
+}
+if (child.tagName.toLowerCase() != 'span') {
+    var style_name = this.start_line[child.tagName.toLowerCase()];
+    this.active_state[style_name] = true;
+}
+var style = child.style;
+var z = '';
+if (style.color) {
+    this.active_state['color'] = this.rgbToHex(style.color);
+}
+if (style.fontSize) {
+    var z = style.fontSize.replace('px', '');
+    this.active_state['font-size'] = z;
+}
+if (style.fontFamily) {
+    this.active_state['font-family'] = style.fontFamily;
+}
+if (style.textDecorationLine) {
+    this.active_state['underline'] = true;
+}
+if (style.fontWeight) {
+    this.active_state['bold'] = true;
+}
+if (style.fontStyle == 'italic') {
+    this.active_state['italic'] = true;
+}  

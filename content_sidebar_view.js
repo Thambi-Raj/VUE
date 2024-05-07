@@ -1,29 +1,27 @@
 const content_sidebar_component = {
     template: `<div class="content-sidebar">
-    <div id="head"> 
-        <span class="material-symbols-outlined" @click="back">logout</span>
-        <simple-dropdown-controller width="sidebar-dropdown" :default_val="dropdown_value" :data="month_array" :name="'month'" :tag="'-'" @change_format="change_drop"></simple-dropdown-controller>
-        <simple-dropdown-controller width="sidebar-dropdown" :default_val="year2" :data="year" :name="'year'" :tag="'-'" @change_format="change_drop"></simple-dropdown-controller>
-    </div>
-    <div id="body" ref="scroll_container">
-        <div id="day-container" v-for="date in last_day" :key="date" :class="{ active: date === this.$root.default_date }" @click="change_date($event.currentTarget, date, $event)">
-            <div id="content">
-                <div id="first">
-                    <span>{{date}}</span>
-                    <br>
-                    <span>{{dropdown_value}}</span>
-                </div>
-                <div id="second">
-                    <i ref="icon" v-if="data[date]" :class="check_data(data[date], date) ? 'fa fa-heart default_class' : 'fa fa-heart-o default_class'" id="favourite" @mouseover="add_hover_class" @mouseout="remove_hover_class"></i>
-                    <div id="editor"  :class="{ 'hide': !data[date] }">                             
-                        <editor-controller :data="data[date] || {}" :preview="false"></editor-controller>
+                    <div id="head"> 
+                        <span class="material-symbols-outlined" @click="back">logout</span>
+                        <simple-dropdown-controller width="sidebar-dropdown" :default_val="dropdown_value" :data="month_array" :name="'month'" :tag="'-'" @change_format="change_drop"></simple-dropdown-controller>
+                        <simple-dropdown-controller width="sidebar-dropdown" :default_val="year2" :data="year" :name="'year'" :tag="'-'" @change_format="change_drop"></simple-dropdown-controller>
                     </div>
-                    <span v-if="!data[date]">no-content</span>
+                    <div id="body" ref="scroll_container">
+                        <div id="day-container" v-for="date in last_day" :key="date" :class="{ active: date === this.$root.default_date }" >
+                        <preview-controller 
+                            :year="dropdown_selected"
+                            :month="dropdown_value"
+                            :favourite_data="total_favourite"
+                            :data="data[date]"
+                            :date="date"
+                            :show_date="true"
+                            :favourite_access="true"
+                            @add_to_favourite="add_fav"
+                            @change_default_date="change_date">
+                        </preview-controller>
+                        
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>`
+                </div>`
 ,
     props: {
         dropdown_selected: {
@@ -40,11 +38,14 @@ const content_sidebar_component = {
         },
         data:{
             type:Object
+        },
+        total_favourite:{
+            type:Object
         }
     },
     mounted() {
+        console.log('aa');
         var div_position = this.$refs.scroll_container.children[this.$root.default_date - 1].getBoundingClientRect();
-        var scroll_y = div_position.y;
         this.$refs.scroll_container.scrollTop = (this.$root.default_date - 1)*div_position.height
         this.get_favourite()
     },
@@ -85,17 +86,12 @@ const content_sidebar_component = {
         back() {
             this.$emit('back_page', this.dropdown_value, ('year_' + this.year2), 1);
         },
-        change_date(e,date,event) {
-            if(event.srcElement.tagName=='I'){
-                event.srcElement.classList.contains('fa-heart') ? 
-                (event.srcElement.classList.remove('fa-heart'), event.srcElement.classList.add('fa-heart-o')) :
-                (event.srcElement.classList.remove('fa-heart-o'), event.srcElement.classList.add('fa-heart'));            
-                this.$emit('add_fav',date);
-            }
-            else if(!e.classList.contains('active')){
-                this.$emit('change_date', date);
-            }
+        add_fav(date){
+            this.$emit('add_favourite',date);
         },
+        change_date(date){
+            this.$emit('change_date',date)
+        }
     }
 }
 

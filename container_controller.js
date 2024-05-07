@@ -10,6 +10,9 @@ const container_controller = {
      container_data:{
         type:Array
      },
+     total_favourite:{
+      type:Object
+     }
     },
     emits:['change_left_pane'],
     methods:{

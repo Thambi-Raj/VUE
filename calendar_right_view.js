@@ -13,12 +13,20 @@ const calendar_component = {
          ]">
         <div v-for="dayIndex in 7" :key="dayIndex" 
              :class="{ 'date-container': true, 'disable': (rowIndex - 1) * 7 + dayIndex - first_day <= 0 || (rowIndex - 1) * 7 + dayIndex - first_day > total_days }" 
-             @click="page_change((rowIndex - 1) * 7 + dayIndex - first_day)" >
+             >
              <div id="sub-container">
              <span class="date">{{ (rowIndex - 1) * 7 + dayIndex - first_day }}</span>
-             <editor-controller v-if="month_preview[(rowIndex - 1) * 7 + dayIndex - first_day]"  :data="month_preview[(rowIndex - 1) * 7 + dayIndex - first_day] || {}"
-             :preview=false>
-             </editor-controller>
+             <preview-controller 
+             :year="year"
+             :month="month"
+             :favourite_data="total_favourite"
+             :data="month_preview[(rowIndex - 1) * 7 + dayIndex - first_day] || {}"
+             :date="(rowIndex - 1) * 7 + dayIndex - first_day"
+             :show_date="false"
+             :favourite_access="false"
+             @change_default_date="change_date"
+            >
+            </preview-controller>
              </div>
         </div>
     </div>
@@ -44,6 +52,9 @@ const calendar_component = {
         },
         month_preview:{
             type:Object
+        },
+        total_favourite:{
+            type:Object
         }
     },
     created(){
@@ -62,7 +73,7 @@ const calendar_component = {
             this.total_days = new Date(year,mon[1]+1,0).getDate();
             this.classFlag = this.first_day > 4 && this.total_days==31 ? 1 :0;
         },
-        page_change(date){
+        change_date(date){
             this.$emit('page_change',date);
         },
     }

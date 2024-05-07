@@ -7,7 +7,7 @@ var dropdown_component = {
             <span>{{title}}</span>
             <span class="material-symbols-outlined drop_down"> arrow_drop_down </span>
         </div>
-        <div id="dropdown_body" :class="active ? active !== id ? 'hide':'':''" >
+        <div id="dropdown_body" :class="active ? active !== id ? 'hide':'':''" ref="dropdown">
             <div class="dropdown-item" v-for="value in data" :class="{ selected : value === default_selected}" @click="change_value(value)">{{value}}</div>
         </div>
     </div>`,

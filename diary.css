@@ -32,12 +32,10 @@
     color: #fff;
     font-weight: bolder;
 }
-
-#content {
+#root>#content {
     height: calc(100% - 2.8vw);
     width: 100%;
 }
-
 .diary {
     color: #555;
     width: 100%;

@@ -3,10 +3,12 @@ const content_sidebar_controller = {
                    :dropdown_selected="dropdown_selected" 
                    :dropdown_value="dropdown_value" :month_array ="month" 
                    :last_day="lastDay"
+                   :total_favourite="total_favourite"
                    @year_change="change_year" 
                    @month_change="change_month"
                    @back_page="back"
                    @change_date="change_date"
+                   @add_favourite="add_favourite"
                    >
                    </contentSidebar-root>`,
          props:{
@@ -18,6 +20,9 @@ const content_sidebar_controller = {
             },
             month:{
                 type:Array
+            },
+            total_favourite:{
+              type:Object
             }
          },
          data(){
@@ -54,8 +59,11 @@ const content_sidebar_controller = {
                this.$emit('back',year,month,date);
           },
           change_date(date){
-            this.$emit('change_date',date);
+            this.$emit('change_default_date',date);
           },
+          add_favourite(date){
+            this.$emit('add_fav',date)
+          }
          }
 }
  

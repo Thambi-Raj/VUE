@@ -14,6 +14,9 @@ const calendar_controller = {
         },
         month_preview:{
             type:Object
+        },
+        total_favourite:{
+            type:Object
         }
     },
     methods:{

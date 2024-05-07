@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="editor.css">
     <link rel="stylesheet" href="simpleDropdown.css">
     <link rel="stylesheet" href="diary.css">
+    <link rel="stylesheet" href="/preview/preview.css">
     <script src="dropdown_view.js"></script>
     <script src="dropdown_controller.js"></script>
     <script src="button_view.js"></script>
@@ -39,6 +40,8 @@
     <script src="simpleDropdown_view.js"></script>
     <script src="simpleDropdown_controller.js"></script>
     <script src="diary_view.js"></script>
+    <script src="/preview/preview_controller.js"></script>
+    <script src="/preview/preview_view.js"></script>
 </head>
 <body>
     <div id="root">
@@ -50,11 +53,13 @@
         <div id="content">
             <div class="diary">
                   <diary-component :dropdown_selected="dropdown_selected" :data="data" :dropdown_value="dropdown_value"
-                    :content_view="content_view" :default_date="default_date" :favourite="favourite_data"
-                    :month_preview="month_preview" :favourite="favourite" @change_page="page_change"
+                    :content_view="content_view" :default_date="default_date" :favourite="is_favourite"
+                    :month_preview="month_preview"  @change_page="page_change"
+                    :total_favourite=total_favourite
                     @change_dropdown_head="change_dropdown_head" @change_dropdown_value="change_dropdown_value"
                     @change_mention="change_mention" @change_date="change_date" @save_json="save_json" @change_content_view= "change_content_view"
-                    @add_fav="add_fav" :result_data="result_data">
+                    @add_fav="add_fav" :result_data="result_data"
+                    >
                 </diary-component>
             </div>
         </div>
@@ -76,19 +81,15 @@
                 prev_date: 1,
                 data: [],
                 content_view: true,
-                favourite_data: this.check_favourite(),
+                is_favourite: this.check_favourite(),
                 month_preview: this.get_month_preview("year_2024", "Apr"),
                 result_data: {},
-                favourite: false
+                total_favourite: {},
             }
         },
-        mounted() {
+        created() {
             this.get_data();
-        },
-        watch: {
-            default_date(newVal, oldVal) {
-                this.prev_date = oldVal;
-            }
+            this.check_favourite();
         },
         emits: ["page_change", "change_dropdown_head", "change_dropdown_value", "change_mention", "save_content", "change_date", "add_fav"],
         methods: {
@@ -105,7 +106,7 @@
                     this.get_data();
                     this.month_preview = this.get_month_preview(this.dropdown_selected, this.dropdown_value)
                 }
-                this.favourite_data = this.check_favourite(this.default_date);
+                this.is_favourite = this.check_favourite(this.default_date);
                 ;
             },
             change_dropdown_value(data, bool) {
@@ -115,13 +116,13 @@
                 }
                 this.get_data();
                 this.month_preview = this.get_month_preview(this.dropdown_selected, this.dropdown_value)
-                this.favourite_data = this.check_favourite(this.default_date)
+                this.is_favourite = this.check_favourite(this.default_date)
             },
             page_change(date) {
                 this.content_view = !this.content_view;
                 this.default_date = date;
                 this.get_data();
-                this.favourite_data = this.check_favourite(date)
+                this.is_favourite = this.check_favourite(date)
             },
             print_hello(name) {
                 this.dropdown_selected = name;
@@ -131,9 +132,8 @@
             },
             change_date(date) {
                 this.default_date = date;
-                this.prev_date = date;
                 this.get_data();
-                this.favourite_data = this.check_favourite(date)
+                this.is_favourite = this.check_favourite(date)
             },
             construct_container_format(key) {
                 var data = JSON.parse(localStorage.getItem(key));
@@ -187,20 +187,23 @@
                     this.month_preview = this.get_month_preview(this.dropdown_selected, this.dropdown_value);
                 }, 2000);
             },
-        add_fav(date) {
+            add_fav(date) {
                 var check = this.check_favourite(date);
                 var get_local = !localStorage.getItem("Favourite") ? {} : JSON.parse(localStorage.getItem("Favourite"));
+                console.log(get_local);
+                console.log(check);
                 if (check) {
                     delete get_local[this.dropdown_selected][this.dropdown_value][date];
-                    this.favourite_data = false;
+                    this.is_favourite = false;
                 }
                 else {
-                    this.favourite_data = true;
+                    this.is_favourite = true;
                     get_local[this.$root.dropdown_selected] = get_local[this.$root.dropdown_selected] || {};
                     get_local[this.$root.dropdown_selected][this.$root.dropdown_value] = get_local[this.$root.dropdown_selected][this.$root.dropdown_value] || {};
                     get_local[this.dropdown_selected][this.dropdown_value][date] = true;
                 }
                 localStorage.setItem("Favourite", JSON.stringify(get_local));
+                this.total_favourite = {...get_local}
             },
             get_data() {
                 var get_local = !localStorage.getItem("Data") ? {} : JSON.parse(localStorage.getItem("Data"));
@@ -212,6 +215,7 @@
             },
             check_favourite(date) {
                 var get_local = !localStorage.getItem("Favourite") ? {} : JSON.parse(localStorage.getItem("Favourite"));
+                this.total_favourite = get_local ;
                 var condition = get_local
                     && get_local[this.dropdown_selected] &&
                     get_local[this.dropdown_selected][this.dropdown_value]
@@ -227,7 +231,6 @@
                 var condition = get_local
                     && get_local[year] &&
                     get_local[year][month]
-                console.log('month');
                 return condition ? condition : {};
             },
             change_content_view(){
@@ -254,6 +257,8 @@
     app.component('simple-dropdown-root', simple_dropdown_component);
     app.component('simple-dropdown-controller', simple_dropdown_controller);
     app.component('diary-component', diary_component);
+    app.component('preview-controller',preview_controller)
+    app.component('preview-root',preview_component)
     const vm = app.mount('.diary');
 </script>
 

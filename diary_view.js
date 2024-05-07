@@ -16,9 +16,10 @@ const diary_component = {
                 @drop ="  change_drop_head"
                 @drop1="change_drop_value"
                 @back="back_page"
-                @change_date="change_date"
-                @add_fav=ad_fav
+                @change_date="change_default_date"
+                @add_fav=add_favourite
                 :data="month_preview"
+                :total_favourite="total_favourite"
                 >
             </contentSidebar-controller>
         </div>
@@ -28,27 +29,23 @@ const diary_component = {
                 :year="dropdown_selected" 
                 :default_date="default_date"
                 :month_preview="month_preview"
-                @change_page="change_page">
+                @change_page="change_page"
+                :total_favourite="total_favourite">
         </calendar-controller>
         <editor-controller v-if= "!content_view"  :data="result_data" :favourite = "favourite"
              :default_date="default_date"
-             @save_content="save_json"
-             @add_fav = ad_fav
+             @save_json_content="save_json"
              :preview="true">
         </editor-controller>
         <container-controller  v-if ="content_view && result_template== 'button' "
                 :name="dropdown_selected"
                 :span="dropdown_selected"
                 :container_data="data"
+                :total_favourite="total_favourite"
                 @change_left_pane="change_left_pane">
         </container-controller>
         </div>
         `,
-    watch:{
-        content_view(){
-            console.log(this.content_view);
-        }
-    },
     props: {
         dropdown_value: {
             type: String
@@ -72,6 +69,9 @@ const diary_component = {
             type:Boolean
         },
         month_preview:{
+            type:Object
+        },
+        total_favourite:{
             type:Object
         }
     },
@@ -139,21 +139,15 @@ const diary_component = {
         reset_active(data) {
             this.active = data;
         },
-        change_date(date) {
+        change_default_date(date) {
             this.$emit('change_date', date);
         },
-        save_json(json,date) {
-            if(json.tagName){
-                // console.log('yes');
-            }
-            else{
-                this.$emit('save_json', json,date);
-            }
+        save_json(json,date) {   
+         this.$emit('save_json', json,date);
         },
-        ad_fav(date){
-            if(date){
-                this.$emit('add_fav',date);
-            }
+        add_favourite(date){
+            console.log(date);
+            this.$emit('add_fav',date);
         },
         change_left_pane(year,month,date){
             date = parseInt(date);

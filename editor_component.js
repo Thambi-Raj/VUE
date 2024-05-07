@@ -25,7 +25,7 @@ const editor_component = {
                    <simple-dropdown-controller width="small_width" :default_val="back_ground" :data="texture" :name="'background'" :tag="'image'" @change_background="change_background"></simple-dropdown-controller>
                 
                    </div> 
-                 <div id="texture-field" ref="back_ground" :class="className">
+                 <div id="texture-field" ref="back_ground" >
                     <div id="word-pad" contenteditable="true" ref="content" spellcheck="false">
                         <div class="line-content">
                         &#x200B; 
@@ -68,12 +68,9 @@ const editor_component = {
                 'i': 'italic',
                 'u': 'underline',
             },
-            empty_select: -1,
             default_size: 15,
-            images_url:'',
+            images_url:[],
             back_ground:'',
-            index:0,
-            className:'add_transition'
         };
     },
     props: {
@@ -113,10 +110,6 @@ const editor_component = {
          image(){
             this.convert_url_to_image(this.image);
          },
-         default_date(){
-            this.className='';
-            this.className='add_transition'
-         }
     },
     methods: {
         editor_functionality(){

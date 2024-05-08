@@ -17,7 +17,7 @@ const editor_component = {
                    </div>
                    <div class="file">
                    <label for="Color">Color &nbsp;&nbsp;</label>
-                   <input type="color" id="Color" @change="change_text_format($event.target.value, 'forecolor', 'font')" :value="active_state.color">
+                   <input type="color" id="Color" @change="change_text_format($event.target.value, 'forecolor', 'font')" :value="active_state.color" ref="color_input">
                    </div>
                    <simple-dropdown-controller width="font_size_width" :default_val="active_state['font-size']" :data="font_size" :name="'FontSize'" :tag="'-'" @change_format="change_text_format"></simple-dropdown-controller>
                    <simple-dropdown-controller width="normal_width":default_val="active_state['font-family']" :data="font_family" :name="'FontName'" :tag="'-'" @change_format="change_text_format"></simple-dropdown-controller>
@@ -31,7 +31,7 @@ const editor_component = {
                         &#x200B; 
                         </div>
                     </div>
-                    <div id="drag_container" ref="drag" @mousedown="add_mousemove_event">
+                    <div id="drag_container" ref="drag" @mousedown="start_drag_event">
                     
                     </div>
                     <div id="imageContainer" ref="image" class="image_container">
@@ -68,51 +68,52 @@ const editor_component = {
                 'i': 'italic',
                 'u': 'underline',
             },
-            default_size: 15,
-            images_url:[],
-            back_ground:'',
+            empty_select: -1,
+            images_url: '',
+            back_ground: '',
+            index: 0,
         };
     },
     props: {
-        data:{
-            type:Object
+        data: {
+            type: Object
         },
-        template:{
-            type:String
+        template: {
+            type: String
         },
-        image:{
-            type:Array
+        image: {
+            type: Array
         },
-        global_props:{
-            type:Object
+        global_props: {
+            type: Object
         },
-        favourite:{
-            type:Boolean,
+        favourite: {
+            type: Boolean,
         },
-        preview:{
-            type:Boolean
+        preview: {
+            type: Boolean
         },
-        default_date:{
-            type:Number,
-            default:0
+        default_date: {
+            type: Number,
+            default: 0
         }
     },
     mounted() {
-         this.editor_functionality();
-         this.check_for_draft();
-         this.check_for_preview();
-         this.convert_url_to_image(this.image);
+        this.editor_functionality();
+        this.check_for_draft();
+        this.check_for_preview();
+        this.convert_url_to_image(this.image);
     },
-    watch:{
-        data(){
+    watch: {
+        data() {
             this.check_for_draft();
         },
-         image(){
+        image() {
             this.convert_url_to_image(this.image);
-         },
+        },
     },
     methods: {
-        editor_functionality(){
+        editor_functionality() {
             var editor = this.$refs.content;
             editor.focus();
             editor.addEventListener('click', (e) => {
@@ -123,23 +124,16 @@ const editor_component = {
                     var last_child = this.$refs.content.childNodes[this.$refs.content.childNodes.length - 1];
                     this.traverse_element(last_child, false);
                 }
-             })
+            })
             editor.addEventListener('keydown', (e) => {
                 if (this.$refs.content.innerText.length <= 1 && e.key == 'Backspace') {
-                    this.$refs.content.innerHTML = '';
-                    this.remove_active();
-                    this.$refs.content.innerHTML += '<div class="line-content"> &#x200B;</div>';
+                    this.maintain_first_div();
                     e.preventDefault();
                 }
                 else if (e.key == 'Backspace') {
-                    var sel = document.getSelection();
-                    if (sel.anchorNode.parentNode.textContent.length == 1 && sel.anchorNode.parentNode.tagName.toLowerCase() == 'span') {
-                        var spanParent = sel.anchorNode.parentNode;
-                        spanParent.parentNode.removeChild(spanParent);
-                        e.preventDefault();
-                    }
+                    this.delete_empty_styles_tag(e);
                 }
-            });
+            })
             editor.addEventListener('keyup', (e) => {
                 if (this.empty_select == 0) {
                     var fontTags = document.querySelectorAll('font');
@@ -149,7 +143,7 @@ const editor_component = {
                         attr.forEach((e, i) => {
                             var span = document.createElement('span');
                             if (e == 'size') {
-                                span.style.fontSize = this.active_state['font-size'] ;
+                                span.style.fontSize = this.active_state['font-size'];
                             } else if (e == 'face') {
                                 span.style.fontFamily = get_font_tag.getAttribute('face');
                             } else if (e == 'color') {
@@ -178,28 +172,41 @@ const editor_component = {
                         get_font_tag.parentNode.insertBefore(prev_span, get_font_tag);
                         get_font_tag.parentNode.removeChild(get_font_tag);
                     });
-    
                 }
-                if (e.key == 'Backspace') {
-                    var sel = document.getSelection();
-                    this.remove_active();
-                    if (!(sel.anchorNode.parentElement.tagName.toLowerCase() == 'div')) {
-                        var h = sel.anchorNode.parentElement;
-                        while (h && h.tagName.toLowerCase() != 'div') {
-                            this.update_toolbar_button(h);
-                            h = h.parentElement;
-                        }
-                    }
-                }
+                this.update_cursor_position_toolbar();
                 this.empty_select = -1
-                this.default_size = 15; 
-                this.save_content(this.default_date);
+                 this.save_content(this.default_date);
             })
         },
-        add_mousemove_event(ev) {
-            var prev =  ev.screenX;
+        maintain_first_div() {
+            this.$refs.content.innerHTML = '';
+            this.$refs.content.innerHTML += '<div class="line-content"> &#x200B;</div>';
+            this.reset_Active();
+        },
+        delete_empty_styles_tag(event) {
+            var sel = document.getSelection();
+            if (sel.anchorNode.parentNode.textContent.length == 1 && sel.anchorNode.parentNode.tagName != 'DIV') {
+                var spanParent = sel.anchorNode.parentNode;
+                spanParent.parentNode.removeChild(spanParent);
+                event.preventDefault();
+            }
+        },
+        update_cursor_position_toolbar() {
+            var sel = document.getSelection();
+            this.reset_Active();
+            if (sel.anchorNode.tagName) {
+                this.update_toolbar_button(sel.anchorNode);
+            }
+            var h = sel.anchorNode.parentElement;
+            while (h && h.tagName.toLowerCase() != 'div') {
+                this.update_toolbar_button(h);
+                h = h.parentElement;
+            }
+        },
+        start_drag_event(ev) {
+            var prev = ev.screenX;
             const mousemoveHandler = (e) => {
-               prev = this.drag_start(prev, e.clientX,e.currentTarget);
+                prev = this.drag_move(prev, e.clientX, e.currentTarget);
             };
             const mouseupHandler = () => {
                 this.$refs.editor_width.removeEventListener('mousemove', mousemoveHandler);
@@ -208,41 +215,43 @@ const editor_component = {
             this.$refs.editor_width.addEventListener('mousemove', mousemoveHandler);
             this.$refs.editor_width.addEventListener('mouseup', mouseupHandler);
         },
-        drag_start(prev,result_x,target) {
-                const content = this.$refs.content;
-                const image = this.$refs.image;
-                const background = this.$refs.back_ground.getBoundingClientRect();
-                if(prev>result_x){
-                     result_x+=(2/100)*background.width;
-                }
-                else{
-                    result_x-=(2/100)*background.width;
-                }
-                var parent_width  = target.clientWidth;
-                if(result_x < parent_width){
-                image.style.width = background.width - (result_x - background.x )+"px";
-                content.style.width =(result_x - background.x )+"px";
+        drag_move(prev, result_x, target) {
+            const background = this.$refs.back_ground.getBoundingClientRect();
+            if (prev > result_x) {
+                result_x += (2 / 100) * background.width;
+            }
+            else {
+                result_x -= (2 / 100) * background.width;
+            }
+            this.minimum_width_imageContainer(result_x,target,background);
+            return result_x;
+        },
+        minimum_width_imageContainer(result_x,target,background) {
+            var parent_width = target.clientWidth;
+            const content = this.$refs.content;
+            const image = this.$refs.image;
+            if (result_x < parent_width) {
+                image.style.width = background.width - (result_x - background.x) + "px";
+                content.style.width = (result_x - background.x) + "px";
                 var image_container_width = image.clientWidth;
                 this.set_image_height(image_container_width);
-                console.log('aaa');
-                }
-                return result_x;
-        },              
-        set_image_height(img_width){
-            const aspectRatio = 16 / 14 ;
-            const height = img_width / aspectRatio;
-            var img_container = this.$refs.image.children;
-            for(var i=0;i<img_container.length;i++){
-                  img_container[i].style.height = height+"px";              
             }
         },
-        check_for_preview(){
+        set_image_height(img_width) {
+            const aspectRatio = 16 / 14;
+            const height = img_width / aspectRatio;
+            var img_container = this.$refs.image.children;
+            for (var i = 0; i < img_container.length; i++) {
+                img_container[i].style.height = height + "px";
+            }
+        },
+        check_for_preview() {
             if (!this.preview) {
                 this.$refs.content.setAttribute('contentEditable', 'false');
                 this.$refs.editor_width.classList.add('preview')
             }
         },
-         get_current_element(element) {
+        get_current_element(element) {
             if (!(element.getAttribute && element.getAttribute('class') == 'line-content')) {
                 this.check_styles_in_element(element)
             }
@@ -253,7 +262,7 @@ const editor_component = {
                     this.traverse_element(element, true)
                 }
                 else if (sel.focusNode.parentElement == element) {
-                    this.remove_active();
+                    this.reset_Active();
                 }
                 else {
                     this.traverse_element(element, false)
@@ -262,23 +271,23 @@ const editor_component = {
         },
         check_styles_in_element(element) {
             var h = element;
-            this.remove_active();
+            this.reset_Active();
             while (h.tagName.toLowerCase() !== 'div') {
                 this.update_toolbar_button(h);
                 h = h.parentElement;
             }
-        },      
-        update_toolbar_button(element){
-                var style = element.style;
-                this.set_tag_based_style(element);
-                this.set_color(style);
-                this.set_fontsize(style);
-                this.set_fontname(style);
-                this.set_underline(style);
-                this.set_bold(style);
-                this.set_italic(style);
-        },            
-        set_tag_based_style(h){
+        },
+        update_toolbar_button(element) {
+            var style = element.style;
+            this.set_tag_based_style(element);
+            this.set_color(style);
+            this.set_fontsize(style);
+            this.set_fontname(style);
+            this.set_underline(style);
+            this.set_bold(style);
+            this.set_italic(style);
+        },
+        set_tag_based_style(h) {
             if (h.tagName.toLowerCase() !== 'span') {
                 var style_name = this.start_line[h.tagName.toLowerCase()];
                 this.active_state[style_name] = true;
@@ -294,7 +303,7 @@ const editor_component = {
                 this.active_state['font-size'] = style.fontSize;
             }
         },
-        
+
         set_fontname(style) {
             if (style.fontFamily) {
                 this.active_state['font-family'] = style.fontFamily;
@@ -310,7 +319,6 @@ const editor_component = {
                 this.active_state['bold'] = true;
             }
         },
-        
         set_italic(style) {
             if (style.fontStyle === 'italic') {
                 this.active_state['italic'] = true;
@@ -318,65 +326,79 @@ const editor_component = {
         },
         traverse_element(element, forward) {
             var child = element.childNodes[forward ? 0 : element.childNodes.length - 1];
-            this.remove_active();
+            this.reset_Active();
             while (child && child.tagName && child.tagName.toLowerCase() != 'br') {
                 this.update_toolbar_button(child);
                 child = child.childNodes[forward ? 0 : child.childNodes.length - 1];
             }
         },
-        change_text_format(format, value, span) {
-            if (span) {
+        change_text_format(format, value, font_tag) {
+            if (font_tag) {
                 document.execCommand(value, false, format.replace('px',''));
-                if (value == 'forecolor') {
-                    var val = document.querySelector('.file>#Color').value
-                    this.active_state['color'] = val;
-                    this.fontTag_to_spanTag('color');
-                }
-                else if (value == 'FontSize') {
-                    this.active_state['font-size'] = format;
-                    this.fontTag_to_spanTag('size', format);
-                }
-                else {
-                    this.active_state['font-family'] = format;
-                    this.fontTag_to_spanTag('face');
-                }
+                this.fontTag_contents(format,value);
             }
             else {
+                document.execCommand(format, false, null);
                 if (value == undefined) {
-                    document.execCommand(format, false, null);
                     this.highlight_button(format)
                 }
-                else if (value.startsWith('format')) {
-                    document.execCommand(format, false, null);
-                }
-                else {
-                    document.execCommand(value, false, format)
-                }
             }
-            this.save_content(this.default_date);
+             this.save_content(this.default_date);
             this.$refs.content.focus();
+        },
+        fontTag_contents(format,value){
+            this.check_fontfamily_Attribute(format,value);
+            this.check_fontsize_Attribute(format,value);
+            this.check_forecolor_attribute(format,value);
+        },
+        check_forecolor_attribute(format,value){
+            if (value == 'forecolor') {
+                this.active_state['color'] = this.$refs.color_input.value;
+                this.fontTag_to_spanTag('color');
+            }
+        },
+        check_fontsize_Attribute(format,value){
+            if (value == 'FontSize') {
+                this.active_state['font-size'] = format;
+                this.fontTag_to_spanTag('size', format);
+            }
+        },
+        check_fontfamily_Attribute(format,value){
+            if(value=='FontName'){
+                this.active_state['font-family'] = format;
+                this.fontTag_to_spanTag('face');
+            }
         },
         fontTag_to_spanTag(params, value) {
             this.empty_select = document.querySelectorAll("font").length;
-            var ref=this;
+            var ref = this;
             document.querySelectorAll("font").forEach(function (font) {
                 var span = document.createElement("span");
                 var attr = font.getAttribute(params);
-                if (params == 'color') {
-                    span.style.color = attr;
-                }
-                else if (params == 'size') {
-                    span.style.fontSize = ref.active_state['font-size'] ;
-                }
-                else {
-                    span.style.fontFamily = attr;
-                }
+                ref.set_color_in_span(params,attr,span);
+                ref.set_size_in_span(params,span);
+                ref.set_family_in_span(params,attr,span);
                 while (font.firstChild) {
                     span.appendChild(font.firstChild);
                 }
                 font.parentNode.insertBefore(span, font);
                 font.parentNode.removeChild(font);
             });
+        },
+        set_color_in_span(params,attr,span){
+            if (params == 'color') {
+                span.style.color = attr;
+            }
+        },
+        set_size_in_span(params,span){
+            if (params == 'size') {
+                span.style.fontSize = this.active_state['font-size'];
+            }
+        },
+        set_family_in_span(params,attr,span){
+            if(params=='face'){
+                 span.style.fontFamily = attr;
+            }
         },
         highlight_button(data) {
             this.active_state[data] = !this.active_state[data];
@@ -388,7 +410,7 @@ const editor_component = {
                 return hex.length === 1 ? "0" + hex : hex;
             }).join('');
         },
-        remove_active() {
+        reset_Active() {
             this.active_state = {
                 'bold': false,
                 'italic': false,
@@ -401,55 +423,44 @@ const editor_component = {
                 'background': 'texture31.webp'
             }
         },
-        check_for_draft(){
-                this.remove_active();
-                this.template !='' ?   this.$refs.content.innerHTML = this.template :  this.$refs.content.innerHTML= '<div class="line-content"> &#x200B;</div>'   
-                this.set_global_props(this.global_props);
-                !this.$refs.full_container.classList.contains('hide')? this.$refs.full_container.classList.add('hide'):'';
-                if(this.images_url.length==0){
-                    this.$refs.image.classList.add('hide');
-                    this.$refs.content.classList.add('full-width');
-                    this.$refs.drag.classList.add('hide')
-                }
-                else{
-                    this.$refs.image.classList.contains('hide') ?(  this.$refs.image.classList.remove('hide'),
-                                                                    this.$refs.content.classList.remove('full-width'), this.$refs.drag.classList.remove('hide')):'';
-                }
-        },
-        // check_favourite(){
-        //     if(this.preview){
-        //         if(this.favourite){
-        //             this.$refs.icon.classList.add('clicked');
-        //         }
-        //         else if(this.$refs.icon.classList.contains('clicked')){
-        //             this.$refs.icon.classList.remove('clicked');
-        //         }
-        //     }
-
-        // },
-        convert_url_to_image(result){
-            const image_container = this.$refs.image;
-            image_container.innerHTML='';
-            this.images_url=[];
-            if(result.length==0){
+        check_for_draft() {
+            this.reset_Active();
+            this.template != '' ? this.$refs.content.innerHTML = this.template : this.$refs.content.innerHTML = '<div class="line-content"> &#x200B;</div>'
+            this.set_global_props(this.global_props);
+            !this.$refs.full_container.classList.contains('hide') ? this.$refs.full_container.classList.add('hide') : '';
+            if (this.images_url.length == 0) {
                 this.$refs.image.classList.add('hide');
                 this.$refs.content.classList.add('full-width');
                 this.$refs.drag.classList.add('hide')
             }
-            else{
-                this.$refs.image.classList.contains('hide') ?(  this.$refs.image.classList.remove('hide'),
-                        this.$refs.content.classList.remove('full-width'),this.$refs.drag.classList.remove('hide')):'';
+            else {
+                this.$refs.image.classList.contains('hide') ? (this.$refs.image.classList.remove('hide'),
+                    this.$refs.content.classList.remove('full-width'), this.$refs.drag.classList.remove('hide')) : '';
+            }
+        },
+        convert_url_to_image(result) {
+            const image_container = this.$refs.image;
+            image_container.innerHTML = '';
+            this.images_url = [];
+            if (result.length == 0) {
+                this.$refs.image.classList.add('hide');
+                this.$refs.content.classList.add('full-width');
+                this.$refs.drag.classList.add('hide')
+            }
+            else {
+                this.$refs.image.classList.contains('hide') ? (this.$refs.image.classList.remove('hide'),
+                    this.$refs.content.classList.remove('full-width'), this.$refs.drag.classList.remove('hide')) : '';
             }
             for (let i = 0; i < result.length; i++) {
                 const img = document.createElement('img');
                 img.setAttribute('src', result[i]);
-                var span ='<span class="material-symbols-outlined">delete</span>'
+                var span = '<span class="material-symbols-outlined">delete</span>'
                 var div = document.createElement('div');
                 div.appendChild(img.cloneNode(true));
-                div.innerHTML+=span;
+                div.innerHTML += span;
                 this.set_img_height(div);
                 image_container.appendChild(div);
-                this.add_event_listener(div,this.$refs.show_photo,i);
+                this.add_event_listener(div, this.$refs.show_photo, i);
                 (div => {
                     div.addEventListener('mouseover', () => {
                         div.children[1].classList.add('show');
@@ -460,7 +471,7 @@ const editor_component = {
                         this.remove_image(div);
                     });
                 })(div);
-                
+
                 (div => {
                     div.addEventListener('mouseout', () => {
                         div.children[1].classList.remove('show');
@@ -469,76 +480,76 @@ const editor_component = {
                 this.images_url.push(result[i])
             }
 
-          
+
         },
-        set_img_height(img){
+        set_img_height(img) {
             var img_width = this.$refs.image.clientWidth;
             const aspectRatio = 16 / 14;
             const height = img_width / aspectRatio;
-            img.style.height = height+"px"; 
+            img.style.height = height + "px";
         },
-        add_event_listener(div,parent_container,index){
-            var ref= this;
-            div.addEventListener('click',(e)=>{
-              if(e.srcElement.tagName !='SPAN'){
-                    ref.$refs.show_photo.innerHTML='';
+        add_event_listener(div, parent_container, index) {
+            var ref = this;
+            div.addEventListener('click', (e) => {
+                if (e.srcElement.tagName != 'SPAN') {
+                    ref.$refs.show_photo.innerHTML = '';
                     const img = document.createElement('img');
                     img.setAttribute('src', ref.images_url[index]);
                     var photo_div = ref.add_image_in_full_screen(img);
-                    photo_div.innerHTML+=`<span class="material-symbols-outlined">close</span>`;
+                    photo_div.innerHTML += `<span class="material-symbols-outlined">close</span>`;
                     ref.$refs.show_photo.appendChild(photo_div);
                     ref.$refs.full_container.classList.remove('hide');
-              }
+                }
             })
-           
+
         },
-        add_image_in_full_screen(img){
-             var div = document.createElement('div');
-             div.appendChild(img);
-             return div;
+        add_image_in_full_screen(img) {
+            var div = document.createElement('div');
+            div.appendChild(img);
+            return div;
         },
         remove_image(div) {
             var parent = div.parentElement;
             var index = Array.from(parent.children).indexOf(div);
             parent.children[index].remove();
-            this.images_url.splice(index, 1);   
-            this.save_content(this.default_date);
-            if(this.images_url.length==0){
+            this.images_url.splice(index, 1);
+             this.save_content(this.default_date);
+            if (this.images_url.length == 0) {
                 this.$refs.image.classList.add('hide');
                 this.$refs.content.classList.add('full-width');
                 this.$refs.drag.classList.add('hide');
             }
         },
-        set_global_props(props){
-            if(props["background_image"]){
+        set_global_props(props) {
+            if (props["background_image"]) {
                 this.$refs.back_ground.style.backgroundImage = props["background_image"];
-                this.back_ground =  props["background_image"].replace("url(\"", "");
+                this.back_ground = props["background_image"].replace("url(\"", "");
                 this.back_ground = this.back_ground.replace("\")", "");
             }
-            else{
+            else {
                 this.$refs.back_ground.style.backgroundImage = `url(${"texture31.webp"})`
-                this.back_ground = "texture31.webp" 
+                this.back_ground = "texture31.webp"
             }
         },
-        change_background(data){
+        change_background(data) {
             this.$refs.back_ground.style.backgroundImage = `url(${data})`;
             this.background = data;
-            this.save_content(this.default_date);
+             this.save_content(this.default_date);
         },
         insert_photo(event) {
             const file = event.target.files[0];
             const reader = new FileReader();
-            const ref = this; 
-            if(this.images_url.length==0){
-                this.$refs.image.classList.contains('hide') ?(  this.$refs.image.classList.remove('hide'),
-                this.$refs.content.classList.remove('full-width'),this.$refs.drag.classList.remove('hide')):'';
+            const ref = this;
+            if (this.images_url.length == 0) {
+                this.$refs.image.classList.contains('hide') ? (this.$refs.image.classList.remove('hide'),
+                    this.$refs.content.classList.remove('full-width'), this.$refs.drag.classList.remove('hide')) : '';
             }
             reader.onload = function () {
                 const img = document.createElement('img');
                 img.setAttribute('src', reader.result);
-        
+
                 const div = document.createElement('div');
-        
+
                 const deleteSpan = document.createElement('span');
                 deleteSpan.className = 'material-symbols-outlined';
                 deleteSpan.textContent = 'delete';
@@ -564,19 +575,19 @@ const editor_component = {
             reader.readAsDataURL(file);
         },
         storeDataURL(dataURL) {
-            this.images_url.push(dataURL);
-            this.save_content(this.default_date);
+             this.images_url.push(dataURL);
+             this.save_content(this.default_date);
         },
-        save_content(date){
-          var html =this.$refs.content; 
-          var back_ground = this.$refs.back_ground.style.backgroundImage;
-          this.$emit('save_content' , html , this.images_url,back_ground,date);
+        save_content(date) {
+            var html = this.$refs.content;
+            var back_ground = this.$refs.back_ground.style.backgroundImage;
+            this.$emit('save_content', html, this.images_url, back_ground, date);
         },
-        add_favourite(){
-            this.$emit('add_fav','op')
+        add_favourite() {
+            this.$emit('add_fav', 'op')
         },
-        close_container(event){
-            if(event.target.tagName=='SPAN'){
+        close_container(event) {
+            if (event.target.tagName == 'SPAN') {
                 this.$refs.full_container.classList.add('hide');
             }
         }

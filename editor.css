@@ -145,8 +145,11 @@ font-family: sans-serif;
 color: #666;
 overflow: auto;
 overflow-x: hidden;
-padding: 1vw;
+padding: 1vw 0vw;
 line-height: 2vw;
+}
+.editor-root>#texture-field>#word-pad>.line-content{
+    padding:0vw 1vw;
 }
 .editor-root>#texture-field>.full-width{
     width: 100% !important;

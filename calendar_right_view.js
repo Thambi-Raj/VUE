@@ -40,7 +40,6 @@ const calendar_component = {
             first_day: 1,
             total_days: 0,
             classFlag: 0,
-            id_map:this.$root.$data.id_map
         }
     },
     props: {
@@ -66,7 +65,7 @@ const calendar_component = {
     },
     methods: {
         set_config_data() {
-            var year = this.id_map[this.year];
+            var year = this.year.split('_')[1];
             var mon = this.month.toUpperCase() == 'JAN' ? [year - 1, 12] : [year,this.months.indexOf(this.month.toUpperCase())];
             var day = new Date(mon[0],mon[1], 0);  //new Date(this.year,0, 0);
             this.first_day = day.getDay() == 6 ? 0 : day.getDay() + 1;

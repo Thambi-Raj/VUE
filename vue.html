@@ -35,7 +35,7 @@
     <script src="container_controller.js"></script>
     <script src="content_sidebar_view.js"></script>
     <script src="content_sidebar_controller.js"></script>
-    <script src="editor_component.js"></script>
+    <script src="editor_view.js"></script>
     <script src="editor_controller.js"></script>
     <script src="simpleDropdown_view.js"></script>
     <script src="simpleDropdown_controller.js"></script>
@@ -52,13 +52,24 @@
         </div>
         <div id="content">
             <div class="diary">
-                  <diary-component :dropdown_selected="dropdown_selected" :data="data" :dropdown_value="dropdown_value"
-                    :content_view="content_view" :default_date="default_date" :favourite="is_favourite"
-                    :month_preview="month_preview"  @change_page="page_change"
+                  <diary-component 
+                    :dropdown_selected="dropdown_selected" 
+                    :dropdown_value="dropdown_value"
+                    :default_date="default_date" 
+                    :editor_view="editor_view"
+                    :month_preview="month_preview"  
                     :total_favourite=total_favourite
-                    @change_dropdown_head="change_dropdown_head" @change_dropdown_value="change_dropdown_value"
-                    @change_mention="change_mention" @change_date="change_date" @save_json="save_json" @change_content_view= "change_content_view"
-                    @add_fav="add_fav" :result_data="result_data"
+                    :default_date_data="default_date_data"
+                    :container_format_data="container_format_data"
+                    @change_page="page_change"
+                    @change_dropdown_head="change_dropdown_head" 
+                    @change_dropdown_value="change_dropdown_value"
+                    @change_date="change_date"
+                    @save_json="save_json"
+                    @change_editor_view= "change_editor_view"
+                    @add_fav="add_fav" 
+                    @get_favourite_data="construct_container_format('Favourite')"
+                    @update_month_preview ="update_month_preview"
                     >
                 </diary-component>
             </div>
@@ -74,16 +85,10 @@
                 dropdown_selected: 'year_2024',
                 dropdown_value: 'Apr',
                 default_date: 1,
-                id_map: {
-                    'year_2024': 2024,
-                    'year_2023': 2023
-                },
-                prev_date: 1,
-                data: [],
-                content_view: true,
-                is_favourite: this.check_favourite(),
+                container_format_data: [],
+                editor_view: false,
                 month_preview: this.get_month_preview("year_2024", "Apr"),
-                result_data: {},
+                default_date_data: {},
                 total_favourite: {},
             }
         },
@@ -91,49 +96,27 @@
             this.get_data();
             this.check_favourite();
         },
-        emits: ["page_change", "change_dropdown_head", "change_dropdown_value", "change_mention", "save_content", "change_date", "add_fav"],
+        emits: ["page_change", "change_dropdown_head", "change_dropdown_value", "change_mention", "save_content", "change_date", "add_fav","get_favourite_data"],
         methods: {
             change_dropdown_head(data, bool) {
                 this.dropdown_selected = data;
-                if (bool) {
-                    this.content_view = true;
-                }
-                this.data = data == 'favorite'
-                    ? this.construct_container_format("Favourite") : data == 'bookmarks'
-                        ? this.bookmark_data : [];
-                this.construct_container_format("Favourite");
-                if (data.startsWith('year')) {
-                    this.get_data();
-                    this.month_preview = this.get_month_preview(this.dropdown_selected, this.dropdown_value)
-                }
-                this.is_favourite = this.check_favourite(this.default_date);
-                ;
+                this.get_data();
             },
             change_dropdown_value(data, bool) {
                 this.dropdown_value = data;
-                if (bool) {
-                    this.content_view = true;
-                }
                 this.get_data();
-                this.month_preview = this.get_month_preview(this.dropdown_selected, this.dropdown_value)
-                this.is_favourite = this.check_favourite(this.default_date)
             },
             page_change(date) {
-                this.content_view = !this.content_view;
+                this.editor_view = !this.editor_view;
                 this.default_date = date;
                 this.get_data();
-                this.is_favourite = this.check_favourite(date)
-            },
-            print_hello(name) {
-                this.dropdown_selected = name;
-            },
-            change_mention(name) {
-                this.data = [{ 'FEB 2024': [1, 2, 5] }];
             },
             change_date(date) {
                 this.default_date = date;
                 this.get_data();
-                this.is_favourite = this.check_favourite(date)
+            },
+            update_month_preview(){
+                this.month_preview = this.get_month_preview(this.dropdown_selected, this.dropdown_value)
             },
             construct_container_format(key) {
                 var data = JSON.parse(localStorage.getItem(key));
@@ -146,7 +129,7 @@
                         for (var j = 0; j < res.length; j++) {
                             var get_date = Object.keys(data[keys[i]][res[j]]).sort();
                             if (get_date.length >= 1) {
-                                var s = res[j].toLocaleUpperCase() + '_' + this.id_map[keys[i]];
+                                var s = res[j].toLocaleUpperCase() +'_'+keys[i].split('_')[1];
                                 var obj = {};
                                 obj[s] = get_date;
                                 result.push(obj);
@@ -154,7 +137,7 @@
                         }
                     }
                 }
-                return result;
+                this.container_format_data =result;
             },
             month_based_sort(array) {
                 var month = { "Jan": 0, "Feb": 1, "Mar": 2, "Apr": 3, "May": 4, "Jun": 5, "Jul": 6, "Aug": 7, "Sep": 8, "Oct": 9, "Nov": 10, "Dec": 11 };
@@ -178,26 +161,23 @@
                 return result;
             },
             save_json(json, date) {
+                var ref = this;
                 var get_local = !localStorage.getItem("Data") ? {} : JSON.parse(localStorage.getItem("Data"));
                 get_local[this.dropdown_selected] = get_local[this.dropdown_selected] || {};
                 get_local[this.dropdown_selected][this.dropdown_value] = get_local[this.dropdown_selected][this.dropdown_value] || {};
                 get_local[this.dropdown_selected][this.dropdown_value][date] = { ...json };
                 setTimeout(() => {
                     localStorage.setItem("Data", JSON.stringify(get_local));
-                    this.month_preview = this.get_month_preview(this.dropdown_selected, this.dropdown_value);
-                }, 2000);
+                    ref.update_month_preview()
+                }, 500);
             },
             add_fav(date) {
                 var check = this.check_favourite(date);
                 var get_local = !localStorage.getItem("Favourite") ? {} : JSON.parse(localStorage.getItem("Favourite"));
-                console.log(get_local);
-                console.log(check);
                 if (check) {
                     delete get_local[this.dropdown_selected][this.dropdown_value][date];
-                    this.is_favourite = false;
                 }
                 else {
-                    this.is_favourite = true;
                     get_local[this.$root.dropdown_selected] = get_local[this.$root.dropdown_selected] || {};
                     get_local[this.$root.dropdown_selected][this.$root.dropdown_value] = get_local[this.$root.dropdown_selected][this.$root.dropdown_value] || {};
                     get_local[this.dropdown_selected][this.dropdown_value][date] = true;
@@ -211,7 +191,7 @@
                     && get_local[this.dropdown_selected] &&
                     get_local[this.dropdown_selected][this.dropdown_value]
                     && get_local[this.dropdown_selected][this.dropdown_value][this.default_date];
-                this.result_data = condition ? condition : {};
+                this.default_date_data = condition ? condition : {};
             },
             check_favourite(date) {
                 var get_local = !localStorage.getItem("Favourite") ? {} : JSON.parse(localStorage.getItem("Favourite"));
@@ -224,7 +204,6 @@
                     return true;
                 }
                 return false;
-
             },
             get_month_preview(year, month) {
                 var get_local = !localStorage.getItem("Data") ? {} : JSON.parse(localStorage.getItem("Data"));
@@ -233,8 +212,8 @@
                     get_local[year][month]
                 return condition ? condition : {};
             },
-            change_content_view(){
-                this.content_view = !this.content_view;
+            change_editor_view(){
+                this.editor_view = !this.editor_view;
             }
         },
     })

@@ -40,7 +40,7 @@ const sidebar_component = {
     props: {
         dropdown_selected: String,
         dropdown_value: String,
-        month_array:Array
+        month_array:Array,
     },
     emits:['change_dropdown_head','change_dropdown_value','change_mention'],
     methods: {

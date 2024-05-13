@@ -3,7 +3,6 @@ const editor_controller = {
                 :data      = "data"
                 :image     = "image"  
                 :template  = "template"
-                :favourite = "favourite"
                 :global_props = "global_props"
                 @save_content="save_content"
                 @add_fav="add_fav"
@@ -13,10 +12,6 @@ const editor_controller = {
     props:{
         data:{
             type:Object
-        },
-        favourite:{
-            type:Boolean,
-            default:false
         },
         preview:{
             type:Boolean,
@@ -81,7 +76,7 @@ const editor_controller = {
                         }
                     }
                 }
-                var child = html.childNodes;
+                var child = html.children;
                 recursion(child, this.editor_elements, {}, this.closed_element_index);
             },
             format_for_json() {
@@ -98,10 +93,7 @@ const editor_controller = {
                 var close = 0;
                 for (var i = 0; i < content.length; i++) {
                     if (content[i].tagName && content[i].tagName.toLowerCase() == 'div') {
-                        this.check_for_lineStyle(content[i], single_line);
-                        if(content[i].getAttribute('style')){
-                            close++;
-                        }
+                       this.is_div(content[i],close,single_line); 
                     }
                     else if (content[i].tagName) {
                         this.get_styles_from_tag(content[i], styles,close);
@@ -127,6 +119,12 @@ const editor_controller = {
                 this.closed_element_index= [];
                 return result;
 
+            },
+            is_div(content,close,single_line){
+                this.check_for_lineStyle(content , single_line);
+                    if(content.getAttribute('style')){
+                        close++;  // 
+                    }
             },
             check_for_lineStyle(element, json) {
                 json["data"] = [];
@@ -213,6 +211,7 @@ const editor_controller = {
             },  
             save_content(html,images,background,date){
                 this.DFS(html);
+                console.log(this.editor_elements);
                 var json_content = this.constructDiary_jsonFormat(this.editor_elements);
                 json_content["images"]=images;
                 json_content["global_props"]={"background_image":background};

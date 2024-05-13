@@ -61,12 +61,11 @@ const preview_component={
         return false;
         },
        content_click(e,date,event) {
-        if(event.srcElement.tagName=='I'){
-            console.log(event.srcElement);
+        if(event.srcElement.tagName=='I' && event.srcElement.classList.contains('fa')){
             event.srcElement.classList.contains('fa-heart') ? 
             (event.srcElement.classList.remove('fa-heart'), event.srcElement.classList.add('fa-heart-o')) :
             (event.srcElement.classList.remove('fa-heart-o'), event.srcElement.classList.add('fa-heart'));   
-             this.$emit('add_fav',date);
+            this.$emit('add_fav',date);
         }
         else if(!e.classList.contains('active')){
             this.$emit('change_date', date);

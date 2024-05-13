@@ -27,9 +27,7 @@ const editor_component = {
                    </div> 
                  <div id="texture-field" ref="back_ground" >
                     <div id="word-pad" contenteditable="true" ref="content" spellcheck="false">
-                        <div class="line-content">
-                        &#x200B; 
-                        </div>
+                    <div class="line-content">\u200b</div>
                     </div>
                     <div id="drag_container" ref="drag" @mousedown="start_drag_event">
                     
@@ -68,10 +66,10 @@ const editor_component = {
                 'i': 'italic',
                 'u': 'underline',
             },
-            empty_select: -1,
+            font_tag_length: -1,
             images_url: '',
             back_ground: '',
-            index: 0,
+
         };
     },
     props: {
@@ -86,9 +84,6 @@ const editor_component = {
         },
         global_props: {
             type: Object
-        },
-        favourite: {
-            type: Boolean,
         },
         preview: {
             type: Boolean
@@ -127,7 +122,7 @@ const editor_component = {
             })
             editor.addEventListener('keydown', (e) => {
                 if (this.$refs.content.innerText.length <= 1 && e.key == 'Backspace') {
-                    this.maintain_first_div();
+                    this.check_content_empty();
                     e.preventDefault();
                 }
                 else if (e.key == 'Backspace') {
@@ -135,52 +130,63 @@ const editor_component = {
                 }
             })
             editor.addEventListener('keyup', (e) => {
-                if (this.empty_select == 0) {
-                    var fontTags = document.querySelectorAll('font');
-                    fontTags.forEach((get_font_tag) => {
-                        var attr = get_font_tag.getAttributeNames();
-                        var prev_span = document.createElement('span');
+                if (this.font_tag_length == 0) {
+                    var fontTags = editor.querySelectorAll('font');
+                    fontTags.forEach((element) => {
+                        var attr = element.getAttributeNames();
+                        var span = document.createElement('span');
                         attr.forEach((e, i) => {
-                            var span = document.createElement('span');
-                            if (e == 'size') {
-                                span.style.fontSize = this.active_state['font-size'];
-                            } else if (e == 'face') {
-                                span.style.fontFamily = get_font_tag.getAttribute('face');
-                            } else if (e == 'color') {
-                                span.style.color = get_font_tag.getAttribute('color');
-                            }
+                            this.set_size_in_span(e, span);
+                            this.set_family_in_span(e, element.getAttribute('face'), span);
+                            this.set_color_in_span(e, element.getAttribute('color'), span);
                             if (i == attr.length - 1) {
-                                span.innerText = get_font_tag.innerText;
+                                span.innerText = element.innerText;
                             }
-                            i == 0 ? prev_span = span :
-                                i == 1 ? (prev_span.append(span)) :
-                                    prev_span.children[0].append(span);
                         });
-                        var gte = get_font_tag.childNodes[0];
-                        while (gte && gte.tagName != 'DIV') {
-                            if (gte.tagName == 'B') {
-                                prev_span.style.fontWeight = "bold";
-                            }
-                            if (gte.tagName == 'U') {
-                                prev_span.style.textDecorationLine = "underline";
-                            }
-                            if (gte.tagName == 'I') {
-                                prev_span.style.fontStyle = "italic";
-                            }
-                            gte = gte.childNodes[0];
-                        }
-                        get_font_tag.parentNode.insertBefore(prev_span, get_font_tag);
-                        get_font_tag.parentNode.removeChild(get_font_tag);
+                        this.check_tag_present_in_span(element, span);
+                        element.parentNode.insertBefore(span, element);
+                        element.parentNode.removeChild(element);
                     });
                 }
                 this.update_cursor_position_toolbar();
-                this.empty_select = -1
-                 this.save_content(this.default_date);
+                this.font_tag_length = -1;
+                var pattern = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
+                if (pattern.test(e.key) || e.key === 'Enter' || e.key === 'Backspace') {
+                    this.save_content(this.default_date);
+                }
             })
         },
-        maintain_first_div() {
+        check_for_draft() {
+            this.reset_Active();
+            this.template != '' ? this.$refs.content.innerHTML = this.template : this.$refs.content.innerHTML = ' <div class="line-content">\u200b</div>'
+            this.set_global_props(this.global_props);
+            this.check_for_image_container(this.images_url);
+            this.check_for_full_imageView();
+        },
+        check_for_preview() {
+            if (!this.preview) {
+                this.$refs.content.setAttribute('contentEditable', 'false');
+                this.$refs.editor_width.classList.add('preview')
+            }
+        },
+        convert_url_to_image(result) {
+            const image_container = this.$refs.image;
+            image_container.innerHTML = '';
+            this.images_url = [];
+            this.check_for_image_container(result)
+            for (let i = 0; i < result.length; i++) {
+                var div = this.construct_image_container(result[i]);
+                image_container.appendChild(div);
+                this.show_image_in_fullView(div, i);
+                this.mousemove_event_for_image(div);
+                this.mouseout_event_for_image(div);
+                this.remove_event_for_image(div);
+                this.images_url.push(result[i])
+            }
+        },
+        check_content_empty() {
             this.$refs.content.innerHTML = '';
-            this.$refs.content.innerHTML += '<div class="line-content"> &#x200B;</div>';
+            this.$refs.content.innerHTML += '<div class="line-content">\u200b</div>';
             this.reset_Active();
         },
         delete_empty_styles_tag(event) {
@@ -189,6 +195,21 @@ const editor_component = {
                 var spanParent = sel.anchorNode.parentNode;
                 spanParent.parentNode.removeChild(spanParent);
                 event.preventDefault();
+            }
+        },
+        check_tag_present_in_span(element, prev_span) {
+            var span_first_element = element.childNodes[0];
+            while (span_first_element && span_first_element.tagName != 'DIV') {
+                if (span_first_element.tagName == 'B') {
+                    prev_span.style.fontWeight = "bold";
+                }
+                if (span_first_element.tagName == 'U') {
+                    prev_span.style.textDecorationLine = "underline";
+                }
+                if (span_first_element.tagName == 'I') {
+                    prev_span.style.fontStyle = "italic";
+                }
+                span_first_element = span_first_element.childNodes[0];
             }
         },
         update_cursor_position_toolbar() {
@@ -223,10 +244,10 @@ const editor_component = {
             else {
                 result_x -= (2 / 100) * background.width;
             }
-            this.minimum_width_imageContainer(result_x,target,background);
+            this.minimum_width_imageContainer(result_x, target, background);
             return result_x;
         },
-        minimum_width_imageContainer(result_x,target,background) {
+        minimum_width_imageContainer(result_x, target, background) {
             var parent_width = target.clientWidth;
             const content = this.$refs.content;
             const image = this.$refs.image;
@@ -243,12 +264,6 @@ const editor_component = {
             var img_container = this.$refs.image.children;
             for (var i = 0; i < img_container.length; i++) {
                 img_container[i].style.height = height + "px";
-            }
-        },
-        check_for_preview() {
-            if (!this.preview) {
-                this.$refs.content.setAttribute('contentEditable', 'false');
-                this.$refs.editor_width.classList.add('preview')
             }
         },
         get_current_element(element) {
@@ -303,7 +318,6 @@ const editor_component = {
                 this.active_state['font-size'] = style.fontSize;
             }
         },
-
         set_fontname(style) {
             if (style.fontFamily) {
                 this.active_state['font-family'] = style.fontFamily;
@@ -334,8 +348,8 @@ const editor_component = {
         },
         change_text_format(format, value, font_tag) {
             if (font_tag) {
-                document.execCommand(value, false, format.replace('px',''));
-                this.fontTag_contents(format,value);
+                document.execCommand(value, false, format.replace('px', ''));
+                this.fontTag_contents(format, value);
             }
             else {
                 document.execCommand(format, false, null);
@@ -343,41 +357,42 @@ const editor_component = {
                     this.highlight_button(format)
                 }
             }
-             this.save_content(this.default_date);
+            this.save_content(this.default_date);
             this.$refs.content.focus();
         },
-        fontTag_contents(format,value){
-            this.check_fontfamily_Attribute(format,value);
-            this.check_fontsize_Attribute(format,value);
-            this.check_forecolor_attribute(format,value);
+        fontTag_contents(format, value) {
+            this.check_fontfamily_Attribute(format, value);
+            this.check_fontsize_Attribute(format, value);
+            this.check_forecolor_attribute(format, value);
         },
-        check_forecolor_attribute(format,value){
+        check_forecolor_attribute(format, value) {
             if (value == 'forecolor') {
                 this.active_state['color'] = this.$refs.color_input.value;
                 this.fontTag_to_spanTag('color');
             }
         },
-        check_fontsize_Attribute(format,value){
+        check_fontsize_Attribute(format, value) {
             if (value == 'FontSize') {
                 this.active_state['font-size'] = format;
                 this.fontTag_to_spanTag('size', format);
             }
         },
-        check_fontfamily_Attribute(format,value){
-            if(value=='FontName'){
+        check_fontfamily_Attribute(format, value) {
+            if (value == 'FontName') {
                 this.active_state['font-family'] = format;
                 this.fontTag_to_spanTag('face');
             }
         },
         fontTag_to_spanTag(params, value) {
-            this.empty_select = document.querySelectorAll("font").length;
+            var editor = this.$refs.content;
+            this.font_tag_length = editor.querySelectorAll("font").length;
             var ref = this;
-            document.querySelectorAll("font").forEach(function (font) {
+            editor.querySelectorAll("font").forEach(function (font) {
                 var span = document.createElement("span");
                 var attr = font.getAttribute(params);
-                ref.set_color_in_span(params,attr,span);
-                ref.set_size_in_span(params,span);
-                ref.set_family_in_span(params,attr,span);
+                ref.set_color_in_span(params, attr, span);
+                ref.set_size_in_span(params, span);
+                ref.set_family_in_span(params, attr, span);
                 while (font.firstChild) {
                     span.appendChild(font.firstChild);
                 }
@@ -385,19 +400,19 @@ const editor_component = {
                 font.parentNode.removeChild(font);
             });
         },
-        set_color_in_span(params,attr,span){
+        set_color_in_span(params, attr, span) {
             if (params == 'color') {
                 span.style.color = attr;
             }
         },
-        set_size_in_span(params,span){
+        set_size_in_span(params, span) {
             if (params == 'size') {
                 span.style.fontSize = this.active_state['font-size'];
             }
         },
-        set_family_in_span(params,attr,span){
-            if(params=='face'){
-                 span.style.fontFamily = attr;
+        set_family_in_span(params, attr, span) {
+            if (params == 'face') {
+                span.style.fontFamily = attr;
             }
         },
         highlight_button(data) {
@@ -423,64 +438,52 @@ const editor_component = {
                 'background': 'texture31.webp'
             }
         },
-        check_for_draft() {
-            this.reset_Active();
-            this.template != '' ? this.$refs.content.innerHTML = this.template : this.$refs.content.innerHTML = '<div class="line-content"> &#x200B;</div>'
-            this.set_global_props(this.global_props);
-            !this.$refs.full_container.classList.contains('hide') ? this.$refs.full_container.classList.add('hide') : '';
-            if (this.images_url.length == 0) {
-                this.$refs.image.classList.add('hide');
-                this.$refs.content.classList.add('full-width');
-                this.$refs.drag.classList.add('hide')
+        check_for_full_imageView() {
+            !this.$refs.full_container.classList.contains('hide') ?
+                this.$refs.full_container.classList.add('hide') : '';
+        },
+        check_for_image_container(images) {
+            if (images.length == 0) {
+                this.image_not_present_in_draft();
             }
             else {
-                this.$refs.image.classList.contains('hide') ? (this.$refs.image.classList.remove('hide'),
-                    this.$refs.content.classList.remove('full-width'), this.$refs.drag.classList.remove('hide')) : '';
+                this.image_present_in_draft();
             }
         },
-        convert_url_to_image(result) {
-            const image_container = this.$refs.image;
-            image_container.innerHTML = '';
-            this.images_url = [];
-            if (result.length == 0) {
-                this.$refs.image.classList.add('hide');
-                this.$refs.content.classList.add('full-width');
-                this.$refs.drag.classList.add('hide')
-            }
-            else {
-                this.$refs.image.classList.contains('hide') ? (this.$refs.image.classList.remove('hide'),
-                    this.$refs.content.classList.remove('full-width'), this.$refs.drag.classList.remove('hide')) : '';
-            }
-            for (let i = 0; i < result.length; i++) {
-                const img = document.createElement('img');
-                img.setAttribute('src', result[i]);
-                var span = '<span class="material-symbols-outlined">delete</span>'
-                var div = document.createElement('div');
-                div.appendChild(img.cloneNode(true));
-                div.innerHTML += span;
-                this.set_img_height(div);
-                image_container.appendChild(div);
-                this.add_event_listener(div, this.$refs.show_photo, i);
-                (div => {
-                    div.addEventListener('mouseover', () => {
-                        div.children[1].classList.add('show');
-                    });
-                })(div);
-                (div => {
-                    div.children[1].addEventListener('click', () => {
-                        this.remove_image(div);
-                    });
-                })(div);
-
-                (div => {
-                    div.addEventListener('mouseout', () => {
-                        div.children[1].classList.remove('show');
-                    });
-                })(div);
-                this.images_url.push(result[i])
-            }
-
-
+        image_not_present_in_draft() {
+            this.$refs.image.classList.add('hide');
+            this.$refs.content.classList.add('full-width');
+            this.$refs.drag.classList.add('hide')
+        },
+        image_present_in_draft() {
+            this.$refs.image.classList.contains('hide') ? (this.$refs.image.classList.remove('hide'),
+                this.$refs.content.classList.remove('full-width'), this.$refs.drag.classList.remove('hide'))
+                : '';
+        },
+        construct_image_container(result) {
+            const img = document.createElement('img');
+            img.setAttribute('src', result);
+            var span = '<span class="material-symbols-outlined">delete</span>'
+            var div = document.createElement('div');
+            div.appendChild(img.cloneNode(true));
+            div.innerHTML += span;
+            this.set_img_height(div);
+            return div;
+        },
+        mousemove_event_for_image(div) {
+            div.addEventListener('mouseover', () => {
+                div.children[1].classList.add('show');
+            });
+        },
+        remove_event_for_image(div) {
+            div.children[1].addEventListener('click', () => {
+                this.remove_image(div);
+            });
+        },
+        mouseout_event_for_image(div) {
+            div.addEventListener('mouseout', () => {
+                div.children[1].classList.remove('show');
+            });
         },
         set_img_height(img) {
             var img_width = this.$refs.image.clientWidth;
@@ -488,7 +491,7 @@ const editor_component = {
             const height = img_width / aspectRatio;
             img.style.height = height + "px";
         },
-        add_event_listener(div, parent_container, index) {
+        show_image_in_fullView(div, index) {
             var ref = this;
             div.addEventListener('click', (e) => {
                 if (e.srcElement.tagName != 'SPAN') {
@@ -501,7 +504,6 @@ const editor_component = {
                     ref.$refs.full_container.classList.remove('hide');
                 }
             })
-
         },
         add_image_in_full_screen(img) {
             var div = document.createElement('div');
@@ -513,28 +515,29 @@ const editor_component = {
             var index = Array.from(parent.children).indexOf(div);
             parent.children[index].remove();
             this.images_url.splice(index, 1);
-             this.save_content(this.default_date);
+            this.save_content(this.default_date);
             if (this.images_url.length == 0) {
-                this.$refs.image.classList.add('hide');
-                this.$refs.content.classList.add('full-width');
-                this.$refs.drag.classList.add('hide');
+                this.image_not_present_in_draft();
             }
         },
         set_global_props(props) {
             if (props["background_image"]) {
-                this.$refs.back_ground.style.backgroundImage = props["background_image"];
-                this.back_ground = props["background_image"].replace("url(\"", "");
-                this.back_ground = this.back_ground.replace("\")", "");
+                this.set_image_for_editor(props);
             }
             else {
                 this.$refs.back_ground.style.backgroundImage = `url(${"texture31.webp"})`
                 this.back_ground = "texture31.webp"
             }
         },
+        set_image_for_editor(props) {
+            this.$refs.back_ground.style.backgroundImage = props["background_image"];
+            this.back_ground = props["background_image"].replace("url(\"", "");
+            this.back_ground = this.back_ground.replace("\")", "");
+        },
         change_background(data) {
             this.$refs.back_ground.style.backgroundImage = `url(${data})`;
             this.background = data;
-             this.save_content(this.default_date);
+            this.save_content(this.default_date);
         },
         insert_photo(event) {
             const file = event.target.files[0];
@@ -545,38 +548,20 @@ const editor_component = {
                     this.$refs.content.classList.remove('full-width'), this.$refs.drag.classList.remove('hide')) : '';
             }
             reader.onload = function () {
-                const img = document.createElement('img');
-                img.setAttribute('src', reader.result);
-
-                const div = document.createElement('div');
-
-                const deleteSpan = document.createElement('span');
-                deleteSpan.className = 'material-symbols-outlined';
-                deleteSpan.textContent = 'delete';
-                deleteSpan.addEventListener('click', () => {
-                    ref.remove_image(div);
-                });
-                div.appendChild(img);
-                div.appendChild(deleteSpan);
-                ref.set_img_height(div);
+                const i = ref.images_url.length;
+                var div = ref.construct_image_container(reader.result);
                 ref.$refs.image.appendChild(div);
-                div.addEventListener('mouseover', () => {
-                    deleteSpan.classList.add('show');
-                });
-                div.addEventListener('mouseout', () => {
-                    deleteSpan.classList.remove('show');
-                });
-                const photo_div = ref.add_image_in_full_screen(img.cloneNode(true));
-                const index = ref.images_url.length;
-                ref.$refs.show_photo.appendChild(photo_div);
-                ref.add_event_listener(div, ref.$refs.show_photo, index);
+                ref.show_image_in_fullView(div, i);
+                ref.mousemove_event_for_image(div);
+                ref.mouseout_event_for_image(div);
+                ref.remove_event_for_image(div);
                 ref.storeDataURL(reader.result);
             };
             reader.readAsDataURL(file);
         },
         storeDataURL(dataURL) {
-             this.images_url.push(dataURL);
-             this.save_content(this.default_date);
+            this.images_url.push(dataURL);
+            this.save_content(this.default_date);
         },
         save_content(date) {
             var html = this.$refs.content;
@@ -584,7 +569,7 @@ const editor_component = {
             this.$emit('save_content', html, this.images_url, back_ground, date);
         },
         add_favourite() {
-            this.$emit('add_fav', 'op')
+            this.$emit('add_fav')
         },
         close_container(event) {
             if (event.target.tagName == 'SPAN') {
@@ -593,6 +578,3 @@ const editor_component = {
         }
     }
 };
-
-
-{/* <simple-dropdown-controller width="normal_width" :default_val="active_state['formatBlock']" :data="heading" :name="'formatBlock'" :tag="'-'" @change_format="change_text_format"></simple-dropdown-controller> */ }

@@ -1,6 +1,14 @@
 var dropdown_controller = {
     template: `<div :class="active == id ? 'section clicked' : 'section' " :id ='id' > 
-        <dropdown-root  :first_icon='first_icon' :title='title' :default_selected='default_selected' :data="data"  :active ='active' :id='id' @change_value = change_value @change_activestate=change_activestate></dropdown-root>
+        <dropdown-root  :first_icon='first_icon' 
+        :title='title'
+        :default_selected='default_selected'
+        :data="data"
+        :active ='active' 
+        :id='id'
+        @change_value = change_value
+        @change_activestate=change_activestate>
+        </dropdown-root>
         </div>
         `,
     props:{
@@ -24,7 +32,7 @@ var dropdown_controller = {
         },
         default_selected:{
             type:String
-        }
+        },
     },
     emits:['change_value','change_active'],
     methods: {

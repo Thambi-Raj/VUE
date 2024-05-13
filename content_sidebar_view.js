@@ -44,9 +44,9 @@ const content_sidebar_component = {
         }
     },
     mounted() {
-        console.log('aa');
-        var div_position = this.$refs.scroll_container.children[this.$root.default_date - 1].getBoundingClientRect();
-        this.$refs.scroll_container.scrollTop = (this.$root.default_date - 1)*div_position.height
+        var container_Rect = this.$refs.scroll_container.children[this.$root.default_date - 1]
+        var scrolltop = container_Rect.clientHeight * (this.$root.default_date - 1);
+        this.$refs.scroll_container.scrollTop = scrolltop;
         this.get_favourite()
     },
     data() {

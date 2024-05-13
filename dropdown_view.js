@@ -7,7 +7,7 @@ var dropdown_component = {
             <span>{{title}}</span>
             <span class="material-symbols-outlined drop_down"> arrow_drop_down </span>
         </div>
-        <div id="dropdown_body" :class="active ? active !== id ? 'hide':'':''" ref="dropdown">
+        <div id="dropdown_body" :class="active ? active !== id ? 'hide':'':''" ref="dropdown" >
             <div class="dropdown-item" v-for="value in data" :class="{ selected : value === default_selected}" @click="change_value(value)">{{value}}</div>
         </div>
     </div>`,
@@ -32,23 +32,23 @@ var dropdown_component = {
         },
         id:{
             type:String
-        }
+        },
     },
     emits:['change_value','change_activestate'],
     data(){
         return {
-            selected: this.default_selected
+            selected: this.default_selected,
+            show_dropdown:true
         }
     },
-
     methods:{
         change_value(value){
             this.selected = value;
-            this.show_drop = false; 
             this.$emit('change_value',this.selected);
         },
         change_activestate(){
             this.$emit('change_activestate',this.id);
+            this.show_dropdown = !this.show_dropdown
         }
     }
 }

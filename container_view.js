@@ -1,14 +1,14 @@
 const container_component = {
     template: `<div id="container-root" v-if="preview"> 
                     <div id="container-head">
-                           <span class="material-symbols-outlined">{{span}}</span>
+                           <span class="material-symbols-outlined ">{{span}}</span>
                            <span id="text">{{name}}</span>
                     </div>
                     <div id="container-body">
                          <div  v-for="(item, index) in container_data" :key="index">
                            <div id="main_container" v-for="(value, key) in item" :key="key">
                                 <div id="head">
-                                 <span>{{key}}</span>
+                                 <span>{{split_name_for_head(key)}}</span>
                                 </div>
                                 <div id="content">
                                   <div id="sub_container" v-for="val in value" :key="val" @click="get_key_for_data(key, val,'click')">
@@ -70,6 +70,10 @@ const container_component = {
         get_year(key){
             var year = key.split('_')[1];
             return year;
+        },
+        split_name_for_head(name){
+            var string =name.split('_');
+            return string[0]+' '+string[1];
         }
 
     }

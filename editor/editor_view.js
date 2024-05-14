@@ -27,7 +27,7 @@ const editor_component = {
                    </div> 
                  <div id="texture-field" ref="back_ground" >
                     <div id="word-pad" contenteditable="true" ref="content" spellcheck="false">
-                    <div class="line-content">\u200b</div>
+                    <div class="line-content"></div>
                     </div>
                     <div id="drag_container" ref="drag" @mousedown="start_drag_event">
                     
@@ -67,7 +67,7 @@ const editor_component = {
                 'u': 'underline',
             },
             font_tag_length: -1,
-            images_url: '',
+            images_url: [],
             back_ground: '',
 
         };
@@ -94,7 +94,7 @@ const editor_component = {
         }
     },
     mounted() {
-        this.editor_functionality();
+        this.preview ? this.editor_functionality():'';
         this.check_for_draft();
         this.check_for_preview();
         this.convert_url_to_image(this.image);
@@ -130,35 +130,17 @@ const editor_component = {
                 }
             })
             editor.addEventListener('keyup', (e) => {
-                if (this.font_tag_length == 0) {
-                    var fontTags = editor.querySelectorAll('font');
-                    fontTags.forEach((element) => {
-                        var attr = element.getAttributeNames();
-                        var span = document.createElement('span');
-                        attr.forEach((e, i) => {
-                            this.set_size_in_span(e, span);
-                            this.set_family_in_span(e, element.getAttribute('face'), span);
-                            this.set_color_in_span(e, element.getAttribute('color'), span);
-                            if (i == attr.length - 1) {
-                                span.innerText = element.innerText;
-                            }
-                        });
-                        this.check_tag_present_in_span(element, span);
-                        element.parentNode.insertBefore(span, element);
-                        element.parentNode.removeChild(element);
-                    });
-                }
-                this.update_cursor_position_toolbar();
-                this.font_tag_length = -1;
+                this.check_for_previous_span();
                 var pattern = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
                 if (pattern.test(e.key) || e.key === 'Enter' || e.key === 'Backspace') {
                     this.save_content(this.default_date);
                 }
+                this.update_cursor_position_toolbar();
             })
         },
         check_for_draft() {
             this.reset_Active();
-            this.template != '' ? this.$refs.content.innerHTML = this.template : this.$refs.content.innerHTML = ' <div class="line-content">\u200b</div>'
+            this.template != '' ? this.$refs.content.innerHTML = this.template : this.$refs.content.innerHTML = ' <div class="line-content"></div>'
             this.set_global_props(this.global_props);
             this.check_for_image_container(this.images_url);
             this.check_for_full_imageView();
@@ -177,7 +159,7 @@ const editor_component = {
             for (let i = 0; i < result.length; i++) {
                 var div = this.construct_image_container(result[i]);
                 image_container.appendChild(div);
-                this.show_image_in_fullView(div, i);
+                this.open_image_in_fullView(div, i);
                 this.mousemove_event_for_image(div);
                 this.mouseout_event_for_image(div);
                 this.remove_event_for_image(div);
@@ -186,7 +168,7 @@ const editor_component = {
         },
         check_content_empty() {
             this.$refs.content.innerHTML = '';
-            this.$refs.content.innerHTML += '<div class="line-content">\u200b</div>';
+            this.$refs.content.innerHTML += '<div class="line-content"></div>';
             this.reset_Active();
         },
         delete_empty_styles_tag(event) {
@@ -197,20 +179,40 @@ const editor_component = {
                 event.preventDefault();
             }
         },
-        check_tag_present_in_span(element, prev_span) {
-            var span_first_element = element.childNodes[0];
-            while (span_first_element && span_first_element.tagName != 'DIV') {
-                if (span_first_element.tagName == 'B') {
-                    prev_span.style.fontWeight = "bold";
-                }
-                if (span_first_element.tagName == 'U') {
-                    prev_span.style.textDecorationLine = "underline";
-                }
-                if (span_first_element.tagName == 'I') {
-                    prev_span.style.fontStyle = "italic";
-                }
-                span_first_element = span_first_element.childNodes[0];
+        check_for_previous_span(){
+            if (this.font_tag_length == 0) {
+                var span = document.createElement('span');
+                var element = window.getSelection().anchorNode.parentElement;
+                var fontTag =this.get_font_tag(element,span);
+                this.styles_in_fonttag(fontTag,span);
+                span.innerHTML = fontTag.innerHTML;
+                fontTag.parentNode.insertBefore(span, fontTag);
+                fontTag.parentNode.removeChild(fontTag);
             }
+            this.font_tag_length = -1;
+        },
+        get_font_tag(element,span){
+            while (element && element.tagName != 'FONT') {
+                if (element.tagName == 'B') {
+                    span.style.fontWeight = "bold";
+                }
+                if (element.tagName == 'U') {
+                    span.style.textDecorationLine = "underline";
+                }
+                if (element.tagName == 'I') {
+                    span.style.fontStyle = "italic";
+                }
+                element = element.parentElement;
+            }
+            return element;
+        },
+        styles_in_fonttag(fontTag,span){
+            var attr = fontTag.getAttributeNames();
+            attr.forEach((e) => {
+                this.set_size_in_span(e, span);
+                this.set_family_in_span(e, fontTag.getAttribute('face'), span);
+                this.set_color_in_span(e, fontTag.getAttribute('color'), span);
+            });   
         },
         update_cursor_position_toolbar() {
             var sel = document.getSelection();
@@ -273,7 +275,8 @@ const editor_component = {
             else {
                 var sel = document.getSelection();
                 var content_length = sel.anchorOffset;
-                if (content_length <= 1) {
+                console.log(sel.focusNode.parentElement);
+                if (content_length <=0) {
                     this.traverse_element(element, true)
                 }
                 else if (sel.focusNode.parentElement == element) {
@@ -338,6 +341,21 @@ const editor_component = {
                 this.active_state['italic'] = true;
             }
         },
+        set_color_in_span(params, attr, span) {
+            if (params == 'color') {
+                span.style.color = attr;
+            }
+        },
+        set_size_in_span(params, span) {
+            if (params == 'size') {
+                span.style.fontSize = this.active_state['font-size'];
+            }
+        },
+        set_family_in_span(params, attr, span) {
+            if (params == 'face') {
+                span.style.fontFamily = attr;
+            }
+        },
         traverse_element(element, forward) {
             var child = element.childNodes[forward ? 0 : element.childNodes.length - 1];
             this.reset_Active();
@@ -383,38 +401,40 @@ const editor_component = {
                 this.fontTag_to_spanTag('face');
             }
         },
-        fontTag_to_spanTag(params, value) {
-            var editor = this.$refs.content;
-            this.font_tag_length = editor.querySelectorAll("font").length;
-            var ref = this;
-            editor.querySelectorAll("font").forEach(function (font) {
-                var span = document.createElement("span");
-                var attr = font.getAttribute(params);
-                ref.set_color_in_span(params, attr, span);
-                ref.set_size_in_span(params, span);
-                ref.set_family_in_span(params, attr, span);
-                while (font.firstChild) {
-                    span.appendChild(font.firstChild);
+        fontTag_to_spanTag() {
+            var font_nodes =this.getFontNodes();
+            this.font_tag_length = font_nodes.length;
+            font_nodes.forEach(element=>{
+                var span = document.createElement('span');
+                this.styles_in_fonttag(element,span);
+                span.innerHTML = element.innerHTML;
+                element.parentNode.insertBefore(span, element);
+                element.parentNode.removeChild(element);
+            })
+        },
+        getFontNodes() {
+            var selectedFontTags = [];
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            const parentContainer = this.$refs.content;
+            if (selection.rangeCount > 0 && parentContainer) {
+                Array.from(parentContainer.childNodes).forEach(node => this.checkForFontTag(selectedFontTags,range,node));
+            }
+            return selectedFontTags;
+        },
+        checkForFontTag(selectedFontTags,range,node) {
+            if (range.intersectsNode(node)) {
+                if (node.nodeName.toLowerCase() === 'font') {
+                    selectedFontTags.push(node);
+                } else {
+                    Array.from(node.getElementsByTagName('font')).forEach(fontNode => {
+                        if (range.intersectsNode(fontNode)) {
+                            selectedFontTags.push(fontNode);
+                        }
+                    });
                 }
-                font.parentNode.insertBefore(span, font);
-                font.parentNode.removeChild(font);
-            });
-        },
-        set_color_in_span(params, attr, span) {
-            if (params == 'color') {
-                span.style.color = attr;
             }
-        },
-        set_size_in_span(params, span) {
-            if (params == 'size') {
-                span.style.fontSize = this.active_state['font-size'];
-            }
-        },
-        set_family_in_span(params, attr, span) {
-            if (params == 'face') {
-                span.style.fontFamily = attr;
-            }
-        },
+        },    
         highlight_button(data) {
             this.active_state[data] = !this.active_state[data];
         },
@@ -491,7 +511,7 @@ const editor_component = {
             const height = img_width / aspectRatio;
             img.style.height = height + "px";
         },
-        show_image_in_fullView(div, index) {
+        open_image_in_fullView(div, index) {
             var ref = this;
             div.addEventListener('click', (e) => {
                 if (e.srcElement.tagName != 'SPAN') {
@@ -522,14 +542,14 @@ const editor_component = {
         },
         set_global_props(props) {
             if (props["background_image"]) {
-                this.set_image_for_editor(props);
+                this.set_background_image_for_editor(props);
             }
             else {
                 this.$refs.back_ground.style.backgroundImage = `url(${"texture31.webp"})`
                 this.back_ground = "texture31.webp"
             }
         },
-        set_image_for_editor(props) {
+        set_background_image_for_editor(props) {
             this.$refs.back_ground.style.backgroundImage = props["background_image"];
             this.back_ground = props["background_image"].replace("url(\"", "");
             this.back_ground = this.back_ground.replace("\")", "");
@@ -551,7 +571,7 @@ const editor_component = {
                 const i = ref.images_url.length;
                 var div = ref.construct_image_container(reader.result);
                 ref.$refs.image.appendChild(div);
-                ref.show_image_in_fullView(div, i);
+                ref.open_image_in_fullView(div, i);
                 ref.mousemove_event_for_image(div);
                 ref.mouseout_event_for_image(div);
                 ref.remove_event_for_image(div);

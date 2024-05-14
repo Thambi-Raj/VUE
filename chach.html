@@ -1,51 +1,16 @@
+get_font_tag(element,span){
+    while (element && element.tagName != 'FONT') {
+        if (element.tagName == 'B') {
+            span.style.fontWeight = "bold";
+        }
+        if (element.tagName == 'U') {
+            span.style.textDecorationLine = "underline";
+        }
+        if (element.tagName == 'I') {
+            span.style.fontStyle = "italic";
+        }
 
-if (h.tagName.toLowerCase() != 'span') {
-    var style_name = this.start_line[h.tagName.toLowerCase()];
-    this.active_state[style_name] = true;
-}
-var style = h.style;
-var z = '';
-if (style.color) {
-    this.active_state['color'] = this.rgbToHex(style.color);
-}
-if (style.fontSize) {
-    var z = style.fontSize.replace('px', '');
-    this.active_state['font-size'] = z;
-}
-if (style.fontFamily) {
-    this.active_state['font-family'] = style.fontFamily;
-}
-if (style.textDecorationLine) {
-    this.active_state['underline'] = true;
-}
-if (style.fontWeight) {
-    this.active_state['bold'] = true;
-}
-if (style.fontStyle == 'italic') {
-    this.active_state['italic'] = true;
-}
-if (child.tagName.toLowerCase() != 'span') {
-    var style_name = this.start_line[child.tagName.toLowerCase()];
-    this.active_state[style_name] = true;
-}
-var style = child.style;
-var z = '';
-if (style.color) {
-    this.active_state['color'] = this.rgbToHex(style.color);
-}
-if (style.fontSize) {
-    var z = style.fontSize.replace('px', '');
-    this.active_state['font-size'] = z;
-}
-if (style.fontFamily) {
-    this.active_state['font-family'] = style.fontFamily;
-}
-if (style.textDecorationLine) {
-    this.active_state['underline'] = true;
-}
-if (style.fontWeight) {
-    this.active_state['bold'] = true;
-}
-if (style.fontStyle == 'italic') {
-    this.active_state['italic'] = true;
-}  
+        element = element.parentElement;
+    }
+    return element;
+},

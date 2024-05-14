@@ -7,18 +7,18 @@ const sidebar_component = {
                 :title="'2024'" 
                 :default_selected="dropdown_value" 
                 :data="month_array" 
-                @change_active="change_activestate" 
                 :active="dropdown_selected" 
+                @change_active="change_activestate" 
                 @change_value="change_value">
             </dropdown-controller>
             <dropdown-controller 
                 :id="'year_2023'" 
-                :first_icon="'clinical_notes '" 
+                :first_icon="'clinical_notes'" 
                 :title="'2023'"  
                 :default_selected="dropdown_value" 
                 :data="month_array" 
-                @change_active="change_activestate" 
                 :active="dropdown_selected" 
+                @change_active="change_activestate" 
                 @change_value="change_value">
             </dropdown-controller>
             <button-controller 

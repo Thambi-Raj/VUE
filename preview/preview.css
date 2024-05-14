@@ -102,6 +102,8 @@
 .preview-root>#content>#second>#editor>.preview>#texture-field>#word-pad>.line-content{
     opacity: 1;
     padding: 0vw !important;
+    height: min-content !important;
+
 }
 .preview-root>#content>#second>#editor>.preview>#texture-field>#word-pad>.line-content b{
     opacity: .7;

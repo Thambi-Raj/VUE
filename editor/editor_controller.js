@@ -211,7 +211,6 @@ const editor_controller = {
             },  
             save_content(html,images,background,date){
                 this.DFS(html);
-                console.log(this.editor_elements);
                 var json_content = this.constructDiary_jsonFormat(this.editor_elements);
                 json_content["images"]=images;
                 json_content["global_props"]={"background_image":background};

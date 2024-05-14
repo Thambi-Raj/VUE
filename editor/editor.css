@@ -113,7 +113,6 @@
     background-repeat: no-repeat;
     background-size: cover;
     display: flex;
-
 }
 
 .editor-root>#texture-field>#word-pad::-webkit-scrollbar {
@@ -150,6 +149,8 @@ line-height: 2vw;
 }
 .editor-root>#texture-field>#word-pad>.line-content{
     padding:0vw 1vw;
+    width: 100%;
+    height: 2vw;
 }
 .editor-root>#texture-field>.full-width{
     width: 100% !important;

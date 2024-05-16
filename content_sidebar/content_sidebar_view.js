@@ -6,7 +6,7 @@ const content_sidebar_component = {
                         <simple-dropdown-controller width="sidebar-dropdown" :default_val="year2" :data="year" :name="'year'" :tag="'-'" @change_format="change_drop"></simple-dropdown-controller>
                     </div>
                     <div id="body" ref="scroll_container">
-                        <div id="day-container" v-for="date in last_day" :key="date" :class="{ active: date === this.$root.default_date }" >
+                        <div id="day-container" v-for="date in last_day" :key="date" :class="{ active: date === this.default_date }" >
                         <preview-controller 
                             :year="dropdown_selected"
                             :month="dropdown_value"
@@ -30,6 +30,9 @@ const content_sidebar_component = {
         dropdown_value: {
             type: String
         },
+        default_date:{
+            type:Number
+        },
         month_array: {
             type: Array
         },
@@ -44,8 +47,9 @@ const content_sidebar_component = {
         }
     },
     mounted() {
-        var container_Rect = this.$refs.scroll_container.children[this.$root.default_date - 1]
-        var scrolltop = container_Rect.clientHeight * (this.$root.default_date - 1);
+        var container_Rect = this.$refs.scroll_container.children[this.default_date - 1];
+        console.log( this.default_date);
+        var scrolltop = container_Rect.clientHeight * (this.default_date - 1);
         this.$refs.scroll_container.scrollTop = scrolltop;
         this.get_favourite()
     },

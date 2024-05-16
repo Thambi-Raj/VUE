@@ -21,8 +21,4 @@ const container_controller = {
          this.$emit('change_left_pane',year,month,date);
       }
     },
-    mounted(){
-      console.log('aaa');
-    }
-
 }

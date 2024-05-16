@@ -50,16 +50,13 @@ const preview_component={
             default: 2024
         }
     },
-    // mounted(){
-    //     console.log(this.favourite_access && this.data);
-    // },
     methods:{
-      check_data(){
+       check_data(){
             if(this.favourite_data[this.year] &&  this.favourite_data[this.year][this.month] &&  this.favourite_data[this.year][this.month][this.date]){
                 return true
             }
-        return false;
-        },
+            return false;
+       },
        content_click(e,date,event) {
         if(event.srcElement.tagName=='I' && event.srcElement.classList.contains('fa')){
             event.srcElement.classList.contains('fa-heart') ? 

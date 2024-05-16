@@ -1,5 +1,5 @@
 const editor_component = {
-    template: `<div class="editor-root" ref="editor_width">
+    template: `<div class="editor-root" ref="editor_width" :class="{ preview: preview_class !== '' }">
                  <div id="editor-tool" ref="editor_tool" v-if="preview">
                    <div :class="{ 'button clicked': active_state.bold, 'button': !active_state.bold }" id="bold" @click="change_text_format('bold')">
                    <span class="material-symbols-outlined">format_bold</span>
@@ -25,18 +25,28 @@ const editor_component = {
                    <simple-dropdown-controller width="small_width" :default_val="back_ground" :data="texture" :name="'background'" :tag="'image'" @change_background="change_background"></simple-dropdown-controller>
                 
                    </div> 
-                 <div id="texture-field" ref="back_ground" >
-                    <div id="word-pad" contenteditable="true" ref="content" spellcheck="false">
-                    <div class="line-content"></div>
-                    </div>
-                    <div id="drag_container" ref="drag" @mousedown="start_drag_event">
-                    
-                    </div>
-                    <div id="imageContainer" ref="image" class="image_container">
-                    
-                    </div>
-                 </div>    
-                 <div id="full_container_photo" class="hide"  @click="close_container" ref="full_container">
+                   <div id="texture-field" ref="back_ground">
+                         <div id="word-pad" contenteditable="true" ref="content" spellcheck="false" 
+                            @click="editor_click_event" 
+                            @keydown="editor_keydown_event" 
+                            @keyup="editor_keyup_event"  
+                            :class=" { 'full-width': image.length == 0 }">
+                                <div class="line-content" ref="line_div"
+                            ></div>
+                         </div>
+                        <div id="drag_container" ref="drag" @mousedown="start_drag_event" :class="drag_container_class" v-if="image.length > 0">
+                            
+                        </div>
+                        <div id="imageContainer" :class="image_container_class" v-if="preview && image.length > 0" ref="image" >
+                            <div v-for="(url, index) in image" :key="index" ref="child_images" @mouseover="image_hover(index)" 
+                                @mouseout="image_out(index)"    
+                                :style="set_ima_height(this)" >
+                                <img :src="url">
+                                <span ref="delete_icon" class="material-symbols-outlined" @click="image_click($event.currentTarget,index)">delete</span>
+                            </div>
+                        </div>
+                 </div>   
+                 <div id="full_container_photo" :class=image_full_view_class  @click="close_container" ref="full_container">
                       
                      <div id="image_con"  ref="show_photo">
              
@@ -69,7 +79,13 @@ const editor_component = {
             font_tag_length: -1,
             images_url: [],
             back_ground: '',
-
+            preview_class:'',
+            image_container_class:'image_container',
+            drag_container_class:'',
+            wordPad_class:'',
+            image_full_view_class:'hide',
+            deleteIconRef:null,
+            check_for_image_change:false
         };
     },
     props: {
@@ -90,28 +106,36 @@ const editor_component = {
         },
         default_date: {
             type: Number,
-            default: 0
         }
     },
     mounted() {
-        this.preview ? this.editor_functionality():'';
         this.check_for_draft();
         this.check_for_preview();
-        this.convert_url_to_image(this.image);
+        this.images_url =this.image;
     },
     watch: {
+        default_date(){
+            const contentElement = this.$refs.content;
+            if (contentElement.hasAttribute('style')) {
+                contentElement.removeAttribute('style');
+                this.$refs.image.removeAttribute('style');
+            }
+        },
         data() {
             this.check_for_draft();
         },
         image() {
-            this.convert_url_to_image(this.image);
+            this.images_url =this.image;
         },
     },
     methods: {
-        editor_functionality() {
-            var editor = this.$refs.content;
-            editor.focus();
-            editor.addEventListener('click', (e) => {
+        set_ima_height(){
+          if(Object.keys(this.$refs).length!=0 ){
+              console.log(this.$refs.child_images);
+          }
+        },
+        editor_click_event(e){
+            if(this.preview){
                 if (e.srcElement != this.$refs.content) {
                     this.get_current_element(e.srcElement, e);
                 }
@@ -119,51 +143,53 @@ const editor_component = {
                     var last_child = this.$refs.content.childNodes[this.$refs.content.childNodes.length - 1];
                     this.traverse_element(last_child, false);
                 }
-            })
-            editor.addEventListener('keydown', (e) => {
-                if (this.$refs.content.innerText.length <= 1 && e.key == 'Backspace') {
-                    this.check_content_empty();
-                    e.preventDefault();
-                }
-                else if (e.key == 'Backspace') {
-                    this.delete_empty_styles_tag(e);
-                }
-            })
-            editor.addEventListener('keyup', (e) => {
-                this.check_for_previous_span();
-                var pattern = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
-                if (pattern.test(e.key) || e.key === 'Enter' || e.key === 'Backspace') {
-                    this.save_content(this.default_date);
-                }
-                this.update_cursor_position_toolbar();
-            })
+            }
+        },
+        editor_keydown_event(e){
+            if (this.$refs.content.innerText.length <= 1 && e.key == 'Backspace') {
+                this.check_content_empty();
+                e.preventDefault();
+            }
+            else if (e.key == 'Backspace') {
+                this.delete_empty_styles_tag(e);
+            }
+        },
+        editor_keyup_event(e){
+            this.check_for_previous_span();
+            var pattern = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
+            if (pattern.test(e.key) || e.key === 'Enter' || e.key === 'Backspace') {
+                this.save_content(this.default_date);
+            }
+            this.update_cursor_position_toolbar();
         },
         check_for_draft() {
             this.reset_Active();
             this.template != '' ? this.$refs.content.innerHTML = this.template : this.$refs.content.innerHTML = ' <div class="line-content"></div>'
             this.set_global_props(this.global_props);
             this.check_for_image_container(this.images_url);
-            this.check_for_full_imageView();
         },
         check_for_preview() {
             if (!this.preview) {
                 this.$refs.content.setAttribute('contentEditable', 'false');
-                this.$refs.editor_width.classList.add('preview')
+                this.preview_class = 'preview';
             }
         },
-        convert_url_to_image(result) {
-            const image_container = this.$refs.image;
-            image_container.innerHTML = '';
-            this.images_url = [];
-            this.check_for_image_container(result)
-            for (let i = 0; i < result.length; i++) {
-                var div = this.construct_image_container(result[i]);
-                image_container.appendChild(div);
-                this.open_image_in_fullView(div, i);
-                this.mousemove_event_for_image(div);
-                this.mouseout_event_for_image(div);
-                this.remove_event_for_image(div);
-                this.images_url.push(result[i])
+        image_hover(index){
+            this.$refs.delete_icon[index].classList.add('show');
+        },
+        image_out(index){
+            this.$refs.delete_icon[index].classList.remove('show');
+        },
+        image_click(target,index){
+            this.images_url.splice(index, 1);
+            this.save_content(this.default_date);
+            if(this.images_url.length==0){
+                const contentElement = this.$refs.content;
+                if (contentElement) {
+                    if (this.preview && contentElement.hasAttribute('style')) {
+                        contentElement.removeAttribute('style');
+                    }
+                }
             }
         },
         check_content_empty() {
@@ -172,7 +198,7 @@ const editor_component = {
             this.reset_Active();
         },
         delete_empty_styles_tag(event) {
-            var sel = document.getSelection();
+            var sel = window.getSelection();
             if (sel.anchorNode.parentNode.textContent.length == 1 && sel.anchorNode.parentNode.tagName != 'DIV') {
                 var spanParent = sel.anchorNode.parentNode;
                 spanParent.parentNode.removeChild(spanParent);
@@ -215,7 +241,7 @@ const editor_component = {
             });   
         },
         update_cursor_position_toolbar() {
-            var sel = document.getSelection();
+            var sel = window.getSelection();
             this.reset_Active();
             if (sel.anchorNode.tagName) {
                 this.update_toolbar_button(sel.anchorNode);
@@ -246,10 +272,11 @@ const editor_component = {
             else {
                 result_x -= (2 / 100) * background.width;
             }
-            this.minimum_width_imageContainer(result_x, target, background);
+            this.minimum_width_imageContainer(result_x, target);
             return result_x;
         },
-        minimum_width_imageContainer(result_x, target, background) {
+        minimum_width_imageContainer(result_x, target) {
+            background= this.$refs.back_ground.getBoundingClientRect();
             var parent_width = target.clientWidth;
             const content = this.$refs.content;
             const image = this.$refs.image;
@@ -273,7 +300,7 @@ const editor_component = {
                 this.check_styles_in_element(element)
             }
             else {
-                var sel = document.getSelection();
+                var sel = window.getSelection();
                 var content_length = sel.anchorOffset;
                 console.log(sel.focusNode.parentElement);
                 if (content_length <=0) {
@@ -458,38 +485,32 @@ const editor_component = {
                 'background': 'texture31.webp'
             }
         },
-        check_for_full_imageView() {
-            !this.$refs.full_container.classList.contains('hide') ?
-                this.$refs.full_container.classList.add('hide') : '';
-        },
         check_for_image_container(images) {
-            if (images.length == 0) {
-                this.image_not_present_in_draft();
-            }
-            else {
-                this.image_present_in_draft();
-            }
+            // if (images.length == 0) {
+            //     this.image_not_present_in_draft();
+            // }
+            // else {
+            //     this.image_present_in_draft();
+            // }
         },
         image_not_present_in_draft() {
-            this.$refs.image.classList.add('hide');
-            this.$refs.content.classList.add('full-width');
-            this.$refs.drag.classList.add('hide')
+            this.image_container_class = 'hide';
+            this.wordPad_class ='full-width';
+            this.drag_container_class='hide';
         },
         image_present_in_draft() {
-            this.$refs.image.classList.contains('hide') ? (this.$refs.image.classList.remove('hide'),
-                this.$refs.content.classList.remove('full-width'), this.$refs.drag.classList.remove('hide'))
+            this.image_container_class=='hide' ? 
+                (this.image_container_class = 'image_container',
+                this.wordPad_class ='', 
+                this.drag_container_class='')
                 : '';
         },
-        construct_image_container(result) {
-            const img = document.createElement('img');
-            img.setAttribute('src', result);
-            var span = '<span class="material-symbols-outlined">delete</span>'
-            var div = document.createElement('div');
-            div.appendChild(img.cloneNode(true));
-            div.innerHTML += span;
-            this.set_img_height(div);
-            return div;
-        },
+        // construct_image_container(result) {
+        //     var div = document.createElement('div');
+        //     div.appendChild(img.cloneNode(true));
+        //     this.set_img_height(div);
+        //     return div;
+        // },
         mousemove_event_for_image(div) {
             div.addEventListener('mouseover', () => {
                 div.children[1].classList.add('show');
@@ -505,11 +526,11 @@ const editor_component = {
                 div.children[1].classList.remove('show');
             });
         },
-        set_img_height(img) {
-            var img_width = this.$refs.image.clientWidth;
-            const aspectRatio = 16 / 14;
-            const height = img_width / aspectRatio;
-            img.style.height = height + "px";
+        set_img_height(div) {
+            if(this.$refs.child_images.length > 0 && this.$refs.child_images[0].getAttribute('style')){
+                var previous = this.$refs.child_images[0].getAttribute('style');
+                div.setAttribute('style',previous);
+            }   
         },
         open_image_in_fullView(div, index) {
             var ref = this;
@@ -519,9 +540,9 @@ const editor_component = {
                     const img = document.createElement('img');
                     img.setAttribute('src', ref.images_url[index]);
                     var photo_div = ref.add_image_in_full_screen(img);
-                    photo_div.innerHTML += `<span class="material-symbols-outlined">close</span>`;
-                    ref.$refs.show_photo.appendChild(photo_div);
-                    ref.$refs.full_container.classList.remove('hide');
+                        photo_div.innerHTML += `<span class="material-symbols-outlined">close</span>`;
+                        ref.$refs.show_photo.appendChild(photo_div);
+                    ref.image_full_view_class='';
                 }
             })
         },
@@ -560,27 +581,22 @@ const editor_component = {
             this.save_content(this.default_date);
         },
         insert_photo(event) {
+            
             const file = event.target.files[0];
             const reader = new FileReader();
             const ref = this;
-            if (this.images_url.length == 0) {
-                this.$refs.image.classList.contains('hide') ? (this.$refs.image.classList.remove('hide'),
-                    this.$refs.content.classList.remove('full-width'), this.$refs.drag.classList.remove('hide')) : '';
-            }
             reader.onload = function () {
-                const i = ref.images_url.length;
-                var div = ref.construct_image_container(reader.result);
-                ref.$refs.image.appendChild(div);
-                ref.open_image_in_fullView(div, i);
-                ref.mousemove_event_for_image(div);
-                ref.mouseout_event_for_image(div);
-                ref.remove_event_for_image(div);
                 ref.storeDataURL(reader.result);
             };
             reader.readAsDataURL(file);
+            this.$refs.image_file.value='';
+            this.check_for_image_change=true;
         },
         storeDataURL(dataURL) {
             this.images_url.push(dataURL);
+            var div = document.createElement('div');
+            this.set_img_height(div);
+            this.$refs.image.appendChild(div);
             this.save_content(this.default_date);
         },
         save_content(date) {
@@ -593,7 +609,7 @@ const editor_component = {
         },
         close_container(event) {
             if (event.target.tagName == 'SPAN') {
-                this.$refs.full_container.classList.add('hide');
+                this.image_full_view_class='hide';
             }
         }
     }

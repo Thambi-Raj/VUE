@@ -1,8 +1,13 @@
 var button_controller = {
     template: `
-        <div :class = "active === button_name ? 'active' : ' ' " :id ='id' > 
-            <button-root :id ='id' :button_name="button_name" :icon_name="icon_name" @button_clicked="button_clicked" :drop_down=show_drop></button-root>
-        </div>
+            <button-root 
+            :id ='id'
+            :button_name="button_name" 
+            :icon_name="icon_name"
+            @button_clicked="button_clicked" 
+            :active="active"
+            :drop_down=show_drop>
+            </button-root>
     `,
     props: {
         button_name: {
@@ -26,7 +31,6 @@ var button_controller = {
     emits:['change_active'],
     methods: {
         button_clicked(template,name) {
-           
             this.$emit('change_active',name,template);
         }
     }

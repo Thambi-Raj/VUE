@@ -5,6 +5,7 @@ const sidebar_controller= {
                 :dropdown_selected="dropdown_selected" 
                 :dropdown_value="dropdown_value"  
                 :month_array="month"
+                :root_ref="root_ref"
                 @change_dropdown_head="change_dropdown_head" 
                 @change_dropdown_value="change_dropdown_value"
                 @change_mention="change_mention"
@@ -15,7 +16,10 @@ const sidebar_controller= {
     props: {
         dropdown_selected: {type:String},
         dropdown_value: {type:String},
-        month:{type:Array}
+        month:{type:Array},
+        root_ref:{
+            type:Object
+        }
     },
     emits:["change_drop_head","change_drop_value","change_mention"],
     methods: {

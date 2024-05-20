@@ -64,6 +64,9 @@
                   :total_favourite=total_favourite
                   :default_date_data="default_date_data"
                   :container_format_data="container_format_data"
+                  :root_ref="app"
+                  :dropdown_values="dropdown_values"
+                  :right_template = "right_template"
                   @change_page="page_change"
                   @change_dropdown_head="change_dropdown_head" 
                   @change_dropdown_value="change_dropdown_value"
@@ -74,6 +77,7 @@
                   @get_favourite_data="construct_container_format"
                   @update_month_preview ="update_month_preview"
                   ></diary-controller>
+                  <event-bus :root="app"></event-bus>
             </div>
         </div>
     </div>
@@ -86,19 +90,26 @@
         return {
             dropdown_selected: 'year_2024',
             dropdown_value: 'Apr',
+            dropdown_values:[],
             default_date: 1,
             container_format_data: [],
             editor_view: false,
             month_preview: this.get_month_preview("year_2024", "Apr"),
             default_date_data: {},
             total_favourite: {},
+            dropdown_values:[],
+            eventbus:{},
+            app:this,
+            right_template:'calendar'
         }
     },
     created() {
         this.get_data();
         this.check_favourite();
+        this.construct_container_format('favourite');
+        this.get_dropdown_values('year_2024')
     },
-    emits: ["page_change", "change_dropdown_head", "change_dropdown_value", "change_date", "add_fav"],
+    emits: ["page_change", "change_dropdown_head", "change_dropdown_value", "change_date", "add_fav", "get_favourite_data"],
     methods: {
         change_dropdown_head(data, bool) {
             this.dropdown_selected = data;
@@ -120,11 +131,11 @@
         update_month_preview() {
             this.month_preview = this.get_month_preview(this.dropdown_selected, this.dropdown_value)
         },
-        construct_container_format(key) {
-            var data = JSON.parse(localStorage.getItem(key));
+        construct_container_format() {
+            var data = JSON.parse(localStorage.getItem('favorite'));
+            var result = [];
             if (data != null) {
                 var keys = Object.keys(data).sort().reverse();
-                var result = [];
                 for (var i = 0; i < keys.length; i++) {
                     var month = Object.keys(data[keys[i]]);
                     var res = this.month_based_sort(month);
@@ -138,8 +149,8 @@
                         }
                     }
                 }
+                this.container_format_data = result;
             }
-            this.container_format_data = result;
         },
         month_based_sort(array) {
             var month = { "Jan": 0, "Feb": 1, "Mar": 2, "Apr": 3, "May": 4, "Jun": 5, "Jul": 6, "Aug": 7, "Sep": 8, "Oct": 9, "Nov": 10, "Dec": 11 };
@@ -175,7 +186,6 @@
         },
         add_fav(date) {
             var check = this.check_favourite(date);
-            console.log(check);
             var get_local = !localStorage.getItem("favorite") ? {} : JSON.parse(localStorage.getItem("favorite"));
             if (check) {
                 delete get_local[this.dropdown_selected][this.dropdown_value][date];
@@ -186,6 +196,7 @@
                 get_local[this.dropdown_selected][this.dropdown_value][date] = true;
             }
             localStorage.setItem("favorite", JSON.stringify(get_local));
+            this.construct_container_format('favorite');
             this.total_favourite = { ...get_local }
         },
         get_data() {
@@ -217,9 +228,16 @@
         },
         change_editor_view() {
             this.editor_view = !this.editor_view;
+        },
+        get_dropdown_values(name){
+            var month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            var cur = new Date().getFullYear();
+            var mon = new Date().getMonth();
+            this.dropdown_values = cur == name.split('_')[1] ? month.slice(0, mon + 1) : month;
         }
     },
     })
+    app.component('event-bus',event_bus)
     app.component('dropdown-root', dropdown_component);
     app.component('dropdown-controller', dropdown_controller);
     app.component('button-root', button_component);

@@ -24,6 +24,7 @@ const calendar_component = {
              :date="(rowIndex - 1) * 7 + dayIndex - first_day"
              :show_date="false"
              :favourite_access="false"
+             :root_ref="root_ref"
              @change_default_date="change_date"
             >
             </preview-controller>
@@ -54,7 +55,10 @@ const calendar_component = {
         },
         total_favourite:{
             type:Object
-        }
+        },
+        root_ref:{
+            type:Object
+        },
     },
     created(){
         this.set_config_data();

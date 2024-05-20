@@ -8,6 +8,9 @@ const diary_controller = {
                     :total_favourite=total_favourite
                     :default_date_data="default_date_data"
                     :container_format_data="container_format_data"
+                    :root_ref="root_ref"
+                    :right_template = "right_template"
+                    :dropdown_values="dropdown_values"
                     @change_page="page_change"
                     @change_dropdown_head="change_dropdown_head" 
                     @change_dropdown_value="change_dropdown_value"
@@ -44,6 +47,18 @@ const diary_controller = {
         total_favourite:{
             type:Object
         }, 
+        root_ref:{
+            type:Object
+        }, 
+        right_template:{
+            type:String
+        },
+        dropdown_values:{
+            type:Array
+        }
+    },
+    mounted(){
+        console.log(this.dropdown_values);
     },
     emits: ["page_change", "change_dropdown_head", "change_dropdown_value", "save_json", "change_date", "add_favourite","update_month_preview","construct_container_format","change_editor_view"],
     methods: {

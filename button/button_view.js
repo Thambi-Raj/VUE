@@ -14,14 +14,16 @@ var button_component = {
         },
         active:{
             type:String
+        },
+        root_ref:{
+            type:Object
         }
     },
     emits:['button_clicked'],
     methods:{
         button_clicked(){
-            console.log(this.$root);
-            // emitter.emit('change',this.icon_name)
-            this.$emit('button_clicked','button',this.icon_name);
+            this.root_ref.eventbus.change_right_template('container')
+            this.root_ref.eventbus.change_head(this.icon_name);
         }
     }
     

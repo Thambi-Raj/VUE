@@ -4,9 +4,11 @@ const editor_controller = {
                 :image     = "image"  
                 :template  = "template"
                 :global_props = "global_props"
+                :preview="preview"
+                :date="date"
+                :height=height
                 @save_content="save_content"
                 @add_fav="add_fav"
-                :preview="preview"
                 > 
               </editor-root>`,
     props:{
@@ -17,14 +19,14 @@ const editor_controller = {
             type:Boolean,
             default:false
         },
-    },
-    mounted(){
-        console.log(this.data);
+        date:{
+            type:Number
+        },
     },
     watch:{
         data(){
             this.template = this.data &&  this.data["contents"]  ?  this.decoded_html_string(this.data["contents"]):'';
-            this.image =  this.data && this.data["images"] ? this.data["images"] :[];
+            this.image =  this.data && this.data["images"] ? [...this.data["images"]] :[];
             this.global_props =  this.data && this.data["global_props"] ? this.data["global_props"] :{};
         },
     },
@@ -36,9 +38,11 @@ const editor_controller = {
             template:this.get_decode_html(),
             bookmark : true,
             global_props : this.get_global_props(),
+            images : this.get_images_array().length,
+            height:''
           }
     },
-    methods:{
+    methods:{   
             get_decode_html(){
                 var string='';
                 if(this.data){
@@ -47,10 +51,7 @@ const editor_controller = {
                 return string;
             },
             get_images_array(){
-                var img=[];
-                if(this.data){
-                    img = this.data["images"] ? this.data["images"] :[];
-                }
+                var img=this.data && this.data["images"] ? [...this.data["images"]] :[];
                 return img;
             },
             get_global_props(){
@@ -103,6 +104,7 @@ const editor_controller = {
                         this.get_styles_from_tag(content[i], styles,close);
                     }
                     else if (content[i].nodeType === 3) {
+                      
                         var obj1 = this.set_Style_for_text(content[i].nodeValue, styles)
                         single_line["data"].push({...obj1});
                     }
@@ -218,15 +220,15 @@ const editor_controller = {
                 }
             }, 
 
-            save_content(html,images,background,date){
+            save_content(html,images,background,date,height){
                 this.DFS(html);
                 var json_content = this.constructDiary_jsonFormat(this.editor_elements);
-                json_content["images"]=images;
+                json_content["images"] = images;
+                this.images = images.length;
                 json_content["global_props"]={"background_image":background};
+                this.height = height;
                 this.$emit('save_json_content',json_content,date);     
-
             },
-
             add_fav(){
                 this.$emit('add_fav');
             },

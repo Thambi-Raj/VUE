@@ -40,16 +40,19 @@ const editor_component = {
                         <div id="imageContainer" :class="image_container_class" v-if="preview && image.length > 0" ref="image" >
                             <div v-for="(url, index) in image" :key="index" ref="child_images" @mouseover="image_hover(index)" 
                                 @mouseout="image_out(index)"    
-                                :style="set_ima_height(this)" >
+                                @click="open_image_in_fullView($event,url)"
+                                :style="getheight()">
                                 <img :src="url">
                                 <span ref="delete_icon" class="material-symbols-outlined" @click="image_click($event.currentTarget,index)">delete</span>
                             </div>
                         </div>
                  </div>   
                  <div id="full_container_photo" :class=image_full_view_class  @click="close_container" ref="full_container">
-                      
                      <div id="image_con"  ref="show_photo">
-             
+                            <div>
+                               <img src="" ref="full_img">
+                               <span class="material-symbols-outlined" ref="close_span">close</span>
+                            </div>
                     </div>
                 </div> 
              </div>`,
@@ -83,9 +86,8 @@ const editor_component = {
             image_container_class:'image_container',
             drag_container_class:'',
             wordPad_class:'',
-            image_full_view_class:'hide',
-            deleteIconRef:null,
-            check_for_image_change:false
+            image_full_view_class:'hide', 
+            height:''
         };
     },
     props: {
@@ -106,20 +108,27 @@ const editor_component = {
         },
         default_date: {
             type: Number,
+        },
+        date:{
+            type:Number
+        },
+        image_change:{
+            type:Number
         }
     },
     mounted() {
         this.check_for_draft();
         this.check_for_preview();
-        this.images_url =this.image;
+        this.images_url =this.image;  
     },
     watch: {
-        default_date(){
+        date(){
             const contentElement = this.$refs.content;
             if (contentElement.hasAttribute('style')) {
                 contentElement.removeAttribute('style');
                 this.$refs.image.removeAttribute('style');
             }
+            this.height='';
         },
         data() {
             this.check_for_draft();
@@ -129,11 +138,6 @@ const editor_component = {
         },
     },
     methods: {
-        set_ima_height(){
-          if(Object.keys(this.$refs).length!=0 ){
-              console.log(this.$refs.child_images);
-          }
-        },
         editor_click_event(e){
             if(this.preview){
                 if (e.srcElement != this.$refs.content) {
@@ -144,7 +148,7 @@ const editor_component = {
                     this.traverse_element(last_child, false);
                 }
             }
-        },
+        },     
         editor_keydown_event(e){
             if (this.$refs.content.innerText.length <= 1 && e.key == 'Backspace') {
                 this.check_content_empty();
@@ -158,15 +162,17 @@ const editor_component = {
             this.check_for_previous_span();
             var pattern = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
             if (pattern.test(e.key) || e.key === 'Enter' || e.key === 'Backspace') {
-                this.save_content(this.default_date);
+                this.save_content(this.date);
             }
             this.update_cursor_position_toolbar();
         },
+        getheight() {
+            return this.height ? { height: this.height } : {};
+        }, 
         check_for_draft() {
             this.reset_Active();
             this.template != '' ? this.$refs.content.innerHTML = this.template : this.$refs.content.innerHTML = ' <div class="line-content"></div>'
             this.set_global_props(this.global_props);
-            this.check_for_image_container(this.images_url);
         },
         check_for_preview() {
             if (!this.preview) {
@@ -182,7 +188,6 @@ const editor_component = {
         },
         image_click(target,index){
             this.images_url.splice(index, 1);
-            this.save_content(this.default_date);
             if(this.images_url.length==0){
                 const contentElement = this.$refs.content;
                 if (contentElement) {
@@ -190,7 +195,10 @@ const editor_component = {
                         contentElement.removeAttribute('style');
                     }
                 }
+                this.height='';
+
             }
+            this.save_content(this.date);
         },
         check_content_empty() {
             this.$refs.content.innerHTML = '';
@@ -281,8 +289,10 @@ const editor_component = {
             const content = this.$refs.content;
             const image = this.$refs.image;
             if (result_x < parent_width) {
-                image.style.width = background.width - (result_x - background.x) + "px";
-                content.style.width = (result_x - background.x) + "px";
+                var image_cont_width = background.width - (result_x - background.x);
+                this.convert_px_to_percentage(background,image,image_cont_width,-1)
+                var word_pad =  (result_x - background.x);
+                this.convert_px_to_percentage(background,content,word_pad,-1);
                 var image_container_width = image.clientWidth;
                 this.set_image_height(image_container_width);
             }
@@ -291,8 +301,20 @@ const editor_component = {
             const aspectRatio = 16 / 14;
             const height = img_width / aspectRatio;
             var img_container = this.$refs.image.children;
+            var parent = this.$refs.image.getBoundingClientRect();
+            this.height = height;
             for (var i = 0; i < img_container.length; i++) {
-                img_container[i].style.height = height + "px";
+                this.convert_px_to_percentage(parent,img_container[i],-1,height);  
+            }
+        },
+        convert_px_to_percentage(parent,set_content,width,height){
+            const viewportWidth = window.innerWidth;
+            if (width !== -1) {
+                const vwWidth = (width / viewportWidth) * 100;
+                set_content.style.width = vwWidth + "vw";
+            } else {
+                const vwHeight = (height / viewportWidth) * 100;
+                set_content.style.height = vwHeight + "vw";
             }
         },
         get_current_element(element) {
@@ -302,7 +324,6 @@ const editor_component = {
             else {
                 var sel = window.getSelection();
                 var content_length = sel.anchorOffset;
-                console.log(sel.focusNode.parentElement);
                 if (content_length <=0) {
                     this.traverse_element(element, true)
                 }
@@ -402,7 +423,7 @@ const editor_component = {
                     this.highlight_button(format)
                 }
             }
-            this.save_content(this.default_date);
+            this.save_content(this.date);
             this.$refs.content.focus();
         },
         fontTag_contents(format, value) {
@@ -419,7 +440,7 @@ const editor_component = {
         check_fontsize_Attribute(format, value) {
             if (value == 'FontSize') {
                 this.active_state['font-size'] = format;
-                this.fontTag_to_spanTag('size', format);
+                this.fontTag_to_spanTag('sizspane', format);
             }
         },
         check_fontfamily_Attribute(format, value) {
@@ -485,81 +506,12 @@ const editor_component = {
                 'background': 'texture31.webp'
             }
         },
-        check_for_image_container(images) {
-            // if (images.length == 0) {
-            //     this.image_not_present_in_draft();
-            // }
-            // else {
-            //     this.image_present_in_draft();
-            // }
-        },
-        image_not_present_in_draft() {
-            this.image_container_class = 'hide';
-            this.wordPad_class ='full-width';
-            this.drag_container_class='hide';
-        },
-        image_present_in_draft() {
-            this.image_container_class=='hide' ? 
-                (this.image_container_class = 'image_container',
-                this.wordPad_class ='', 
-                this.drag_container_class='')
-                : '';
-        },
-        // construct_image_container(result) {
-        //     var div = document.createElement('div');
-        //     div.appendChild(img.cloneNode(true));
-        //     this.set_img_height(div);
-        //     return div;
-        // },
-        mousemove_event_for_image(div) {
-            div.addEventListener('mouseover', () => {
-                div.children[1].classList.add('show');
-            });
-        },
-        remove_event_for_image(div) {
-            div.children[1].addEventListener('click', () => {
-                this.remove_image(div);
-            });
-        },
-        mouseout_event_for_image(div) {
-            div.addEventListener('mouseout', () => {
-                div.children[1].classList.remove('show');
-            });
-        },
-        set_img_height(div) {
-            if(this.$refs.child_images.length > 0 && this.$refs.child_images[0].getAttribute('style')){
-                var previous = this.$refs.child_images[0].getAttribute('style');
-                div.setAttribute('style',previous);
-            }   
-        },
-        open_image_in_fullView(div, index) {
+        open_image_in_fullView(e,url) {
             var ref = this;
-            div.addEventListener('click', (e) => {
                 if (e.srcElement.tagName != 'SPAN') {
-                    ref.$refs.show_photo.innerHTML = '';
-                    const img = document.createElement('img');
-                    img.setAttribute('src', ref.images_url[index]);
-                    var photo_div = ref.add_image_in_full_screen(img);
-                        photo_div.innerHTML += `<span class="material-symbols-outlined">close</span>`;
-                        ref.$refs.show_photo.appendChild(photo_div);
+                    ref.$refs.full_img.src = url;
                     ref.image_full_view_class='';
                 }
-            })
-        },
-        add_image_in_full_screen(img) {
-            var div = document.createElement('div');
-            div.appendChild(img);
-            return div;
-        },
-        remove_image(div) {
-            var parent = div.parentElement;
-            var index = Array.from(parent.children).indexOf(div);
-            parent.children[index].remove();
-            this.images_url.splice(index, 1);
-            this.save_content(this.default_date);
-            if (this.images_url.length == 0) {
-                this.image_not_present_in_draft();
-            }
         },
         set_global_props(props) {
             if (props["background_image"]) {
@@ -578,10 +530,9 @@ const editor_component = {
         change_background(data) {
             this.$refs.back_ground.style.backgroundImage = `url(${data})`;
             this.background = data;
-            this.save_content(this.default_date);
+            this.save_content(this.date);
         },
         insert_photo(event) {
-            
             const file = event.target.files[0];
             const reader = new FileReader();
             const ref = this;
@@ -590,19 +541,15 @@ const editor_component = {
             };
             reader.readAsDataURL(file);
             this.$refs.image_file.value='';
-            this.check_for_image_change=true;
         },
         storeDataURL(dataURL) {
             this.images_url.push(dataURL);
-            var div = document.createElement('div');
-            this.set_img_height(div);
-            this.$refs.image.appendChild(div);
-            this.save_content(this.default_date);
+            this.save_content(this.date);
         },
         save_content(date) {
             var html = this.$refs.content;
             var back_ground = this.$refs.back_ground.style.backgroundImage;
-            this.$emit('save_content', html, this.images_url, back_ground, date);
+            this.$emit('save_content', html, this.images_url, back_ground, date,this.height);
         },
         add_favourite() {
             this.$emit('add_fav')

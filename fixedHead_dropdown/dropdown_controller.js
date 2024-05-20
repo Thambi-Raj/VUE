@@ -7,6 +7,7 @@ var dropdown_controller = {
                         :dropdown_data=" dropdown_data"
                         :active ='active' 
                         :id='id'
+                        :root_ref="root_ref"
                         @change_value = change_value
                         @change_activestate=change_activestate>
                     </dropdown-root>
@@ -34,6 +35,9 @@ var dropdown_controller = {
         default_selected:{
             type:String
         },
+        root_ref:{
+            type:Object
+        }
     },
     emits:['change_value','change_active'],
     methods: {

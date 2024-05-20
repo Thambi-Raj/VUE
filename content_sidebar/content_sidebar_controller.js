@@ -6,6 +6,7 @@ const content_sidebar_controller = {
                    :last_day="lastDay"
                    :total_favourite="total_favourite"
                    :default_date="default_date"
+                   :root_ref="root_ref"
                    @year_change="change_year" 
                    @month_change="change_month"
                    @back_page="back"
@@ -28,7 +29,10 @@ const content_sidebar_controller = {
     },
     total_favourite: {
       type: Object
-    }
+    },
+    root_ref:{
+      type:Object
+  },
   },
   data() {
     return {

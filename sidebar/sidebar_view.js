@@ -8,6 +8,7 @@ const sidebar_component = {
                 :default_selected="dropdown_value" 
                 :dropdown_data="month_array" 
                 :active="dropdown_selected" 
+                :root_ref="root_ref"
                 @change_active="change_activestate" 
                 @change_value="change_value">
             </dropdown-controller>
@@ -18,6 +19,7 @@ const sidebar_component = {
                 :default_selected="dropdown_value" 
                 :dropdown_data="month_array" 
                 :active="dropdown_selected" 
+                :root_ref="root_ref"
                 @change_active="change_activestate" 
                 @change_value="change_value">
             </dropdown-controller>
@@ -25,6 +27,7 @@ const sidebar_component = {
                 :id="'favorite'" 
                 :button_name="'Favourite'" 
                 :icon_name="'favorite'" 
+                :root_ref="root_ref"
                 @change_active="change_activestate" 
                 :active="dropdown_selected">
             </button-controller>
@@ -32,6 +35,7 @@ const sidebar_component = {
                 :id="'bookmark'" 
                 :button_name="'Bookmarks'" 
                 :icon_name="'bookmarks'" 
+                :root_ref="root_ref"
                 @change_active="change_activestate" 
                 :active="dropdown_selected">
             </button-controller>
@@ -41,6 +45,9 @@ const sidebar_component = {
         dropdown_selected: String,
         dropdown_value: String,
         month_array:Array,
+        root_ref:{
+            type:Object
+        }
     },
     emits:['change_dropdown_head','change_dropdown_value','change_mention'],
     methods: {

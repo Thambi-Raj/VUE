@@ -6,6 +6,7 @@ var button_controller = {
             :icon_name="icon_name"
             @button_clicked="button_clicked" 
             :active="active"
+            :root_ref="root_ref"
             :drop_down=show_drop>
             </button-root>
     `,
@@ -21,6 +22,9 @@ var button_controller = {
         },
         active:{
             type:String
+        },
+        root_ref:{
+            type:Object
         }
     },
     data() {

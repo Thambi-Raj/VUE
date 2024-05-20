@@ -2,8 +2,8 @@ const content_sidebar_component = {
     template: `<div class="content-sidebar">
                     <div id="head"> 
                         <span class="material-symbols-outlined" @click="back">logout</span>
-                        <simple-dropdown-controller width="sidebar-dropdown" :default_val="dropdown_value" :data="month_array" :name="'month'" :tag="'-'" @change_format="change_drop"></simple-dropdown-controller>
-                        <simple-dropdown-controller width="sidebar-dropdown" :default_val="year2" :data="year" :name="'year'" :tag="'-'" @change_format="change_drop"></simple-dropdown-controller>
+                        <simple-dropdown-controller width="sidebar-dropdown" :default_val="dropdown_value" :data="month_array" :name="'month'" :tag="'-'" @change_format="change_month"></simple-dropdown-controller>
+                        <simple-dropdown-controller width="sidebar-dropdown" :default_val="year2" :data="year" :name="'year'" :tag="'-'" @change_format="change_year"></simple-dropdown-controller>
                     </div>
                     <div id="body" ref="scroll_container">
                         <div id="day-container" v-for="date in last_day" :key="date" :class="{ active: date === this.default_date }" >
@@ -13,12 +13,12 @@ const content_sidebar_component = {
                             :favourite_data="total_favourite"
                             :data="data[date]"
                             :date="date"
+                            :root_ref="root_ref"
                             :show_date="true"
                             :favourite_access="true"
                             @add_to_favourite="add_fav"
                             @change_default_date="change_date">
                         </preview-controller>
-                        
                         </div>
                     </div>
                 </div>`
@@ -44,11 +44,13 @@ const content_sidebar_component = {
         },
         total_favourite:{
             type:Object
-        }
+        },
+        root_ref:{
+            type:Object
+        },
     },
     mounted() {
         var container_Rect = this.$refs.scroll_container.children[this.default_date - 1];
-        console.log( this.default_date);
         var scrolltop = container_Rect.clientHeight * (this.default_date - 1);
         this.$refs.scroll_container.scrollTop = scrolltop;
         this.get_favourite()
@@ -56,8 +58,6 @@ const content_sidebar_component = {
     data() {
         return {
             year: [2023, 2024],
-            month_drop: false,
-            year_drop: false,
             year2: this.dropdown_selected.split('_')[1],
             favourite:''
         }
@@ -83,12 +83,19 @@ const content_sidebar_component = {
         get_favourite(){
            this.favourite = JSON.parse(localStorage.getItem('Favourite')) || {}
         },
+        change_month(val){
+            this.root_ref.eventbus.change_value(val)
+        },
+        change_year(year){
+            this.root_ref.eventbus.change_head(('year_'+year))
+        },
         change_drop(index) {
             typeof index == "string" ? (this.month_drop = false, this.$emit('month_change', index))
                 : (this.year_drop = false, this.year2 = index, this.$emit('year_change', 'year_' + this.year2));
         },
         back() {
-            this.$emit('back_page', this.dropdown_value, ('year_' + this.year2), 1);
+            // this.$emit('back_page', this.dropdown_value, ('year_' + this.year2), 1);
+            this.root_ref.eventbus.change_right_template('calendar');  
         },
         add_fav(date){
             this.$emit('add_favourite',date);

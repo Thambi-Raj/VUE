@@ -2,6 +2,7 @@ const calendar_controller = {
     template: `<calendar-root 
     :month=month
     :year =year 
+    :root_ref="root_ref"
     :month_preview = month_preview
      @page_change = page_change>
     </calendar-root>`,
@@ -17,7 +18,10 @@ const calendar_controller = {
         },
         total_favourite:{
             type:Object
-        }
+        },
+        root_ref:{
+            type:Object
+        },
     },
     methods:{
         page_change(date){

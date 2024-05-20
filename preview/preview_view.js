@@ -14,7 +14,7 @@ const preview_component={
                 </i>
                 </div>
                 <div id="editor" :class="{ 'hide': !data }">                             
-                    <editor-controller :data="data || {}" :preview="false"></editor-controller>
+                    <editor-controller :data="data || {}" :preview="false" :date=date></editor-controller>
                 </div>
             </div>
         </div>
@@ -48,7 +48,10 @@ const preview_component={
         year: {
             type: [String, Number],
             default: 2024
-        }
+        },
+        root_ref:{
+            type:Object
+        },
     },
     methods:{
        check_data(){
@@ -58,14 +61,18 @@ const preview_component={
             return false;
        },
        content_click(e,date,event) {
+
         if(event.srcElement.tagName=='I' && event.srcElement.classList.contains('fa')){
             event.srcElement.classList.contains('fa-heart') ? 
             (event.srcElement.classList.remove('fa-heart'), event.srcElement.classList.add('fa-heart-o')) :
             (event.srcElement.classList.remove('fa-heart-o'), event.srcElement.classList.add('fa-heart'));   
-            this.$emit('add_fav',date);
+            // this.$emit('add_fav',date);
+            this.root_ref.eventbus.add_to_favourite(date);
         }
         else if(!e.classList.contains('active')){
-            this.$emit('change_date', date);
+            // this.$emit('change_date', date);
+            this.root_ref.eventbus.change_date(date);
+            this.root_ref.eventbus.change_right_template('editor');
         }
     },
     }

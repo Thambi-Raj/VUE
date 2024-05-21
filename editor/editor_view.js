@@ -1,5 +1,5 @@
 const editor_component = {
-    template: `<div class="editor-root" ref="editor_width" :class="{ preview: preview_class !== '' }">
+    template: `<div class="editor-root" ref="editor_width">
                  <div id="editor-tool" ref="editor_tool" v-if="preview">
                    <div :class="{ 'button clicked': active_state.bold, 'button': !active_state.bold }" id="bold" @click="change_text_format('bold')">
                    <span class="material-symbols-outlined">format_bold</span>
@@ -25,6 +25,7 @@ const editor_component = {
                    <simple-dropdown-controller width="small_width" :default_val="back_ground" :data="texture" :name="'background'" :tag="'image'" @change_background="change_background"></simple-dropdown-controller>
                 
                    </div> 
+<<<<<<< HEAD
                    <div id="texture-field" ref="back_ground">
                          <div id="word-pad" contenteditable="true" ref="content" spellcheck="false" 
                             @click="editor_click_event" 
@@ -48,6 +49,21 @@ const editor_component = {
                         </div>
                  </div>   
                  <div id="full_container_photo" :class=image_full_view_class  @click="close_container" ref="full_container">
+=======
+                 <div id="texture-field" ref="back_ground" >
+                    <div id="word-pad" contenteditable="true" ref="content" spellcheck="false">
+                    <div class="line-content"></div>
+                    </div>
+                    <div id="drag_container" ref="drag" @mousedown="start_drag_event">
+                    
+                    </div>
+                    <div id="imageContainer" ref="image" class="image_container">
+                    
+                    </div>
+                 </div>    
+                 <div id="full_container_photo" class="hide"  @click="close_container" ref="full_container">
+                      
+>>>>>>> parent of ddd91e1 (for updating  before backup)
                      <div id="image_con"  ref="show_photo">
                             <div>
                                <img src="" ref="full_img">
@@ -82,12 +98,16 @@ const editor_component = {
             font_tag_length: -1,
             images_url: [],
             back_ground: '',
+<<<<<<< HEAD
             preview_class:'',
             image_container_class:'image_container',
             drag_container_class:'',
             wordPad_class:'',
             image_full_view_class:'hide', 
             height:''
+=======
+
+>>>>>>> parent of ddd91e1 (for updating  before backup)
         };
     },
     props: {
@@ -108,14 +128,21 @@ const editor_component = {
         },
         default_date: {
             type: Number,
+<<<<<<< HEAD
         },
         date:{
             type:[Number,String]
         },
+=======
+            default: 0
+        }
+>>>>>>> parent of ddd91e1 (for updating  before backup)
     },
     mounted() {
+        this.preview ? this.editor_functionality():'';
         this.check_for_draft();
         this.check_for_preview();
+<<<<<<< HEAD
         this.images_url =this.image;  
     },
     watch: {
@@ -127,16 +154,28 @@ const editor_component = {
             }
             this.height='';
         },
+=======
+        this.convert_url_to_image(this.image);
+    },
+    watch: {
+>>>>>>> parent of ddd91e1 (for updating  before backup)
         data() {
             this.check_for_draft();
         },
         image() {
-            this.images_url =this.image;
+            this.convert_url_to_image(this.image);
         },
     },
     methods: {
+<<<<<<< HEAD
         editor_click_event(e){
             if(this.preview){
+=======
+        editor_functionality() {
+            var editor = this.$refs.content;
+            editor.focus();
+            editor.addEventListener('click', (e) => {
+>>>>>>> parent of ddd91e1 (for updating  before backup)
                 if (e.srcElement != this.$refs.content) {
                     this.get_current_element(e.srcElement, e);
                 }
@@ -144,6 +183,7 @@ const editor_component = {
                     var last_child = this.$refs.content.childNodes[this.$refs.content.childNodes.length - 1];
                     this.traverse_element(last_child, false);
                 }
+<<<<<<< HEAD
             }
         },     
         editor_keydown_event(e){
@@ -162,6 +202,26 @@ const editor_component = {
                 this.save_content(this.date);
             }
             this.update_cursor_position_toolbar();
+=======
+            })
+            editor.addEventListener('keydown', (e) => {
+                if (this.$refs.content.innerText.length <= 1 && e.key == 'Backspace') {
+                    this.check_content_empty();
+                    e.preventDefault();
+                }
+                else if (e.key == 'Backspace') {
+                    this.delete_empty_styles_tag(e);
+                }
+            })
+            editor.addEventListener('keyup', (e) => {
+                this.check_for_previous_span();
+                var pattern = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
+                if (pattern.test(e.key) || e.key === 'Enter' || e.key === 'Backspace') {
+                    this.save_content(this.default_date);
+                }
+                this.update_cursor_position_toolbar();
+            })
+>>>>>>> parent of ddd91e1 (for updating  before backup)
         },
         getheight() {
             return this.height ? { height: this.height } : {};
@@ -170,13 +230,19 @@ const editor_component = {
             this.reset_Active();
             this.template != '' ? this.$refs.content.innerHTML = this.template : this.$refs.content.innerHTML = ' <div class="line-content"></div>'
             this.set_global_props(this.global_props);
+<<<<<<< HEAD
+=======
+            this.check_for_image_container(this.images_url);
+            this.check_for_full_imageView();
+>>>>>>> parent of ddd91e1 (for updating  before backup)
         },
         check_for_preview() {
             if (!this.preview) {
                 this.$refs.content.setAttribute('contentEditable', 'false');
-                this.preview_class = 'preview';
+                this.$refs.editor_width.classList.add('preview')
             }
         },
+<<<<<<< HEAD
         image_hover(index){
             this.$refs.delete_icon[index].classList.add('show');
         },
@@ -194,6 +260,21 @@ const editor_component = {
                 }
                 this.height='';
 
+=======
+        convert_url_to_image(result) {
+            const image_container = this.$refs.image;
+            image_container.innerHTML = '';
+            this.images_url = [];
+            this.check_for_image_container(result)
+            for (let i = 0; i < result.length; i++) {
+                var div = this.construct_image_container(result[i]);
+                image_container.appendChild(div);
+                this.open_image_in_fullView(div, i);
+                this.mousemove_event_for_image(div);
+                this.mouseout_event_for_image(div);
+                this.remove_event_for_image(div);
+                this.images_url.push(result[i])
+>>>>>>> parent of ddd91e1 (for updating  before backup)
             }
             this.save_content(this.date);
         },
@@ -203,7 +284,7 @@ const editor_component = {
             this.reset_Active();
         },
         delete_empty_styles_tag(event) {
-            var sel = window.getSelection();
+            var sel = document.getSelection();
             if (sel.anchorNode.parentNode.textContent.length == 1 && sel.anchorNode.parentNode.tagName != 'DIV') {
                 var spanParent = sel.anchorNode.parentNode;
                 spanParent.parentNode.removeChild(spanParent);
@@ -246,7 +327,7 @@ const editor_component = {
             });   
         },
         update_cursor_position_toolbar() {
-            var sel = window.getSelection();
+            var sel = document.getSelection();
             this.reset_Active();
             if (sel.anchorNode.tagName) {
                 this.update_toolbar_button(sel.anchorNode);
@@ -277,11 +358,10 @@ const editor_component = {
             else {
                 result_x -= (2 / 100) * background.width;
             }
-            this.minimum_width_imageContainer(result_x, target);
+            this.minimum_width_imageContainer(result_x, target, background);
             return result_x;
         },
-        minimum_width_imageContainer(result_x, target) {
-            background= this.$refs.back_ground.getBoundingClientRect();
+        minimum_width_imageContainer(result_x, target, background) {
             var parent_width = target.clientWidth;
             const content = this.$refs.content;
             const image = this.$refs.image;
@@ -319,7 +399,7 @@ const editor_component = {
                 this.check_styles_in_element(element)
             }
             else {
-                var sel = window.getSelection();
+                var sel = document.getSelection();
                 var content_length = sel.anchorOffset;
                 if (content_length <=0) {
                     this.traverse_element(element, true)
@@ -503,11 +583,78 @@ const editor_component = {
                 'background': 'texture31.webp'
             }
         },
+<<<<<<< HEAD
         open_image_in_fullView(e,url) {
+=======
+        check_for_full_imageView() {
+            !this.$refs.full_container.classList.contains('hide') ?
+                this.$refs.full_container.classList.add('hide') : '';
+        },
+        check_for_image_container(images) {
+            if (images.length == 0) {
+                this.image_not_present_in_draft();
+            }
+            else {
+                this.image_present_in_draft();
+            }
+        },
+        image_not_present_in_draft() {
+            this.$refs.image.classList.add('hide');
+            this.$refs.content.classList.add('full-width');
+            this.$refs.drag.classList.add('hide')
+        },
+        image_present_in_draft() {
+            this.$refs.image.classList.contains('hide') ? (this.$refs.image.classList.remove('hide'),
+                this.$refs.content.classList.remove('full-width'), this.$refs.drag.classList.remove('hide'))
+                : '';
+        },
+        construct_image_container(result) {
+            const img = document.createElement('img');
+            img.setAttribute('src', result);
+            var span = '<span class="material-symbols-outlined">delete</span>'
+            var div = document.createElement('div');
+            div.appendChild(img.cloneNode(true));
+            div.innerHTML += span;
+            this.set_img_height(div);
+            return div;
+        },
+        mousemove_event_for_image(div) {
+            div.addEventListener('mouseover', () => {
+                div.children[1].classList.add('show');
+            });
+        },
+        remove_event_for_image(div) {
+            div.children[1].addEventListener('click', () => {
+                this.remove_image(div);
+            });
+        },
+        mouseout_event_for_image(div) {
+            div.addEventListener('mouseout', () => {
+                div.children[1].classList.remove('show');
+            });
+        },
+        set_img_height(img) {
+            var img_width = this.$refs.image.clientWidth;
+            const aspectRatio = 16 / 14;
+            const height = img_width / aspectRatio;
+            img.style.height = height + "px";
+        },
+        open_image_in_fullView(div, index) {
+>>>>>>> parent of ddd91e1 (for updating  before backup)
             var ref = this;
                 if (e.srcElement.tagName != 'SPAN') {
+<<<<<<< HEAD
                     ref.$refs.full_img.src = url;
                     ref.image_full_view_class='';
+=======
+                    ref.$refs.show_photo.innerHTML = '';
+                    const img = document.createElement('img');
+                    img.setAttribute('src', ref.images_url[index]);
+                    var photo_div = ref.add_image_in_full_screen(img);
+                    photo_div.innerHTML += `<span class="material-symbols-outlined">close</span>`;
+                    ref.$refs.show_photo.appendChild(photo_div);
+                    ref.$refs.full_container.classList.remove('hide');
+>>>>>>> parent of ddd91e1 (for updating  before backup)
                 }
         },
         set_global_props(props) {
@@ -533,15 +680,33 @@ const editor_component = {
             const file = event.target.files[0];
             const reader = new FileReader();
             const ref = this;
+            if (this.images_url.length == 0) {
+                this.$refs.image.classList.contains('hide') ? (this.$refs.image.classList.remove('hide'),
+                    this.$refs.content.classList.remove('full-width'), this.$refs.drag.classList.remove('hide')) : '';
+            }
             reader.onload = function () {
+                const i = ref.images_url.length;
+                var div = ref.construct_image_container(reader.result);
+                ref.$refs.image.appendChild(div);
+                ref.open_image_in_fullView(div, i);
+                ref.mousemove_event_for_image(div);
+                ref.mouseout_event_for_image(div);
+                ref.remove_event_for_image(div);
                 ref.storeDataURL(reader.result);
             };
             reader.readAsDataURL(file);
+<<<<<<< HEAD
             this.$refs.image_file.value='';
         },
         storeDataURL(dataURL) {
             this.images_url.push(dataURL);
             this.save_content(this.date);
+=======
+        },
+        storeDataURL(dataURL) {
+            this.images_url.push(dataURL);
+            this.save_content(this.default_date);
+>>>>>>> parent of ddd91e1 (for updating  before backup)
         },
         save_content(date) {
             var html = this.$refs.content;
@@ -553,7 +718,7 @@ const editor_component = {
         },
         close_container(event) {
             if (event.target.tagName == 'SPAN') {
-                this.image_full_view_class='hide';
+                this.$refs.full_container.classList.add('hide');
             }
         }
     }

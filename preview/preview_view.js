@@ -53,6 +53,7 @@ const preview_component={
             type:Object
         },
     },
+<<<<<<< HEAD
    
     methods:{
        check_favourite(){
@@ -63,9 +64,18 @@ const preview_component={
                         return true;  
                   }
                }
+=======
+    // mounted(){
+    //     console.log(this.favourite_access && this.data);
+    // },
+    methods:{
+      check_data(){
+            if(this.favourite_data[this.year] &&  this.favourite_data[this.year][this.month] &&  this.favourite_data[this.year][this.month][this.date]){
+                return true
+>>>>>>> parent of ddd91e1 (for updating  before backup)
             }
-            return false;
-       },
+        return false;
+        },
        content_click(e,date,event) {
         if(event.srcElement.tagName=='I' && event.srcElement.classList.contains('fa')){
             event.srcElement.classList.contains('fa-heart') ? 

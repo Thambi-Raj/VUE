@@ -110,11 +110,8 @@ const editor_component = {
             type: Number,
         },
         date:{
-            type:Number
+            type:[Number,String]
         },
-        image_change:{
-            type:Number
-        }
     },
     mounted() {
         this.check_for_draft();

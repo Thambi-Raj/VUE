@@ -20,11 +20,11 @@ const event_bus = {
         },
         change_dropdown_value(val){
             this.root.dropdown_value = val;
-            this.root.update_month_preview()
+            this.root.update_month_preview();
             this.root.get_data();
         },
         change_right_template(name){
-            this.root.right_template = name; 
+            this.root.change_template(name); 
         },
         change_date(date){
             this.root.default_date =date;

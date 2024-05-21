@@ -1,16 +1,16 @@
-const content_sidebar_component = {
+const previewSidebar_component = {
     template: `<div class="content-sidebar">
                     <div id="head"> 
                         <span class="material-symbols-outlined" @click="back">logout</span>
-                        <simple-dropdown-controller width="sidebar-dropdown" :default_val="dropdown_value" :data="month_array" :name="'month'" :tag="'-'" @change_format="change_month"></simple-dropdown-controller>
-                        <simple-dropdown-controller width="sidebar-dropdown" :default_val="year2" :data="year" :name="'year'" :tag="'-'" @change_format="change_year"></simple-dropdown-controller>
+                        <simple-dropdown-controller width="sidebar-dropdown" :default_val="month" :data="month_array" :name="'month'" :tag="'-'" @change_format="change_month"></simple-dropdown-controller>
+                        <simple-dropdown-controller width="sidebar-dropdown" :default_val="year" :data="year_Array" :name="'year'" :tag="'-'" @change_format="change_year"></simple-dropdown-controller>
                     </div>
                     <div id="body" ref="scroll_container">
-                        <div id="day-container" v-for="date in last_day" :key="date" :class="{ active: date === this.default_date }" >
+                        <div id="day-container" v-for="date in total_count" :key="date" :class="{ active: date === this.date }" >
                         <preview-controller 
-                            :year="dropdown_selected"
-                            :month="dropdown_value"
-                            :favourite_data="total_favourite"
+                            :year="year"
+                            :month="month"
+                            :favourite_data="favourite_data"
                             :data="data[date]"
                             :date="date"
                             :root_ref="root_ref"
@@ -24,41 +24,40 @@ const content_sidebar_component = {
                 </div>`
 ,
     props: {
-        dropdown_selected: {
-            type: String,
+        year: {
+            type: [Number,String],
         },
-        dropdown_value: {
+        month: {
             type: String
         },
-        default_date:{
+        date:{
             type:Number
         },
         month_array: {
             type: Array
         },
-        last_day: {
+        total_count: {
             type: Number
         },
         data:{
             type:Object
         },
-        total_favourite:{
-            type:Object
+        favourite_data:{
+            type:Array
         },
         root_ref:{
             type:Object
         },
     },
     mounted() {
-        var container_Rect = this.$refs.scroll_container.children[this.default_date - 1];
-        var scrolltop = container_Rect.clientHeight * (this.default_date - 1);
+        var container_Rect = this.$refs.scroll_container.children[this.date - 1];
+        var scrolltop = container_Rect.clientHeight * (this.date - 1);
         this.$refs.scroll_container.scrollTop = scrolltop;
-        this.get_favourite()
+        this.get_favourite();
     },
     data() {
         return {
-            year: [2023, 2024],
-            year2: this.dropdown_selected.split('_')[1],
+            year_Array: [2023, 2024],
             favourite:''
         }
     },
@@ -70,15 +69,6 @@ const content_sidebar_component = {
         remove_hover_class(e){
             e.srcElement.classList.remove('hover')
             e.srcElement.classList.add('default_class');
-
-        },
-        check_data(data,date){
-            if(data){
-                if(this.favourite[this.dropdown_selected] &&  this.favourite[this.dropdown_selected][this.dropdown_value] &&  this.favourite[this.dropdown_selected][this.dropdown_value][date]){
-                    return true
-                }
-            }
-            return false;
         },
         get_favourite(){
            this.favourite = JSON.parse(localStorage.getItem('Favourite')) || {}
@@ -86,15 +76,14 @@ const content_sidebar_component = {
         change_month(val){
             this.root_ref.eventbus.change_value(val)
         },
-        change_year(year){
-            this.root_ref.eventbus.change_head(('year_'+year))
-        },
-        change_drop(index) {
-            typeof index == "string" ? (this.month_drop = false, this.$emit('month_change', index))
-                : (this.year_drop = false, this.year2 = index, this.$emit('year_change', 'year_' + this.year2));
+        change_year(val){
+            this.root_ref.eventbus.change_head(val);
+            this.root_ref.eventbus.get_dropdown_values(val);
+            this.root_ref.eventbus.change_value(this.month_array[0]);
         },
         back() {
-            // this.$emit('back_page', this.dropdown_value, ('year_' + this.year2), 1);
+            console.log(this.root_ref.dropdown_selected);
+            // this.$emit('back_page', this.month, ('year_' + this.year2), 1);
             this.root_ref.eventbus.change_right_template('calendar');  
         },
         add_fav(date){

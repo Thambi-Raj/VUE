@@ -5,7 +5,7 @@ const simple_dropdown_component = {
         <span class="material-symbols-outlined">{{dropdown_icon}}</span>
     </div>
     <div id="option" v-if="dropdown_visible" :class="option_class_name">
-        <span v-for="element in data" @click="change_drop(element,name)" :class="{ 'clicked': element === selected_value, 'material-symbols-outlined': tag === 'span' }">
+        <span v-for="element in data" @click="change_drop(element,name)" :class="{ 'clicked': element == selected_value, 'material-symbols-outlined': tag === 'span' }">
             {{element}}
         </span>
     </div>
@@ -16,7 +16,7 @@ const simple_dropdown_component = {
     <span class="material-symbols-outlined">{{dropdown_icon}}</span>
 </div>
 <div id="option" v-if="dropdown_visible" :class="option_class_name">
-    <div v-for="element in data" :key="element" class="image_dropdown" :class="{ 'clicked': element === selected_value }" @click="change_drop(element, 'back_ground')">
+    <div v-for="element in data" :key="element" class="image_dropdown" :class="{ 'clicked': element == selected_value }" @click="change_drop(element, 'back_ground')">
         <img :src="getImageUrl(element)" class="drop-down-image" >
     </div>
 </div>
@@ -45,7 +45,7 @@ const simple_dropdown_component = {
     methods: {
         show_drop() {
             this.dropdown_visible = !this.dropdown_visible;
-           this.dropdown_icon = this.dropdown_icon=="arrow_drop_up" ?"arrow_drop_down":"arrow_drop_up";
+            this.dropdown_icon = this.dropdown_icon=="arrow_drop_up" ?"arrow_drop_down":"arrow_drop_up";
         },
         change_drop(data,back) {
             this.dropdown_visible = false;

@@ -20,7 +20,7 @@ const editor_controller = {
             default:false
         },
         date:{
-            type:Number
+            type:[Number,String]
         },
     },
     watch:{

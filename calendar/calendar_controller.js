@@ -11,12 +11,9 @@ const calendar_controller = {
             type: String
         },
         year: {
-            type: String
+            type: [String,Number]
         },
         month_preview:{
-            type:Object
-        },
-        total_favourite:{
             type:Object
         },
         root_ref:{

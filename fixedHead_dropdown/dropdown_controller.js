@@ -1,12 +1,11 @@
 var dropdown_controller = {
-    template: `<div :class="active == id ? 'section clicked' : 'section' " :id ='id' > 
+    template: `<div :class="active == name ? 'section clicked' : 'section' "  > 
                     <dropdown-root  
-                        :first_icon='first_icon' 
+                        :icon=icon 
                         :name='name'
                         :default_selected='default_selected'
                         :dropdown_data=" dropdown_data"
                         :active ='active' 
-                        :id='id'
                         :root_ref="root_ref"
                         @change_value = change_value
                         @change_activestate=change_activestate>
@@ -21,16 +20,13 @@ var dropdown_controller = {
             type: Array,
         },
         name:{
-            type:String,
+            type:[String,Number],
         },
-        first_icon:{
+        icon:{
             type:String
-        },
-        id:{
-            type:String 
         },
         active:{
-            type:String
+            type:[String,Number]
         },
         default_selected:{
             type:String

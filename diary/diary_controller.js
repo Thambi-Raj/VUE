@@ -3,14 +3,12 @@ const diary_controller = {
                     :dropdown_selected="dropdown_selected" 
                     :dropdown_value = dropdown_value
                     :default_date=default_date 
-                    :editor_view=editor_view
                     :month_preview=month_preview  
-                    :total_favourite=total_favourite
                     :default_date_data="default_date_data"
-                    :container_format_data="container_format_data"
                     :root_ref="root_ref"
                     :right_template = "right_template"
                     :dropdown_values="dropdown_values"
+                    :favourite_data="favourite_data"
                     @change_page="page_change"
                     @change_dropdown_head="change_dropdown_head" 
                     @change_dropdown_value="change_dropdown_value"
@@ -27,14 +25,9 @@ const diary_controller = {
             type: String
         },
         dropdown_selected: {
-            type: String
+            type: [String,Number]
         },
-        container_format_data: {
-            type: Array
-        },
-        editor_view: {
-            type: Boolean
-        },
+       
         default_date: {
             type:Number
         },
@@ -44,9 +37,6 @@ const diary_controller = {
         month_preview:{
             type:Object
         },
-        total_favourite:{
-            type:Object
-        }, 
         root_ref:{
             type:Object
         }, 
@@ -55,19 +45,16 @@ const diary_controller = {
         },
         dropdown_values:{
             type:Array
+        },favourite_data:{
+            type:Array
         }
-    },
-    mounted(){
-        console.log(this.dropdown_values);
     },
     emits: ["page_change", "change_dropdown_head", "change_dropdown_value", "save_json", "change_date", "add_favourite","update_month_preview","construct_container_format","change_editor_view"],
     methods: {
         change_dropdown_head(data, bool) {
-            console.log('no');
             this.$emit('change_dropdown_head',data,bool);
         },
         change_dropdown_value(data, bool) {
-            console.log('yes');
             this.$emit('change_dropdown_value',data,bool);
         },
         page_change(date) {

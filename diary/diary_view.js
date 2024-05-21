@@ -7,17 +7,18 @@ const diary_component = {
                 :dropdown_value="dropdown_value"
                 :month="dropdown_values"
                 :root_ref="root_ref"
+                :active="actived"
                 @change_drop_head="change_drop_head" 
                 @change_drop_value="change_drop_value" 
                 >
             </sidebar-controller>
-            <contentSidebar-controller v-else 
-                :dropdown_selected="dropdown_selected" 
-                :dropdown_value="dropdown_value"
-                :default_date="default_date"
-                :month="dropdown_values"
+            <previewSidebar-controller v-else 
+                :year="dropdown_selected" 
+                :month="dropdown_value"
+                :date="default_date"
+                :month_Array="dropdown_values"
                 :data="month_preview"
-                :total_favourite="total_favourite"
+                :favourite_data="favourite_data"
                 :root_ref="root_ref"
                 @drop ="  change_drop_head"
                 @drop1="change_drop_value"
@@ -25,17 +26,16 @@ const diary_component = {
                 @change_date="change_default_date"
                 @add_fav=add_favourite
                 >
-            </contentSidebar-controller>
+            </previewSidebar-controller>
         </div>
         <div id="right-container-root">
         <calendar-controller v-if="right_template === 'calendar'" 
                 :month="dropdown_value"
                 :year="dropdown_selected" 
-                :default_date="default_date"
                 :month_preview="month_preview"
                 :root_ref="root_ref"
                 @change_page="change_page"
-                :total_favourite="total_favourite">
+                >
         </calendar-controller>
         <editor-controller v-if= "right_template === 'editor'"  
                 :data="default_date_data" 
@@ -46,8 +46,8 @@ const diary_component = {
         <container-controller  v-if ="right_template === 'container'"
                 :name="dropdown_selected"
                 :span="dropdown_selected"
-                :container_data="container_format_data"
-                :total_favourite="total_favourite"
+                :favourite_data="favourite_data"
+                :root_ref="root_ref"
                 @change_left_pane="change_left_pane">
         </container-controller>
         </div>
@@ -57,13 +57,7 @@ const diary_component = {
             type: String
         },
         dropdown_selected: {
-            type: String
-        },
-        container_format_data: {
-            type: Array
-        },
-        editor_view: {
-            type: Boolean
+            type: [String,Number]
         },
         default_date: {
             type:Number
@@ -74,9 +68,9 @@ const diary_component = {
         month_preview:{
             type:Object
         },
-        total_favourite:{
-            type:Object
-        }, 
+        favourite_data:{
+            type:Array
+        },
         root_ref:{
             type:Object
         },
@@ -88,18 +82,12 @@ const diary_component = {
         }
     },
     emits: ['change_page','page_change', 'change_dropdown_value', 'change_dropdown_head',"save_json","change_date","add_fav"," change_left_pane","change_editor_view","get_favourite_data","update_month_preview"],
-    mounted() {
-        this.result_template = 'calendar';
-        var cur = new Date().getFullYear();
-        var mon = new Date().getMonth();
-        this.months = cur == this.dropdown_selected.split('_')[1] ? this.months.slice(0, (mon + 1)) : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    },
     data() {
         return {
             result_template: '',
             months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            active: [],
-            favourite_template:false
+            favourite_template:false,
+            actived:this.dropdown_selected
         };
     },
     methods: {
@@ -115,7 +103,7 @@ const diary_component = {
             var mon = new Date().getMonth();
             this.result_template = 'calendar';
             if (data.startsWith('year')) {
-                this.months = cur == data.split('_')[1] ? this.months.slice(0, mon + 1) : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                this.months = cur == data ? this.months.slice(0, mon + 1) : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                 this.$emit('change_dropdown_value', 'Jan');
                 this.favourite_template = false;
                 this.$emit('change_dropdown_head', data);   

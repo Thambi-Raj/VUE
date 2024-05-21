@@ -25,7 +25,7 @@ const preview_controller = {
             default: {}
         },
         favourite_data: {
-            type: Object,
+            type: Array,
             default: {}
         },
         date: {

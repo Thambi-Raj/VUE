@@ -10,7 +10,7 @@ const preview_component={
             <div id="second">
                <div id="favourite" v-if="favourite_access && data">
                  <i  
-                    :class="check_data(date) ? 'fa fa-heart' : 'fa fa-heart-o'">
+                    :class="check_favourite(date) ? 'fa fa-heart' : 'fa fa-heart-o'">
                 </i>
                 </div>
                 <div id="editor" :class="{ 'hide': !data }">                             
@@ -34,7 +34,7 @@ const preview_component={
             default:{}
         },
         favourite_data:{
-            type:Object,
+            type:Array,
             default:false
         },
         date:{
@@ -53,25 +53,31 @@ const preview_component={
             type:Object
         },
     },
+   
     methods:{
-       check_data(){
-            if(this.favourite_data[this.year] &&  this.favourite_data[this.year][this.month] &&  this.favourite_data[this.year][this.month][this.date]){
-                return true
+       check_favourite(){
+            for(var i=0;i<this.favourite_data.length;i++){
+               var key = Object.keys(this.favourite_data[i])[0];
+               if( key  == (this.month+'_'+this.year)){
+                  if(this.favourite_data[i][key].includes(this.date+"")){
+                        return true;  
+                  }
+               }
             }
             return false;
        },
        content_click(e,date,event) {
-
         if(event.srcElement.tagName=='I' && event.srcElement.classList.contains('fa')){
             event.srcElement.classList.contains('fa-heart') ? 
             (event.srcElement.classList.remove('fa-heart'), event.srcElement.classList.add('fa-heart-o')) :
             (event.srcElement.classList.remove('fa-heart-o'), event.srcElement.classList.add('fa-heart'));   
-            // this.$emit('add_fav',date);
             this.root_ref.eventbus.add_to_favourite(date);
         }
         else if(!e.classList.contains('active')){
-            // this.$emit('change_date', date);
-            this.root_ref.eventbus.change_date(date);
+            if(this.root_ref.right_template==='container'){
+                this.root_ref.eventbus.change_head(this.year);
+            }
+            this.root_ref.eventbus.change_date(parseInt(date));
             this.root_ref.eventbus.change_right_template('editor');
         }
     },

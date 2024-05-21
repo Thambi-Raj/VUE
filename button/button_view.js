@@ -1,6 +1,6 @@
 var button_component = {
     template:`<div class="button-root">
-                <div class="button" :class="{ active: active === button_name }" @click="button_clicked">
+                <div class="button" :class="{ active: active === icon_name }" @click="button_clicked">
                     <span class="material-symbols-outlined" v-if="icon_name">{{ icon_name }}</span>
                     <span>{{ button_name }}</span>
                </div>
@@ -13,7 +13,7 @@ var button_component = {
             type:String
         },
         active:{
-            type:String
+            type:[String,Number]
         },
         root_ref:{
             type:Object

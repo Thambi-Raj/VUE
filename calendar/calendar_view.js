@@ -19,7 +19,7 @@ const calendar_component = {
              <preview-controller 
              :year="year"
              :month="month"
-             :favourite_data="total_favourite"
+             :favourite_data="[]"
              :data="month_preview[(rowIndex - 1) * 7 + dayIndex - first_day] || {}"
              :date="(rowIndex - 1) * 7 + dayIndex - first_day"
              :show_date="false"
@@ -45,15 +45,12 @@ const calendar_component = {
     },
     props: {
         year: {
-            type: String
+            type: [Number,String]
         },
         month: {
             type: String
         },
         month_preview:{
-            type:Object
-        },
-        total_favourite:{
             type:Object
         },
         root_ref:{
@@ -68,7 +65,7 @@ const calendar_component = {
     },
     methods: {
         set_config_data() {
-            var year = this.year.split('_')[1];
+            var year = this.year;
             var mon = this.month.toUpperCase() == 'JAN' ? [year - 1, 12] : [year,this.months.indexOf(this.month.toUpperCase())];
             var day = new Date(mon[0],mon[1], 0);  
             this.first_day = day.getDay() == 6 ? 0 : day.getDay() + 1;

@@ -16,11 +16,12 @@ const container_component = {
                                      <preview-controller 
                                      :year="get_year(key)"
                                      :month="get_month(key)"
-                                     :favourite_data="total_favourite"
+                                     :favourite_data="container_data"
                                      :data="get_key_for_data(key,val)"
                                      :date="val"
                                      :show_date="false"
                                      :favourite_access="false"
+                                     :root_ref=root_ref
                                      @change_default_date="get_key_for_data(key,val,'click')">
                                      </preview-controller>
                                      <span id="date">{{val}}</span>
@@ -42,7 +43,7 @@ const container_component = {
         container_data: {
             type: Array
         },
-        total_favourite:{
+        root_ref:{
             type:Object
         }
     },
@@ -57,7 +58,7 @@ const container_component = {
     },
     methods: {
         get_key_for_data(key, date,click) {
-            var year = "year_" + key.split('_')[1];
+            var year =  key.split('_')[1];
             var month = key.split('_')[0].toLowerCase();
             month = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
             click ?(this.$emit('change_left_pane',year,month,date)):'';

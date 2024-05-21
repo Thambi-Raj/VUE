@@ -1,5 +1,11 @@
 const container_controller = {
-    template:   `<container-root :name = name :span=span :container_data=container_data @change_left_pane="change_left_pane"></container-root>`,
+    template:   `<container-root 
+                     :name = name 
+                     :span=span 
+                     :container_data=favourite_data 
+                     :root_ref=root_ref
+                     @change_left_pane="change_left_pane"
+                     ></container-root>`,
     props:{
      name:{
         type:String,
@@ -7,10 +13,10 @@ const container_controller = {
      span:{
         type:String
      },
-     container_data:{
-        type:Array
+     favourite_data:{
+      type:Array
      },
-     total_favourite:{
+     root_ref:{
       type:Object
      }
     },

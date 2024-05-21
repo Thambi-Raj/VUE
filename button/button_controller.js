@@ -1,7 +1,6 @@
 var button_controller = {
     template: `
             <button-root 
-            :id ='id'
             :button_name="button_name" 
             :icon_name="icon_name"
             @button_clicked="button_clicked" 
@@ -17,11 +16,9 @@ var button_controller = {
         icon_name: {
             type: String
         }
-        ,id:{
-            type:String
-        },
+        ,
         active:{
-            type:String
+            type:[String,Number]
         },
         root_ref:{
             type:Object

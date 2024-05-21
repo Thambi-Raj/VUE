@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="/search_dropdown/search-dropdown.css">
     <link rel="stylesheet" href="/calendar/calendar.css">
     <link rel="stylesheet" href="/container/container.css">
-    <link rel="stylesheet" href="/content_sidebar/content_sidebar.css">
+    <link rel="stylesheet" href="/previewSidebar/previewSidebar.css">
     <link rel="stylesheet" href="/editor/editor.css">
     <link rel="stylesheet" href="/dropdown/simpleDropdown.css">
     <link rel="stylesheet" href="/diary/diary.css">
@@ -37,8 +37,8 @@
     <script src="/calendar/calendar_controller.js"></script>
     <script src="/container/container_view.js"></script>
     <script src="/container/container_controller.js"></script>
-    <script src="/content_sidebar/content_sidebar_view.js"></script>
-    <script src="/content_sidebar/content_sidebar_controller.js"></script>
+    <script src="/previewSidebar/previewSidebar_view.js"></script>
+    <script src="/previewSidebar/previewSidebar_controller.js"></script>
     <script src="/editor/editor_view.js"></script>
     <script src="/editor/editor_controller.js"></script>
     <script src="/dropdown/simpleDropdown_view.js"></script>
@@ -59,11 +59,9 @@
                   :dropdown_selected="dropdown_selected" 
                   :dropdown_value = dropdown_value
                   :default_date=default_date 
-                  :editor_view=editor_view
                   :month_preview=month_preview  
-                  :total_favourite=total_favourite
                   :default_date_data="default_date_data"
-                  :container_format_data="container_format_data"
+                  :favourite_data="favourite_data"
                   :root_ref="app"
                   :dropdown_values="dropdown_values"
                   :right_template = "right_template"
@@ -72,7 +70,6 @@
                   @change_dropdown_value="change_dropdown_value"
                   @change_date="change_date"
                   @save_json="save_json"
-                  @change_editor_view= "change_editor_view"
                   @add_favourite="add_fav" 
                   @get_favourite_data="construct_container_format"
                   @update_month_preview ="update_month_preview"
@@ -88,48 +85,39 @@
     const app = Vue.createApp({
         data() {
         return {
-            dropdown_selected: 'year_2024',
+            dropdown_selected: 2024,
             dropdown_value: 'Apr',
             dropdown_values:[],
             default_date: 1,
-            container_format_data: [],
-            editor_view: false,
-            month_preview: this.get_month_preview("year_2024", "Apr"),
+            favourite_data: [],
+            month_preview: this.get_month_preview(2024, "Apr"),
             default_date_data: {},
-            total_favourite: {},
-            dropdown_values:[],
             eventbus:{},
             app:this,
-            right_template:'calendar'
+            right_template:'calendar',
+            favourite_back:false,
         }
     },
     created() {
         this.get_data();
         this.check_favourite();
         this.construct_container_format('favourite');
-        this.get_dropdown_values('year_2024')
+        this.get_dropdown_values(2024)
+    },
+    watch:{
+        right_template(cur,old){
+            if(old =='container' &&  cur =='editor'){
+                this.favourite_back=true;
+            }
+            else{
+                this.favourite_back=false;
+            }
+        },
     },
     emits: ["page_change", "change_dropdown_head", "change_dropdown_value", "change_date", "add_fav", "get_favourite_data"],
     methods: {
-        change_dropdown_head(data, bool) {
-            this.dropdown_selected = data;
-            this.get_data();
-        },
-        change_dropdown_value(data, bool) {
-            this.dropdown_value = data;
-            this.get_data();
-        },
-        page_change(date) {
-            this.editor_view = !this.editor_view;
-            this.default_date = date;
-            this.get_data();
-        },
-        change_date(date) {
-            this.default_date = date;
-            this.get_data();
-        },
         update_month_preview() {
-            this.month_preview = this.get_month_preview(this.dropdown_selected, this.dropdown_value)
+            this.month_preview = this.get_month_preview(this.dropdown_selected, this.dropdown_value);
         },
         construct_container_format() {
             var data = JSON.parse(localStorage.getItem('favorite'));
@@ -142,14 +130,14 @@
                     for (var j = 0; j < res.length; j++) {
                         var get_date = Object.keys(data[keys[i]][res[j]]).sort();
                         if (get_date.length >= 1) {
-                            var s = res[j].toLocaleUpperCase() + '_' + keys[i].split('_')[1];
+                            var s = res[j] + '_' + keys[i];
                             var obj = {};
                             obj[s] = get_date;
                             result.push(obj);
                         }
                     }
                 }
-                this.container_format_data = result;
+                this.favourite_data = result;
             }
         },
         month_based_sort(array) {
@@ -161,7 +149,7 @@
             }
             for (var i = 0; i < index_month.length; i++) {
                 for (var j = i + 1; j < index_month.length; j++) {
-                    if (index_month[i] > index_month[j]) {
+                    if (index_month[i] < index_month[j]) {
                         var temp = index_month[i];
                         index_month[i] = index_month[j];
                         index_month[j] = temp;
@@ -223,17 +211,25 @@
             var get_local = !localStorage.getItem("Data") ? {} : JSON.parse(localStorage.getItem("Data"));
             var condition = get_local
                 && get_local[year] &&
-                get_local[year][month]
-            return condition ? condition : {};
-        },
-        change_editor_view() {
-            this.editor_view = !this.editor_view;
+                get_local[year][month];
+            return condition ? get_local[year][month] : {};
         },
         get_dropdown_values(name){
             var month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
             var cur = new Date().getFullYear();
             var mon = new Date().getMonth();
-            this.dropdown_values = cur == name.split('_')[1] ? month.slice(0, mon + 1) : month;
+            this.dropdown_values = cur == name ? month.slice(0, mon + 1) : month;
+        },
+        change_template(name){
+           if(this.favourite_back){
+                this.right_template ='container';
+                console.log(this.dropdown_selected);
+                this.dropdown_selected ='favorite';
+                this.favourite_back = false;
+           }
+           else{
+               this.right_template=name;
+           }
         }
     },
     })
@@ -250,8 +246,8 @@
     app.component('calendar-controller', calendar_controller);
     app.component('container-root', container_component)
     app.component('container-controller', container_controller);
-    app.component('contentSidebar-root', content_sidebar_component)
-    app.component('contentSidebar-controller', content_sidebar_controller);
+    app.component('previewSidebar-root', previewSidebar_component)
+    app.component('previewSidebar-controller', previewSidebar_controller);
     app.component('editor-controller', editor_controller);
     app.component('editor-root', editor_component);
     app.component('simple-dropdown-root', simple_dropdown_component);

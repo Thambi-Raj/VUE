@@ -14,12 +14,12 @@ const sidebar_controller= {
         </div>
     `,
     props: {
-        dropdown_selected: {type:String},
+        dropdown_selected: {type:[String,Number]},
         dropdown_value: {type:String},
         month:{type:Array},
         root_ref:{
             type:Object
-        }
+        },
     },
     emits:["change_drop_head","change_drop_value","change_mention"],
     methods: {

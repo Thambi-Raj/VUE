@@ -1,4 +1,5 @@
 var dropdown_controller = {
+<<<<<<< HEAD
     template: `<div :class="active == name ? 'section clicked' : 'section' "  > 
                     <dropdown-root  
                         :icon=icon 
@@ -11,20 +12,44 @@ var dropdown_controller = {
                         @change_activestate=change_activestate>
                     </dropdown-root>
                </div>
+=======
+    template: `<div :class="active == id ? 'section clicked' : 'section' " :id ='id' > 
+        <dropdown-root  :first_icon='first_icon' 
+        :title='title'
+        :default_selected='default_selected'
+        :data="data"
+        :active ='active' 
+        :id='id'
+        @change_value = change_value
+        @change_activestate=change_activestate>
+        </dropdown-root>
+        </div>
+>>>>>>> parent of ddd91e1 (for updating  before backup)
         `,
     props:{
         default_selected:{
             type: String,
         },
-        dropdown_data:{
+        data:{
             type: Array,
         },
+<<<<<<< HEAD
         name:{
             type:[String,Number],
+=======
+        title:{
+            type:String,
+>>>>>>> parent of ddd91e1 (for updating  before backup)
         },
         icon:{
             type:String
         },
+<<<<<<< HEAD
+=======
+        id:{
+            type:String
+        },
+>>>>>>> parent of ddd91e1 (for updating  before backup)
         active:{
             type:[String,Number]
         },

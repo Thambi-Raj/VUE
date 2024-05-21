@@ -22,14 +22,15 @@
     display: none;
 }
 .dropdown_root>.active{
-    background-color: #54719112;
-    border-radius: 0px 15px 15px 0px;
+    background-color: #1A222B;
+
 }
 .dropdown_root>#dropdown_head:hover {
-    background-color: #54719112;
+    background-color: #1A222B;
 }
 .dropdown_root>#dropdown_body {
-    padding:0vw 0.3vw 0.3vw 0vw;
+    padding-top: 0.5vw;
+    padding-bottom: 0.5vw;
     background-color: #1A222B;
 }
 .dropdown_root>.hide{
@@ -43,18 +44,13 @@
     background-color: #1A222B;
     padding-left: 1.5vw;
     cursor: pointer;
-    opacity: .7;
 }
 .dropdown_root>#dropdown_body>.dropdown-item:hover{
-    background-color: #0000002e;
-    color: #fff;
-    border-radius: 0px 15px 15px 0px;
+background-color: #3e3e4657;
 }
 .dropdown_root>#dropdown_body>.selected{
-
-color: #fff;
-background-color: #0000002e;
-opacity: 1;
+border: 1px solid #272E3D;
 border-radius: 0px 15px 15px 0px;
-
+color: #fff;
+background-color: #3e3e4657;
 }

@@ -1,6 +1,7 @@
 const sidebar_component = {
     template: `
         <div>
+<<<<<<< HEAD
             <dropdown-controller
                 v-for="(name, index) in  dropDown_head"
                 :icon="'clinical_notes'"
@@ -14,9 +15,42 @@ const sidebar_component = {
              ></dropdown-controller>
             <button-controller 
                 :button_name="'Favourite'" 
+=======
+            <dropdown-controller 
+                :id="'year_2024'" 
+                :first_icon="'clinical_notes'" 
+                :title="'2024'" 
+                :default_selected="dropdown_value" 
+                :data="month_array" 
+                :active="dropdown_selected" 
+                @change_active="change_activestate" 
+                @change_value="change_value">
+            </dropdown-controller>
+            <dropdown-controller 
+                :id="'year_2023'" 
+                :first_icon="'clinical_notes'" 
+                :title="'2023'"  
+                :default_selected="dropdown_value" 
+                :data="month_array" 
+                :active="dropdown_selected" 
+                @change_active="change_activestate" 
+                @change_value="change_value">
+            </dropdown-controller>
+            <button-controller 
+                :id="'favorite'" 
+                :button_name="'favorite'" 
+>>>>>>> parent of ddd91e1 (for updating  before backup)
                 :icon_name="'favorite'" 
                 :root_ref="root_ref"
                 :active="dropdown_selected">
+<<<<<<< HEAD
+=======
+            </button-controller>
+            <button-controller 
+                :id="'bookmark'" 
+                :button_name="'bookmarks'" 
+                :icon_name="'bookmarks'" 
+>>>>>>> parent of ddd91e1 (for updating  before backup)
                 @change_active="change_activestate" 
             </button-controller>
         </div>

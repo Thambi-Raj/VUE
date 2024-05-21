@@ -6,7 +6,11 @@ const previewSidebar_component = {
                         <simple-dropdown-controller width="sidebar-dropdown" :default_val="year" :data="year_Array" :name="'year'" :tag="'-'" @change_format="change_year"></simple-dropdown-controller>
                     </div>
                     <div id="body" ref="scroll_container">
+<<<<<<< HEAD:previewSidebar/previewSidebar_view.js
                         <div id="day-container" v-for="date in total_count" :key="date" :class="{ active: date === this.date }" >
+=======
+                        <div id="day-container" v-for="date in last_day" :key="date" :class="{ active: date === this.$root.default_date }" >
+>>>>>>> parent of ddd91e1 (for updating  before backup):content_sidebar/content_sidebar_view.js
                         <preview-controller 
                             :year="year"
                             :month="month"
@@ -30,9 +34,12 @@ const previewSidebar_component = {
         month: {
             type: String
         },
+<<<<<<< HEAD:previewSidebar/previewSidebar_view.js
         date:{
             type:Number
         },
+=======
+>>>>>>> parent of ddd91e1 (for updating  before backup):content_sidebar/content_sidebar_view.js
         month_array: {
             type: Array
         },
@@ -50,8 +57,13 @@ const previewSidebar_component = {
         },
     },
     mounted() {
+<<<<<<< HEAD:previewSidebar/previewSidebar_view.js
         var container_Rect = this.$refs.scroll_container.children[this.date - 1];
         var scrolltop = container_Rect.clientHeight * (this.date - 1);
+=======
+        var container_Rect = this.$refs.scroll_container.children[this.$root.default_date - 1]
+        var scrolltop = container_Rect.clientHeight * (this.$root.default_date - 1);
+>>>>>>> parent of ddd91e1 (for updating  before backup):content_sidebar/content_sidebar_view.js
         this.$refs.scroll_container.scrollTop = scrolltop;
         this.get_favourite();
     },

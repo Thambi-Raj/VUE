@@ -1,0 +1,149 @@
+[33mcommit 27d0e982d412d051823db0cee3d3e27c26a41da6[m[33m ([m[1;36mHEAD -> [m[1;32mrevert-commit-branch[m[33m, [m[1;31morigin/revert-commit-branch[m[33m)[m
+Author: Thambiraj V <thambiraj-21355@thambi-pt7283.csez.zohocorpin.com>
+Date:   Tue May 21 19:09:16 2024 +0530
+
+    Revert changes from <commit-hash> and moved to new folder
+
+[33mcommit a8eaf02d8c272b2610b2c1b97f4d441c15a07585[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Author: Thambiraj V <thambiraj-21355@thambi-pt7283.csez.zohocorpin.com>
+Date:   Tue May 21 14:53:57 2024 +0530
+
+    before update eventbus
+
+[33mcommit 80d26c430e1fb884700e19d2c2caa24bde92549b[m
+Author: Thambiraj V <thambiraj-21355@thambi-pt7283.csez.zohocorpin.com>
+Date:   Mon May 20 12:07:39 2024 +0530
+
+    before updated dropdown_value
+
+[33mcommit ddd91e14849f676366f63bd02121d120701670d9[m
+Author: Thambiraj V <thambiraj-21355@thambi-pt7283.csez.zohocorpin.com>
+Date:   Thu May 16 20:00:34 2024 +0530
+
+    for updating  before backup
+
+[33mcommit 004473ac30dbe81f4cb3ebf2e7c115e69b917425[m
+Author: Thambiraj V <thambiraj-21355@thambi-pt7283.csez.zohocorpin.com>
+Date:   Tue May 14 12:48:25 2024 +0530
+
+    update folder structure
+
+[33mcommit c3c2f618a6bf60dcae0c4454412d68fe0212a848[m
+Author: Thambiraj V <thambiraj-21355@thambi-pt7283.csez.zohocorpin.com>
+Date:   Mon May 13 15:21:49 2024 +0530
+
+    need to change span tag
+
+[33mcommit c088bab688362c612226f9410d4fee3b4bad5809[m
+Author: Thambiraj V <thambiraj-21355@thambi-pt7283.csez.zohocorpin.com>
+Date:   Wed May 8 13:09:06 2024 +0530
+
+    before changing the keyup event in editor_component
+
+[33mcommit 8f73c60c7174a38f4a6ef7c342c2fa9004bc2080[m
+Author: Thambiraj V <thambiraj-21355@thambi-pt7283.csez.zohocorpin.com>
+Date:   Tue May 7 23:18:24 2024 +0530
+
+    before_backup
+
+[33mcommit de149ad314e5ea4d19d8a1d38090b813efe33bf8[m
+Author: Thambi-Raj <thambirajv123@gmail.com>
+Date:   Tue May 7 15:50:47 2024 +0530
+
+    add a new component named as preview
+
+[33mcommit 752896b74db0a272362647935f5203e2008ad5ef[m
+Author: Thambi-Raj <thambirajv123@gmail.com>
+Date:   Sun May 5 16:25:24 2024 +0530
+
+    update template fpr favourite
+
+[33mcommit 03bfe38e0bab07fcd7642609048befb49f5c7da7[m
+Author: Thambi-Raj <thambirajv123@gmail.com>
+Date:   Sun May 5 15:21:57 2024 +0530
+
+    change transition  in calendar view of preview
+
+[33mcommit e0f8defb794ea462b209f01f59cad22a89cb56cb[m
+Author: Thambi-Raj <thambirajv123@gmail.com>
+Date:   Fri May 3 13:05:44 2024 +0530
+
+    update ui changes
+
+[33mcommit 6cd26907ebf3f3bd40193e19ce007344d240c81b[m
+Author: Thambi-Raj <thambirajv123@gmail.com>
+Date:   Wed Apr 24 17:29:45 2024 +0530
+
+    before change editor-component
+
+[33mcommit 23662f2790f358342256e07bc3f84a8cee237073[m
+Author: Thambi-Raj <thambirajv123@gmail.com>
+Date:   Tue Apr 23 16:10:39 2024 +0530
+
+    set previews
+
+[33mcommit 2c53d6fc9f737518d10e3c34f3ad7881b0d148dc[m
+Author: Thambi-Raj <thambirajv123@gmail.com>
+Date:   Mon Apr 22 19:11:11 2024 +0530
+
+    store a content to local storage and also change a json format content
+
+[33mcommit c506b61c3b6e9b1ae66ea8483444ce977040899f[m
+Author: Thambi-Raj <thambirajv123@gmail.com>
+Date:   Sat Apr 20 22:46:18 2024 +0530
+
+    update small changes in json
+
+[33mcommit 97f11cd3692faaf014209ebe1bcac9f432b063f8[m
+Author: Thambi-Raj <thambirajv123@gmail.com>
+Date:   Sat Apr 20 22:33:36 2024 +0530
+
+    construct a  json format and render a template using a that json
+
+[33mcommit 3ef5b255bc22c89e52c749b00d62db215e8a75f4[m
+Author: Thambi-Raj <thambirajv123@gmail.com>
+Date:   Wed Apr 17 17:40:32 2024 +0530
+
+    update a saved files
+
+[33mcommit f0a427b9722b3cc567112038ccbd0a6cb8d88358[m
+Author: Thambi-Raj <thambirajv123@gmail.com>
+Date:   Sun Apr 14 23:10:21 2024 +0530
+
+    updated all button without alignment
+
+[33mcommit 0f62e6eeae34f330ed1ca6ac7a0770016daa50bf[m
+Author: Thambi-Raj <thambirajv123@gmail.com>
+Date:   Thu Apr 4 22:53:40 2024 +0530
+
+    updated all client-side
+
+[33mcommit ea559546a08d709978d8684ffb87a42c0f8563df[m
+Author: Thambi-Raj <thambirajv123@gmail.com>
+Date:   Wed Apr 3 11:18:35 2024 +0530
+
+    done vue_part for sidebar
+
+[33mcommit e8e7aae204eefcfc338c30869f007f281a19e13d[m
+Author: Thambi-Raj <thambirajv123@gmail.com>
+Date:   Mon Apr 1 17:19:58 2024 +0530
+
+    update drag and drop differerent in div
+
+[33mcommit a948f5970813dd0bc0e6b12b6acfe9b74d9de0a2[m
+Author: Thambi-Raj <thambirajv123@gmail.com>
+Date:   Mon Apr 1 13:31:33 2024 +0530
+
+    correct in drag and drop for element update
+
+[33mcommit 33d18a922f2386eb73107108dffbc03ebe019090[m
+Author: Thambi-Raj <thambirajv123@gmail.com>
+Date:   Sun Mar 31 11:20:28 2024 +0530
+
+    update drag and drop
+
+[33mcommit 1e70d2396bc7c24e34e530487706e5e99a8a230a[m
+Author: Thambi-Raj <thambirajv123@gmail.com>
+Date:   Tue Mar 26 11:43:50 2024 +0530
+
+    first commit

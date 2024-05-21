@@ -2,7 +2,6 @@ const calendar_controller = {
     template: `<calendar-root 
     :month=month
     :year =year 
-    :root_ref="root_ref"
     :month_preview = month_preview
      @page_change = page_change>
     </calendar-root>`,
@@ -11,14 +10,14 @@ const calendar_controller = {
             type: String
         },
         year: {
-            type: [String,Number]
+            type: String
         },
         month_preview:{
             type:Object
         },
-        root_ref:{
+        total_favourite:{
             type:Object
-        },
+        }
     },
     methods:{
         page_change(date){

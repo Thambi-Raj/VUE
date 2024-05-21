@@ -2,76 +2,49 @@ const diary_component = {
     template: `
         <div id="left-container-root">
             <sidebar-controller 
-<<<<<<< HEAD
-                v-if="right_template !== 'editor'" 
+                v-if="!editor_view"
                 :dropdown_selected="dropdown_selected" 
                 :dropdown_value="dropdown_value"
-                :month="dropdown_values"
-                :root_ref="root_ref"
-                :active="actived"
+                :month="months"
                 @change_drop_head="change_drop_head" 
                 @change_drop_value="change_drop_value" 
-                >
-            </sidebar-controller>
-            <previewSidebar-controller v-else 
-                :year="dropdown_selected" 
-                :month="dropdown_value"
-                :date="default_date"
-                :month_Array="dropdown_values"
-                :data="month_preview"
-                :favourite_data="favourite_data"
-                :root_ref="root_ref"
-=======
-                :dropdown_selected="dropdown_selected" 
-                :dropdown_value="dropdown_value"
-                 @change_drop_head="change_drop_head" @change_drop_value="change_drop_value" 
-                :month="month_array"
-                v-if="!editor_view"
-                @change_mention="change_mention"
                 >
             </sidebar-controller>
             <contentSidebar-controller v-else 
                 :dropdown_selected="dropdown_selected" 
                 :dropdown_value="dropdown_value"
-                :month="month_array"
->>>>>>> parent of ddd91e1 (for updating  before backup)
+                :default_date="default_date"
+                :month="months"
+                :data="month_preview"
+                :total_favourite="total_favourite"
                 @drop ="  change_drop_head"
                 @drop1="change_drop_value"
                 @back="back_page"
                 @change_date="change_default_date"
                 @add_fav=add_favourite
-                :data="month_preview"
-                :total_favourite="total_favourite"
                 >
-            </previewSidebar-controller>
+            </contentSidebar-controller>
         </div>
         <div id="right-container-root">
-        <calendar-controller v-if="right_template === 'calendar'" 
+        <calendar-controller v-if="result_template === 'calendar' && !editor_view" 
                 :month="dropdown_value"
                 :year="dropdown_selected" 
+                :default_date="default_date"
                 :month_preview="month_preview"
-                :root_ref="root_ref"
                 @change_page="change_page"
-                >
+                :total_favourite="total_favourite">
         </calendar-controller>
-<<<<<<< HEAD
-        <editor-controller v-if= "right_template === 'editor'"  
+        <editor-controller v-if= "editor_view"  
                 :data="default_date_data" 
-                :date="default_date"
+                :default_date="default_date"
                 @save_json_content="save_json"
                 :preview="true">
-=======
-        <editor-controller v-if= "editor_view"  :data="default_date_data" 
-             :default_date="default_date"
-             @save_json_content="save_json"
-             :preview="true">
->>>>>>> parent of ddd91e1 (for updating  before backup)
         </editor-controller>
-        <container-controller  v-if ="right_template === 'container'"
+        <container-controller  v-if ="!editor_view && result_template== 'button' "
                 :name="dropdown_selected"
                 :span="dropdown_selected"
-                :favourite_data="favourite_data"
-                :root_ref="root_ref"
+                :container_data="container_format_data"
+                :total_favourite="total_favourite"
                 @change_left_pane="change_left_pane">
         </container-controller>
         </div>
@@ -81,7 +54,13 @@ const diary_component = {
             type: String
         },
         dropdown_selected: {
-            type: [String,Number]
+            type: String
+        },
+        container_format_data: {
+            type: Array
+        },
+        editor_view: {
+            type: Boolean
         },
         default_date: {
             type:Number
@@ -92,44 +71,23 @@ const diary_component = {
         month_preview:{
             type:Object
         },
-        favourite_data:{
-            type:Array
-        },
-        root_ref:{
+        total_favourite:{
             type:Object
-        },
-<<<<<<< HEAD
-        right_template:{
-            type:String
-        },
-        dropdown_values:{
-            type:Array
-        }
+        }, 
     },
     emits: ['change_page','page_change', 'change_dropdown_value', 'change_dropdown_head',"save_json","change_date","add_fav"," change_left_pane","change_editor_view","get_favourite_data","update_month_preview"],
+    mounted() {
+        this.result_template = 'calendar';
+        var cur = new Date().getFullYear();
+        var mon = new Date().getMonth();
+        this.months = cur == this.dropdown_selected.split('_')[1] ? this.months.slice(0, (mon + 1)) : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    },
     data() {
         return {
             result_template: '',
             months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            favourite_template:false,
-            actived:this.dropdown_selected
-=======
-        
-    },
-    emits: ['change_page','page_change', 'change_dropdown_value', 'change_dropdown_head', "change_mention","save_json","change_date","add_fav"," change_left_pane","change_editor_view","get_favourite_data","update_month_preview"],
-    created() {
-        this.result_template = 'calendar';
-        var cur = new Date().getFullYear();
-        var mon = new Date().getMonth();
-        this.month_array = cur == this.dropdown_selected.split('_')[1] ? this.month_array.slice(0, (mon + 1)) : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    },
-    data() {
-        return {
-            result_template: '',
-            month_array: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
             active: [],
             favourite_template:false
->>>>>>> parent of ddd91e1 (for updating  before backup)
         };
     },
     methods: {
@@ -145,20 +103,18 @@ const diary_component = {
             var mon = new Date().getMonth();
             this.result_template = 'calendar';
             if (data.startsWith('year')) {
-<<<<<<< HEAD
-                this.months = cur == data ? this.months.slice(0, mon + 1) : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-=======
-                this.month_array = cur == data.split('_')[1] ? this.month_array.slice(0, mon + 1) : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
->>>>>>> parent of ddd91e1 (for updating  before backup)
+                this.months = cur == data.split('_')[1] ? this.months.slice(0, mon + 1) : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                 this.$emit('change_dropdown_value', 'Jan');
-                this.favourite_template = false;    
+                this.favourite_template = false;
+                this.$emit('change_dropdown_head', data);   
                 this.$emit('update_month_preview')
             }
             else{
                 this.result_template='button';
-                this.$emit("get_favourite_data");
+                this.$emit("get_favourite_data",data);
+                this.$emit('change_dropdown_head', data);
             }
-            this.$emit('change_dropdown_head', data);
+         
         },
         back_page(year, month, date) {
          if(!this.favourite_template){
@@ -178,15 +134,6 @@ const diary_component = {
                 this.active.push(data);
             }
         },
-        change_mention(data) {
-            this.$emit('change_mention', data);
-        },
-        remove_active() {
-            this.active = [];
-        },
-        reset_active(data) {
-            this.active = data;
-        },
         change_default_date(date) {
             this.$emit('change_date', date);
         },
@@ -194,7 +141,6 @@ const diary_component = {
          this.$emit('save_json', json,date);
         },
         add_favourite(date){
-            console.log(date);
             this.$emit('add_fav',date);
         },
         change_left_pane(year,month,date){

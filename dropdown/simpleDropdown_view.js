@@ -5,32 +5,21 @@ const simple_dropdown_component = {
         <span class="material-symbols-outlined">{{dropdown_icon}}</span>
     </div>
     <div id="option" v-if="dropdown_visible" :class="option_class_name">
-        <span v-for="element in data" @click="change_drop(element,name)" :class="{ 'clicked': element == selected_value, 'material-symbols-outlined': tag === 'span' }">
+        <span v-for="element in data" @click="change_drop(element,name)" :class="{ 'clicked': element === selected_value, 'material-symbols-outlined': tag === 'span' }">
             {{element}}
         </span>
     </div>
 </div>
 <div class="drop-down-root" v-else>
-<<<<<<< HEAD
 <div id="drop-down-head" @click="show_drop" :class="width" ref="dropdown">
     <img :src="getImageUrl(selected_value)" class="drop-down-image">
     <span class="material-symbols-outlined">{{dropdown_icon}}</span>
 </div>
 <div id="option" v-if="dropdown_visible" :class="option_class_name">
-    <div v-for="element in data" :key="element" class="image_dropdown" :class="{ 'clicked': element == selected_value }" @click="change_drop(element, 'back_ground')">
+    <div v-for="element in data" :key="element" class="image_dropdown" :class="{ 'clicked': element === selected_value }" @click="change_drop(element, 'back_ground')">
         <img :src="getImageUrl(element)" class="drop-down-image" >
-=======
-    <div id="drop-down-head" @click="show_drop" :class="width" ref="dropdown">
-        <img :src="selected_value" class="drop-down-image">
-        <span class="material-symbols-outlined">{{dropdown_icon}}</span>
->>>>>>> parent of ddd91e1 (for updating  before backup)
     </div>
-    <div id="option" v-if="dropdown_visible" :class="option_class_name">
-    <div v-for="element in data" :key="element" class="image_dropdown" :class="{ 'clicked': element === selected_value }">
-        <img :src="element" class="drop-down-image" @click="change_drop(element, 'back_ground')">
-    </div>
-    </div>
-
+</div>
 </div>`
 
               ,
@@ -56,7 +45,7 @@ const simple_dropdown_component = {
     methods: {
         show_drop() {
             this.dropdown_visible = !this.dropdown_visible;
-            this.dropdown_icon = this.dropdown_icon=="arrow_drop_up" ?"arrow_drop_down":"arrow_drop_up";
+           this.dropdown_icon = this.dropdown_icon=="arrow_drop_up" ?"arrow_drop_down":"arrow_drop_up";
         },
         change_drop(data,back) {
             this.dropdown_visible = false;
@@ -66,6 +55,9 @@ const simple_dropdown_component = {
         hide_drop() {
             this.dropdown_visible = false;
             this.dropdown_icon="arrow_drop_down"
+        },
+        getImageUrl(image) {
+            return `../${image}`;
         }
     },
     mounted() {

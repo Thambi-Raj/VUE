@@ -1,64 +1,39 @@
 var dropdown_controller = {
-<<<<<<< HEAD
-    template: `<div :class="active == name ? 'section clicked' : 'section' "  > 
+    template: `<div :class="active == id ? 'section clicked' : 'section' " :id ='id' > 
                     <dropdown-root  
-                        :icon=icon 
+                        :first_icon='first_icon' 
                         :name='name'
                         :default_selected='default_selected'
                         :dropdown_data=" dropdown_data"
                         :active ='active' 
-                        :root_ref="root_ref"
+                        :id='id'
                         @change_value = change_value
                         @change_activestate=change_activestate>
                     </dropdown-root>
                </div>
-=======
-    template: `<div :class="active == id ? 'section clicked' : 'section' " :id ='id' > 
-        <dropdown-root  :first_icon='first_icon' 
-        :title='title'
-        :default_selected='default_selected'
-        :data="data"
-        :active ='active' 
-        :id='id'
-        @change_value = change_value
-        @change_activestate=change_activestate>
-        </dropdown-root>
-        </div>
->>>>>>> parent of ddd91e1 (for updating  before backup)
         `,
     props:{
         default_selected:{
             type: String,
         },
-        data:{
+        dropdown_data:{
             type: Array,
         },
-<<<<<<< HEAD
         name:{
-            type:[String,Number],
-=======
-        title:{
             type:String,
->>>>>>> parent of ddd91e1 (for updating  before backup)
         },
-        icon:{
+        first_icon:{
             type:String
         },
-<<<<<<< HEAD
-=======
         id:{
-            type:String
+            type:String 
         },
->>>>>>> parent of ddd91e1 (for updating  before backup)
         active:{
-            type:[String,Number]
+            type:String
         },
         default_selected:{
             type:String
         },
-        root_ref:{
-            type:Object
-        }
     },
     emits:['change_value','change_active'],
     methods: {

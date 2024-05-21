@@ -4,11 +4,9 @@ const editor_controller = {
                 :image     = "image"  
                 :template  = "template"
                 :global_props = "global_props"
-                :preview="preview"
-                :date="date"
-                :height=height
                 @save_content="save_content"
                 @add_fav="add_fav"
+                :preview="preview"
                 > 
               </editor-root>`,
     props:{
@@ -19,17 +17,14 @@ const editor_controller = {
             type:Boolean,
             default:false
         },
-<<<<<<< HEAD
-        date:{
-            type:[Number,String]
-        },
-=======
->>>>>>> parent of ddd91e1 (for updating  before backup)
+    },
+    mounted(){
+        console.log(this.data);
     },
     watch:{
         data(){
             this.template = this.data &&  this.data["contents"]  ?  this.decoded_html_string(this.data["contents"]):'';
-            this.image =  this.data && this.data["images"] ? [...this.data["images"]] :[];
+            this.image =  this.data && this.data["images"] ? this.data["images"] :[];
             this.global_props =  this.data && this.data["global_props"] ? this.data["global_props"] :{};
         },
     },
@@ -41,11 +36,9 @@ const editor_controller = {
             template:this.get_decode_html(),
             bookmark : true,
             global_props : this.get_global_props(),
-            images : this.get_images_array().length,
-            height:''
           }
     },
-    methods:{   
+    methods:{
             get_decode_html(){
                 var string='';
                 if(this.data){
@@ -54,7 +47,10 @@ const editor_controller = {
                 return string;
             },
             get_images_array(){
-                var img=this.data && this.data["images"] ? [...this.data["images"]] :[];
+                var img=[];
+                if(this.data){
+                    img = this.data["images"] ? this.data["images"] :[];
+                }
                 return img;
             },
             get_global_props(){
@@ -93,6 +89,7 @@ const editor_controller = {
                 obj["images"]=[];
                 return obj;
             },
+
             constructDiary_jsonFormat(content){
                 var result = this.format_for_json();
                 var single_line = {}
@@ -106,7 +103,6 @@ const editor_controller = {
                         this.get_styles_from_tag(content[i], styles,close);
                     }
                     else if (content[i].nodeType === 3) {
-                      
                         var obj1 = this.set_Style_for_text(content[i].nodeValue, styles)
                         single_line["data"].push({...obj1});
                     }
@@ -126,14 +122,15 @@ const editor_controller = {
                 this.editor_elements=[];
                 this.closed_element_index= [];
                 return result;
-
             },
+
             is_div(content,close,single_line){
                 this.check_for_lineStyle(content , single_line);
                     if(content.getAttribute('style')){
                         close++;  // 
                     }
             },
+
             check_for_lineStyle(element, json) {
                 json["data"] = [];
                 if (element.getAttribute('style')) {
@@ -143,6 +140,7 @@ const editor_controller = {
                     json["styles"] = null;
                 }
             },
+
             get_tag_style(element, styles) {
                 if (element == '</b>') {
                     delete styles['b'];
@@ -152,12 +150,14 @@ const editor_controller = {
                     delete styles['i']
                 }
             },
+
             set_Style_for_text(text, styles) {
                 var obj1 = {};
                 obj1["content"] = text;
                 obj1["styles"] = { ...styles};
                 return obj1;
             },
+
             get_styles_from_tag(element, styles,close) {
                 if (element.tagName.toLowerCase() != 'br') {
                     if (element.tagName.toLowerCase() != 'span') {
@@ -173,6 +173,7 @@ const editor_controller = {
                     }
                 }
             }, 
+
             delete_style_present_in_attribute(content, obj) {
                 var style = content.style;
                 if (style.color) {
@@ -196,7 +197,6 @@ const editor_controller = {
             },
             find_styles_in_tag(content, obj) {
                 var style = content.style;
-                var z = '';
                 if (style.color) {
                     obj['color'] = style.color;
                 }
@@ -216,41 +216,27 @@ const editor_controller = {
                 if (style.fontStyle == 'italic') {
                     obj['i'] = true;
                 }
-<<<<<<< HEAD
             }, 
 
-            save_content(html,images,background,date,height){
-=======
-            },  
             save_content(html,images,background,date){
->>>>>>> parent of ddd91e1 (for updating  before backup)
                 this.DFS(html);
                 var json_content = this.constructDiary_jsonFormat(this.editor_elements);
-                json_content["images"] = images;
-                this.images = images.length;
+                json_content["images"]=images;
                 json_content["global_props"]={"background_image":background};
-                this.height = height;
                 this.$emit('save_json_content',json_content,date);     
+
             },
+
             add_fav(){
                 this.$emit('add_fav');
             },
+
             decoded_html_string(editor_content){
                 var res_string = '';
                 for (var i = 0; i < editor_content.length ; i++) {
-                    editor_content[i].styles ? res_string += '<div class="line-content" style="' + editor_content[i].styles + '">'
-                        : res_string += '<div class="line-content">';
+                    res_string = this.check_single_line_styles(editor_content[i],res_string);
                     if (editor_content[i].data) {
-                        editor_content[i].data.forEach((element, j) => {
-                            if (j != 0) {
-                                res_string = this.check_previous_close_tag(editor_content[i].data[j - 1].styles, element.styles, res_string);
-                            }
-                            res_string = this.check_for_new_tag(editor_content[i].data[j - 1] ? editor_content[i].data[j - 1].styles : '', element.styles, res_string);
-                            res_string += element.content;
-                            if (j == editor_content[i].data.length - 1) {
-                                res_string = this.check_previous_close_tag(element.styles, '', res_string);
-                            }
-                        });
+                       res_string = this.content_present_in_line(editor_content[i],res_string); // add a styles for a content in html...
                     }
                     else {
                         res_string += '&ZeroWidthSpace;'
@@ -259,6 +245,27 @@ const editor_controller = {
                 }
                 return res_string;
             },
+
+            check_single_line_styles(editor_content,result){
+                editor_content.styles ? result += '<div class="line-content" style="' + editor_content.styles + '">'
+                        : result += '<div class="line-content">';
+                return result
+            },
+
+            content_present_in_line(editor_content,res_string){
+                editor_content.data.forEach((element, j) => {
+                    if (j != 0) { //i need to compare a styles in currrent and previous element...
+                        res_string = this.check_previous_close_tag(editor_content.data[j - 1].styles, element.styles, res_string);
+                    }
+                    res_string = this.check_for_new_tag(editor_content.data[j - 1] ? editor_content.data[j - 1].styles : '', element.styles, res_string);
+                    res_string += element.content;
+                    if (j == editor_content.data.length - 1) { //for end of the div i need to close all the respective div....
+                        res_string = this.check_previous_close_tag(element.styles, '', res_string);
+                    }
+                });
+                return res_string;
+            },
+
             check_previous_close_tag(previous_styles, current_styles, div) {
                 Object.keys(previous_styles).forEach(tag => {
                     if (current_styles == '' || current_styles[tag] != previous_styles[tag]) {
@@ -292,8 +299,8 @@ const editor_controller = {
                         }
                     }
                 });
-
                 return div;
             },
+
     }
 }
